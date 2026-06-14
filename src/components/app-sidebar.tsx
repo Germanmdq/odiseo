@@ -77,8 +77,8 @@ const data = {
           icon: StickyNote,
         },
         {
-          title: "Planes",
-          url: "/planes",
+          title: "Mi actividad",
+          url: "/actividad",
           icon: Calendar,
         },
         {

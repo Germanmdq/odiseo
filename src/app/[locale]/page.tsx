@@ -1,10 +1,18 @@
-import { redirect } from 'next/navigation';
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function HomePage({
   params,
 }: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string }>
 }) {
-  const { locale } = await params;
-  redirect(`/${locale}/dashboard`);
+  const { locale } = await params
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    redirect(`/${locale}/dashboard`)
+  } else {
+    redirect(`/${locale}/landing`)
+  }
 }

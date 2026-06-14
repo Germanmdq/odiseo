@@ -11,6 +11,7 @@ const publicSegments = new Set([
   'login',
   'registro',
   'recuperar',
+  'auth',
   'sign-in',
   'sign-in-2',
   'sign-in-3',
