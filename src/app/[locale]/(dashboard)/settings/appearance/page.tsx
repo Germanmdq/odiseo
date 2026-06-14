@@ -1,126 +1,106 @@
 "use client"
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import React from "react"
+import { Layout, Palette, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { useTranslations } from "next-intl"
-
-const appearanceFormSchema = z.object({
-  theme: z.enum(["light", "dark"]),
-})
-
-type AppearanceFormValues = z.infer<typeof appearanceFormSchema>
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ThemeTab } from "@/components/theme-customizer/theme-tab"
+import { LayoutTab } from "@/components/theme-customizer/layout-tab"
+import { ImportModal } from "@/components/theme-customizer/import-modal"
+import { useThemeManager } from "@/hooks/use-theme-manager"
+import { useSidebarConfig } from "@/contexts/sidebar-context"
+import { tweakcnThemes } from "@/config/theme-data"
+import type { ImportedTheme } from "@/types/theme-customizer"
 
 export default function AparienciaPage() {
-  const t = useTranslations("settings.apariencia")
+  const { applyImportedTheme, isDarkMode, resetTheme, applyRadius, setBrandColorsValues, applyTheme, applyTweakcnTheme } = useThemeManager()
+  const { updateConfig: updateSidebarConfig } = useSidebarConfig()
 
-  const form = useForm<AppearanceFormValues>({
-    resolver: zodResolver(appearanceFormSchema),
-    defaultValues: {
-      theme: "dark",
-    },
-  })
+  const [selectedTheme, setSelectedTheme] = React.useState("default")
+  const [selectedTweakcnTheme, setSelectedTweakcnTheme] = React.useState("")
+  const [selectedRadius, setSelectedRadius] = React.useState("0.5rem")
+  const [importedTheme, setImportedTheme] = React.useState<ImportedTheme | null>(null)
+  const [importModalOpen, setImportModalOpen] = React.useState(false)
 
-  function onSubmit(data: AppearanceFormValues) {
-    console.log("Appearance saved:", data)
+  const handleReset = () => {
+    setSelectedTheme("default")
+    setSelectedTweakcnTheme("")
+    setSelectedRadius("0.5rem")
+    setImportedTheme(null)
+    setBrandColorsValues({})
+    resetTheme()
+    applyRadius("0.5rem")
+    updateSidebarConfig({ variant: "inset", collapsible: "offcanvas", side: "left" })
   }
 
+  const handleImport = (themeData: ImportedTheme) => {
+    setImportedTheme(themeData)
+    setSelectedTheme("")
+    setSelectedTweakcnTheme("")
+    applyImportedTheme(themeData, isDarkMode)
+  }
+
+  React.useEffect(() => {
+    if (importedTheme) {
+      applyImportedTheme(importedTheme, isDarkMode)
+    } else if (selectedTheme) {
+      applyTheme(selectedTheme, isDarkMode)
+    } else if (selectedTweakcnTheme) {
+      const preset = tweakcnThemes.find(t => t.value === selectedTweakcnTheme)?.preset
+      if (preset) applyTweakcnTheme(preset, isDarkMode)
+    }
+  }, [isDarkMode, importedTheme, selectedTheme, selectedTweakcnTheme, applyImportedTheme, applyTheme, applyTweakcnTheme])
+
   return (
-    <div className="space-y-6 px-4 lg:px-6">
-      <div>
-        <h1 className="text-3xl font-bold">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
+    <>
+      <div className="space-y-6 px-4 lg:px-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Apariencia</h1>
+            <p className="text-muted-foreground">Personalizá tu experiencia. Elegí el tema y el layout que mejor se adapten a vos.</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleReset} className="gap-2 shrink-0 cursor-pointer">
+            <RotateCcw className="h-4 w-4" />
+            Restablecer
+          </Button>
+        </div>
+
+        <Tabs defaultValue="theme">
+          <TabsList>
+            <TabsTrigger value="theme" className="cursor-pointer">
+              <Palette className="h-4 w-4 mr-1.5" />
+              Tema
+            </TabsTrigger>
+            <TabsTrigger value="layout" className="cursor-pointer">
+              <Layout className="h-4 w-4 mr-1.5" />
+              Layout
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="theme" className="mt-4">
+            <ThemeTab
+              selectedTheme={selectedTheme}
+              setSelectedTheme={setSelectedTheme}
+              selectedTweakcnTheme={selectedTweakcnTheme}
+              setSelectedTweakcnTheme={setSelectedTweakcnTheme}
+              selectedRadius={selectedRadius}
+              setSelectedRadius={setSelectedRadius}
+              setImportedTheme={setImportedTheme}
+              onImportClick={() => setImportModalOpen(true)}
+            />
+          </TabsContent>
+
+          <TabsContent value="layout" className="mt-4">
+            <LayoutTab />
+          </TabsContent>
+        </Tabs>
       </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <h3 className="text-lg font-medium">{t("themeLabel")}</h3>
-          <FormField
-            control={form.control}
-            name="theme"
-            render={({ field }) => (
-              <FormItem className="space-y-3">
-                <FormControl>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    className="flex gap-4"
-                  >
-                    <FormItem>
-                      <FormLabel className="[&:has([data-state=checked])>div]:border-primary cursor-pointer">
-                        <FormControl>
-                          <RadioGroupItem value="light" className="sr-only" />
-                        </FormControl>
-                        <div className="rounded-md border-2 border-muted p-4 hover:border-accent transition-colors">
-                          <div className="space-y-2">
-                            <div className="w-20 h-20 bg-white border rounded-md p-3">
-                              <div className="space-y-2">
-                                <div className="h-2 bg-gray-200 rounded w-3/4"></div>
-                                <div className="h-2 bg-gray-200 rounded w-1/2"></div>
-                                <div className="flex space-x-2">
-                                  <div className="h-2 w-2 bg-gray-300 rounded-full"></div>
-                                  <div className="h-2 bg-gray-200 rounded flex-1"></div>
-                                </div>
-                                <div className="flex space-x-2">
-                                  <div className="h-2 w-2 bg-gray-300 rounded-full"></div>
-                                  <div className="h-2 bg-gray-200 rounded flex-1"></div>
-                                </div>
-                              </div>
-                            </div>
-                            <span className="text-sm font-medium">{t("light")}</span>
-                          </div>
-                        </div>
-                      </FormLabel>
-                    </FormItem>
-                    <FormItem>
-                      <FormLabel className="[&:has([data-state=checked])>div]:border-primary cursor-pointer">
-                        <FormControl>
-                          <RadioGroupItem value="dark" className="sr-only" />
-                        </FormControl>
-                        <div className="rounded-md border-2 border-muted p-4 hover:border-accent transition-colors">
-                          <div className="space-y-2">
-                            <div className="w-20 h-20 bg-gray-900 border border-gray-700 rounded-md p-3">
-                              <div className="space-y-2">
-                                <div className="h-2 bg-gray-600 rounded w-3/4"></div>
-                                <div className="h-2 bg-gray-600 rounded w-1/2"></div>
-                                <div className="flex space-x-2">
-                                  <div className="h-2 w-2 bg-gray-500 rounded-full"></div>
-                                  <div className="h-2 bg-gray-600 rounded flex-1"></div>
-                                </div>
-                                <div className="flex space-x-2">
-                                  <div className="h-2 w-2 bg-gray-500 rounded-full"></div>
-                                  <div className="h-2 bg-gray-600 rounded flex-1"></div>
-                                </div>
-                              </div>
-                            </div>
-                            <span className="text-sm font-medium">{t("dark")}</span>
-                          </div>
-                        </div>
-                      </FormLabel>
-                    </FormItem>
-                  </RadioGroup>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="flex space-x-2">
-            <Button type="submit" className="cursor-pointer">{t("save")}</Button>
-            <Button variant="outline" type="button" className="cursor-pointer">{t("cancel")}</Button>
-          </div>
-        </form>
-      </Form>
-    </div>
+      <ImportModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        onImport={handleImport}
+      />
+    </>
   )
 }
