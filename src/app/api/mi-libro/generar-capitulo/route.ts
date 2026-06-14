@@ -8,22 +8,17 @@ export const maxDuration = 60
 const NVIDIA_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
 const NVIDIA_CHAT_MODEL = "meta/llama-3.3-70b-instruct"
 
-function buildPrompt(fragmentos: string[]) {
-  const joined = fragmentos
-    .map((f, i) => `[Fragmento ${i + 1}]\n${f}`)
-    .join("\n\n---\n\n")
+function buildPrompt(tema: string) {
+  return `Escribí un capítulo reflexivo y profundo sobre "${tema}" desde la perspectiva de las enseñanzas de Neville Goddard, en primera persona del usuario, como si fuera parte de su libro personal de práctica espiritual. Español rioplatense, entre 400 y 600 palabras.
 
-  return `A partir de estos fragmentos del proceso personal del usuario, escribí un capítulo de su libro en primera persona, conectando las ideas en una narrativa reflexiva coherente, en español rioplatense neutro.
+El capítulo debe:
+- Empezar con un título sugerido entre corchetes, ej: [Título sugerido: El momento en que entendí]
+- Estar escrito en primera persona, íntimo y reflexivo
+- Conectar la enseñanza de Neville con la experiencia interna del practicante
+- No ser una clase ni una explicación teórica — es una vivencia narrada
+- Terminar con una idea que invite a seguir practicando
 
-Los fragmentos son apuntes, escenas y reflexiones que el usuario fue guardando en su recorrido. Tu tarea es darles forma de capítulo de libro personal: fluido, íntimo, sin numeraciones ni subtítulos técnicos.
-
-Empezá con un título sugerido entre corchetes, ej: [Título sugerido: El momento en que entendí].
-
-Luego escribí el capítulo directamente, en primera persona, sin introducción meta ("este capítulo trata de...") ni cierre explicativo.
-
-Fragmentos:
-
-${joined}`
+Escribí el título y luego el capítulo directamente, sin meta-texto.`
 }
 
 function parseDelta(line: string) {
@@ -40,26 +35,6 @@ function parseDelta(line: string) {
   }
 }
 
-function jsonDbError(message: string, error: unknown) {
-  console.error(message, error)
-  const dbError = error as {
-    message?: string
-    code?: string
-    details?: string
-    hint?: string
-  }
-
-  return Response.json(
-    {
-      error: dbError.message ?? "Error de base de datos",
-      code: dbError.code,
-      details: dbError.details,
-      hint: dbError.hint,
-    },
-    { status: 500 }
-  )
-}
-
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -68,29 +43,12 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.NVIDIA_API_KEY
   if (!apiKey) return Response.json({ error: "Falta NVIDIA_API_KEY" }, { status: 500 })
 
-  const body = (await request.json()) as { memoriaIds?: string[] }
-  const memoriaIds = body.memoriaIds ?? []
+  const body = (await request.json()) as { tema?: string }
+  const tema = body.tema?.trim()
 
-  if (!memoriaIds.length) {
-    return Response.json({ error: "Seleccioná al menos una memoria" }, { status: 400 })
+  if (!tema) {
+    return Response.json({ error: "El tema es requerido" }, { status: 400 })
   }
-
-  const { data: memorias, error } = await supabase
-    .from("memoria")
-    .select("id, content")
-    .eq("user_id", user.id)
-    .in("id", memoriaIds)
-
-  if (error) return jsonDbError("Error loading memorias for chapter generation", error)
-  if (!memorias?.length) {
-    return Response.json({ error: "No se encontraron las memorias" }, { status: 404 })
-  }
-
-  const fragmentos = memorias.map((m) => {
-    const c = m.content as { text?: string } | string
-    if (typeof c === "string") return c
-    return c?.text ?? ""
-  }).filter(Boolean)
 
   const nvidiaResponse = await fetch(NVIDIA_CHAT_URL, {
     method: "POST",
@@ -100,10 +58,10 @@ export async function POST(request: NextRequest) {
     },
     body: JSON.stringify({
       model: NVIDIA_CHAT_MODEL,
-      messages: [{ role: "user", content: buildPrompt(fragmentos) }],
-      temperature: 0.4,
-      top_p: 0.8,
-      max_tokens: 2000,
+      messages: [{ role: "user", content: buildPrompt(tema) }],
+      temperature: 0.6,
+      top_p: 0.9,
+      max_tokens: 1500,
       stream: true,
     }),
   })

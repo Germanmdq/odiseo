@@ -117,20 +117,17 @@ function SetupScreen({
   estado: Extract<Estado, { etapa: "setup" }>
   onStart: (tema: string, cantidad: number) => void
 }) {
-  const [temaSeleccionado, setTemaSeleccionado] = React.useState<string | null>(null)
+  const [tema, setTema] = React.useState("")
   const [cantidad, setCantidad] = React.useState(5)
 
   function handleStart() {
-    if (!temaSeleccionado) return
-    const tema =
-      temaSeleccionado === "__sorpresa"
-        ? TEMAS[Math.floor(Math.random() * TEMAS.length)]
-        : temaSeleccionado
-    onStart(tema, cantidad)
+    const t = tema.trim()
+    if (!t) return
+    onStart(t, cantidad)
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 py-6">
+    <div className="mx-auto max-w-lg space-y-8 py-6">
       {/* Racha arriba */}
       {estado.racha > 0 && (
         <div className="flex items-center gap-2 text-sm font-medium" style={{ color: "#E8401A" }}>
@@ -139,42 +136,31 @@ function SetupScreen({
         </div>
       )}
 
-      <div>
-        <h2 className="mb-4 text-xl font-semibold">¿Sobre qué querés evaluarte hoy?</h2>
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-          {TEMAS_CON_EMOJI.map(({ tema, emoji, label }) => {
-            const isSelected = temaSeleccionado === tema
-            return (
-              <button
-                key={tema}
-                onClick={() => setTemaSeleccionado(tema)}
-                className={cn(
-                  "flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all",
-                  "hover:border-primary/50 hover:bg-primary/5",
-                  isSelected
-                    ? "border-primary bg-primary/10 ring-1 ring-primary"
-                    : "border-border bg-background"
-                )}
-              >
-                <span className="text-3xl leading-none">{emoji}</span>
-                <span className="text-xs font-medium leading-tight">
-                  {label ?? tema}
-                </span>
-              </button>
-            )
-          })}
-        </div>
+      <div className="space-y-2">
+        <label className="text-xl font-semibold block">
+          ¿Sobre qué tema querés evaluarte?
+        </label>
+        <input
+          type="text"
+          value={tema}
+          onChange={e => setTema(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") handleStart() }}
+          placeholder="Ej: la revisión, vivir desde el final, el autoconcepto..."
+          className="w-full rounded-lg border border-input bg-background px-4 py-3 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          autoFocus
+        />
       </div>
 
-      <div>
-        <h3 className="mb-3 text-sm font-medium text-muted-foreground">Cantidad de preguntas</h3>
+      <div className="space-y-3">
+        <p className="text-sm text-muted-foreground">Cantidad de preguntas</p>
         <div className="flex gap-2">
           {CANTIDADES.map((c) => (
             <button
               key={c}
+              type="button"
               onClick={() => setCantidad(c)}
               className={cn(
-                "h-12 w-16 rounded-lg border text-base font-semibold transition-colors",
+                "h-11 w-14 rounded-lg border text-base font-semibold transition-colors",
                 cantidad === c
                   ? "border-primary bg-primary text-primary-foreground"
                   : "bg-background hover:bg-muted"
@@ -186,15 +172,9 @@ function SetupScreen({
         </div>
       </div>
 
-      <div>
-        {temaSeleccionado ? (
-          <Button size="lg" onClick={handleStart}>
-            Empezar
-          </Button>
-        ) : (
-          <p className="text-sm text-muted-foreground italic">Elegí un tema para empezar</p>
-        )}
-      </div>
+      <Button size="lg" onClick={handleStart} disabled={!tema.trim()}>
+        Empezar evaluación
+      </Button>
     </div>
   )
 }

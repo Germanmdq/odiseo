@@ -4,8 +4,8 @@ import {
   CreditCard,
   EllipsisVertical,
   LogOut,
-  BellDot,
-  CircleUser,
+  User,
+  Palette,
 } from "lucide-react"
 import Link from "next/link"
 import { useLocale } from "next-intl"
@@ -59,7 +59,7 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg">
-                < Logo size={28} />
+                <Logo size={28} />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -78,8 +78,8 @@ export function NavUser({
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <div className="h-8 w-8 rounded-lg">
-                  < Logo size={28} />
+                <div className="h-8 w-8 rounded-lg flex items-center justify-center">
+                  <Logo size={28} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -92,27 +92,30 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/settings/account">
-                  <CircleUser />
-                  Cuenta
+                <Link href={`/${locale}/settings/user`}>
+                  <User className="size-4" />
+                  Perfil
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/settings/billing">
-                  <CreditCard />
+                <Link href={`/${locale}/settings/billing`}>
+                  <CreditCard className="size-4" />
                   Suscripción
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/settings/notifications">
-                  <BellDot />
-                  Notificaciones
+                <Link href={`/${locale}/settings/appearance`}>
+                  <Palette className="size-4" />
+                  Apariencia
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive" onClick={handleSignOut}>
-              <LogOut />
+            <DropdownMenuItem
+              className="cursor-pointer text-destructive focus:text-destructive"
+              onClick={handleSignOut}
+            >
+              <LogOut className="size-4" />
               Cerrar sesión
             </DropdownMenuItem>
           </DropdownMenuContent>

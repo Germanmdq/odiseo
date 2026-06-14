@@ -8,20 +8,10 @@ import {
   PlusCircle,
   Sparkles,
   Trash2,
-  X,
 } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
 
 type Capitulo = {
@@ -32,28 +22,6 @@ type Capitulo = {
   memorias_origen: string[] | null
   created_at: string
   updated_at: string
-}
-
-type Memoria = {
-  id: string
-  item_type: string
-  content: { text?: string } | string
-  source: string
-  created_at: string
-}
-
-const TYPE_LABELS: Record<string, string> = {
-  coach: "Coach",
-  narrador: "Creador de escenas",
-  pregunta: "Preguntas",
-  plan: "Tu plan",
-  manual: "Manual",
-}
-
-function getContentText(content: Memoria["content"]): string {
-  if (!content) return ""
-  if (typeof content === "string") return content
-  return content.text ?? ""
 }
 
 function CapituloCard({
@@ -75,6 +43,7 @@ function CapituloCard({
   const [contenido, setContenido] = React.useState(cap.contenido)
   const [saving, setSaving] = React.useState(false)
   const [saved, setSaved] = React.useState(false)
+  const [confirmDelete, setConfirmDelete] = React.useState(false)
   const dirty = titulo !== cap.titulo || contenido !== cap.contenido
 
   async function handleSave() {
@@ -123,14 +92,34 @@ function CapituloCard({
           />
         </div>
 
-        <button
-          type="button"
-          onClick={() => void onDelete(cap.id)}
-          className="shrink-0 rounded p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-          title="Eliminar capítulo"
-        >
-          <Trash2 className="size-4" />
-        </button>
+        {confirmDelete ? (
+          <div className="flex flex-col gap-1 items-end shrink-0">
+            <p className="text-xs text-muted-foreground">¿Eliminar?</p>
+            <button
+              type="button"
+              onClick={() => void onDelete(cap.id)}
+              className="text-xs text-destructive hover:opacity-80"
+            >
+              Sí
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(false)}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              No
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(true)}
+            className="shrink-0 rounded p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+            title="Eliminar capítulo"
+          >
+            <Trash2 className="size-4" />
+          </button>
+        )}
       </div>
 
       <div className="flex justify-end">
@@ -152,14 +141,12 @@ export function MiLibroView() {
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
 
-  const [generarOpen, setGenerarOpen] = React.useState(false)
-  const [memorias, setMemorias] = React.useState<Memoria[]>([])
-  const [memoriasLoading, setMemoriasLoading] = React.useState(false)
-  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
+  // IA generation state
+  const [temaInput, setTemaInput] = React.useState("")
   const [generating, setGenerating] = React.useState(false)
-  const [draft, setDraft] = React.useState<{ titulo: string; contenido: string } | null>(null)
   const [draftTitulo, setDraftTitulo] = React.useState("")
   const [draftContenido, setDraftContenido] = React.useState("")
+  const [showDraft, setShowDraft] = React.useState(false)
   const [savingDraft, setSavingDraft] = React.useState(false)
 
   React.useEffect(() => {
@@ -173,34 +160,11 @@ export function MiLibroView() {
       .finally(() => setLoading(false))
   }, [])
 
-  async function loadMemorias() {
-    setMemoriasLoading(true)
-    try {
-      const r = await fetch("/api/memoria")
-      const d = (await r.json()) as { memorias?: Memoria[] }
-      setMemorias(
-        (d.memorias ?? []).filter((m) =>
-          ["coach", "narrador", "pregunta", "plan", "manual"].includes(m.item_type)
-        )
-      )
-    } finally {
-      setMemoriasLoading(false)
-    }
-  }
-
-  function openGenerar() {
-    setGenerarOpen(true)
-    setDraft(null)
-    setDraftTitulo("")
-    setDraftContenido("")
-    setSelectedIds(new Set())
-    void loadMemorias()
-  }
-
   async function handleGenerar() {
-    if (!selectedIds.size) return
+    const tema = temaInput.trim()
+    if (!tema || generating) return
     setGenerating(true)
-    setDraft({ titulo: "", contenido: "" })
+    setShowDraft(true)
     setDraftTitulo("")
     setDraftContenido("")
 
@@ -208,7 +172,7 @@ export function MiLibroView() {
       const res = await fetch("/api/mi-libro/generar-capitulo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ memoriaIds: [...selectedIds] }),
+        body: JSON.stringify({ tema }),
       })
 
       if (!res.ok || !res.body) throw new Error("Error al generar")
@@ -223,17 +187,14 @@ export function MiLibroView() {
         const chunk = decoder.decode(value, { stream: true })
         accumulated += chunk
 
-        // Parse title from first line if present
         const titleMatch = accumulated.match(/^\[Título sugerido:\s*(.+?)\]/m)
-        if (titleMatch && !draftTitulo) {
+        if (titleMatch) {
           setDraftTitulo(titleMatch[1].trim())
         }
 
         const contentPart = accumulated.replace(/^\[Título sugerido:[^\]]+\]\s*/m, "").trim()
         setDraftContenido(contentPart)
       }
-
-      setDraft({ titulo: draftTitulo, contenido: draftContenido })
     } catch {
       setDraftContenido("No se pudo generar el capítulo. Probá de nuevo.")
     } finally {
@@ -244,21 +205,22 @@ export function MiLibroView() {
   async function handleSaveDraft() {
     setSavingDraft(true)
     try {
-      const memoriaIds = [...selectedIds]
       const res = await fetch("/api/mi-libro", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          titulo: draftTitulo || "Nuevo capítulo",
+          titulo: draftTitulo || `Capítulo sobre ${temaInput}`,
           contenido: draftContenido,
-          memorias_origen: memoriaIds,
+          memorias_origen: [],
         }),
       })
       const d = (await res.json()) as { capitulo?: Capitulo }
       if (d.capitulo) {
         setCapitulos((prev) => [...prev, d.capitulo!])
-        setGenerarOpen(false)
-        setDraft(null)
+        setShowDraft(false)
+        setTemaInput("")
+        setDraftTitulo("")
+        setDraftContenido("")
       }
     } finally {
       setSavingDraft(false)
@@ -342,23 +304,100 @@ export function MiLibroView() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2 flex-wrap">
-        <Button onClick={openGenerar} className="gap-2">
-          <Sparkles className="size-4" />
-          Generar desde Memoria
-        </Button>
-        <Button variant="outline" onClick={() => void handleNuevoEnBlanco()} className="gap-2">
-          <PlusCircle className="size-4" />
-          Nuevo capítulo en blanco
-        </Button>
-      </div>
+    <div className="space-y-6">
+      {/* Crear nuevo capítulo */}
+      {!showDraft ? (
+        <div className="rounded-xl border bg-card p-5 space-y-4">
+          <div className="space-y-1">
+            <p className="font-semibold">Crear capítulo con IA</p>
+            <p className="text-sm text-muted-foreground">
+              Escribí un tema y la IA genera un capítulo basado en las enseñanzas de Neville.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={temaInput}
+              onChange={(e) => setTemaInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleGenerar() }}
+              placeholder="¿Sobre qué querés escribir un capítulo?"
+              className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <Button
+              onClick={() => void handleGenerar()}
+              disabled={!temaInput.trim() || generating}
+              className="gap-2 shrink-0"
+            >
+              <Sparkles className="size-4" />
+              Generar con IA
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 border-t" />
+            <span className="text-xs text-muted-foreground">o</span>
+            <div className="flex-1 border-t" />
+          </div>
+          <Button variant="outline" onClick={() => void handleNuevoEnBlanco()} className="gap-2 w-full">
+            <PlusCircle className="size-4" />
+            Capítulo en blanco
+          </Button>
+        </div>
+      ) : (
+        /* Draft editor */
+        <div className="rounded-xl border bg-card p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="font-semibold text-sm text-muted-foreground">
+              {generating ? (
+                <span className="flex items-center gap-2">
+                  <Sparkles className="size-4 animate-pulse" style={{ color: "#E8401A" }} />
+                  Generando capítulo sobre "{temaInput}"…
+                </span>
+              ) : (
+                "Borrador generado — editalo antes de guardar"
+              )}
+            </p>
+            {!generating && (
+              <button
+                type="button"
+                onClick={() => { setShowDraft(false); setDraftTitulo(""); setDraftContenido("") }}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Cancelar
+              </button>
+            )}
+          </div>
+          <input
+            type="text"
+            value={draftTitulo}
+            onChange={(e) => setDraftTitulo(e.target.value)}
+            placeholder="Título del capítulo"
+            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-semibold placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <Textarea
+            value={draftContenido}
+            onChange={(e) => setDraftContenido(e.target.value)}
+            rows={14}
+            className="resize-none text-sm leading-relaxed"
+            placeholder={generating ? "Generando..." : "El capítulo generado aparecerá acá..."}
+            readOnly={generating}
+          />
+          <div className="flex justify-end gap-2">
+            <Button
+              onClick={() => void handleSaveDraft()}
+              disabled={savingDraft || generating || !draftContenido.trim()}
+            >
+              {savingDraft ? "Guardando..." : "Agregar al libro"}
+            </Button>
+          </div>
+        </div>
+      )}
 
+      {/* Lista de capítulos */}
       {sorted.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
+        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
           <BookOpen className="size-10 text-muted-foreground/40" />
           <p className="text-muted-foreground text-sm max-w-sm">
-            Tu libro está vacío. Generá un capítulo desde tus memorias o empezá escribiendo directamente.
+            Tu libro está vacío. Generá un capítulo con IA o empezá escribiendo directamente.
           </p>
         </div>
       ) : (
@@ -376,117 +415,6 @@ export function MiLibroView() {
           ))}
         </div>
       )}
-
-      <Dialog open={generarOpen} onOpenChange={setGenerarOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="size-4" />
-              Generar capítulo desde Memoria
-            </DialogTitle>
-          </DialogHeader>
-
-          {!draft ? (
-            <div className="flex flex-col gap-4 min-h-0">
-              <p className="text-muted-foreground text-sm">
-                Seleccioná las memorias que querés incluir en el capítulo.
-              </p>
-
-              {memoriasLoading ? (
-                <p className="text-muted-foreground text-sm">Cargando memorias...</p>
-              ) : memorias.length === 0 ? (
-                <p className="text-muted-foreground text-sm">
-                  No hay memorias guardadas todavía. Guardá algo desde Coach, el Creador de escenas o Preguntas.
-                </p>
-              ) : (
-                <ScrollArea className="flex-1 max-h-72">
-                  <div className="space-y-2 pr-2">
-                    {memorias.map((m) => {
-                      const text = getContentText(m.content)
-                      return (
-                        <label
-                          key={m.id}
-                          className="flex items-start gap-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50"
-                        >
-                          <Checkbox
-                            checked={selectedIds.has(m.id)}
-                            onCheckedChange={(checked) => {
-                              setSelectedIds((prev) => {
-                                const next = new Set(prev)
-                                if (checked) next.add(m.id)
-                                else next.delete(m.id)
-                                return next
-                              })
-                            }}
-                            className="mt-0.5"
-                          />
-                          <div className="min-w-0">
-                            <span className="text-xs font-medium text-muted-foreground">
-                              {TYPE_LABELS[m.item_type] ?? m.source}
-                            </span>
-                            <p className="text-sm line-clamp-2 mt-0.5">{text}</p>
-                          </div>
-                        </label>
-                      )
-                    })}
-                  </div>
-                </ScrollArea>
-              )}
-
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setGenerarOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={() => void handleGenerar()}
-                  disabled={!selectedIds.size || generating}
-                  className="gap-2"
-                >
-                  <Sparkles className="size-4" />
-                  {generating ? "Generando..." : `Generar borrador (${selectedIds.size})`}
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3 min-h-0 flex-1">
-              <p className="text-muted-foreground text-xs">
-                Borrador generado — editalo antes de guardar.
-              </p>
-              <Input
-                value={draftTitulo}
-                onChange={(e) => setDraftTitulo(e.target.value)}
-                placeholder="Título del capítulo"
-                className="font-semibold"
-              />
-              <Textarea
-                value={draftContenido}
-                onChange={(e) => setDraftContenido(e.target.value)}
-                rows={12}
-                className="flex-1 resize-none text-sm leading-relaxed"
-                placeholder={generating ? "Generando..." : ""}
-                readOnly={generating}
-              />
-              <div className="flex justify-between gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setDraft(null)
-                    setSelectedIds(new Set())
-                  }}
-                >
-                  Volver a seleccionar
-                </Button>
-                <Button
-                  onClick={() => void handleSaveDraft()}
-                  disabled={savingDraft || generating || !draftContenido.trim()}
-                >
-                  {savingDraft ? "Guardando..." : "Agregar al libro"}
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
