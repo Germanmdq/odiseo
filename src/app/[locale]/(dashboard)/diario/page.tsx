@@ -7,7 +7,6 @@ import { toast } from "sonner"
 type Nota = { id: string; content: string; created_at: string; updated_at: string }
 
 const ACTIVE_COLOR = "#E8401A"
-const DAY_LABELS_SHORT = ["D", "L", "M", "X", "J", "V", "S"]
 
 function utcDateKey(iso: string) {
   return iso.slice(0, 10)
@@ -147,50 +146,77 @@ export default function DiarioPage() {
         <p className="text-muted-foreground text-sm">Tu práctica diaria, en palabras.</p>
       </div>
 
-      {/* 30-day compact calendar */}
+      {/* 30-day calendar */}
       <div>
-        <p className="text-xs text-muted-foreground mb-2">Últimos 30 días</p>
-        <div className="flex flex-wrap gap-1">
-          {days30.map(day => {
-            const hasEntry = notasByDay.has(day)
-            const isToday = day === todayKey
-            const dow = new Date(day + "T12:00:00").getDay()
-            return (
-              <button
-                key={day}
-                type="button"
-                title={day}
-                onClick={() => {
-                  const id = notasByDay.get(day)
-                  if (id) {
-                    setExpandedId(id)
-                    scrollToEntry(id)
-                  }
-                }}
-                disabled={!hasEntry}
-                className="flex flex-col items-center gap-0.5 group"
-              >
-                <div
-                  className="w-6 h-6 rounded transition-opacity"
-                  style={{
-                    backgroundColor: hasEntry ? ACTIVE_COLOR : "hsl(var(--muted))",
-                    opacity: hasEntry ? 1 : 0.5,
-                    outline: isToday ? `2px solid ${ACTIVE_COLOR}` : undefined,
-                    outlineOffset: isToday ? "2px" : undefined,
+        {/* Two rows of 15 so all squares are visible without scroll */}
+        {[days30.slice(0, 15), days30.slice(15)].map((row, ri) => (
+          <div key={ri} className="flex gap-1 mb-1">
+            {row.map(day => {
+              const hasEntry = notasByDay.has(day)
+              const isToday = day === todayKey
+              const dayNum = new Date(day + "T12:00:00").getDate()
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  title={day}
+                  onClick={() => {
+                    const id = notasByDay.get(day)
+                    if (id) {
+                      setExpandedId(id)
+                      scrollToEntry(id)
+                    }
                   }}
-                />
-                <span className="text-[8px] text-muted-foreground leading-none">
-                  {dow === 0 || dow === 6 ? DAY_LABELS_SHORT[dow] : ""}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-        <div className="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground">
-          <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(var(--muted))", opacity: 0.5 }} />
-          <span>Sin entrada</span>
-          <div className="w-3 h-3 rounded ml-2" style={{ backgroundColor: ACTIVE_COLOR }} />
-          <span>Con entrada</span>
+                  className="flex flex-col items-center gap-0.5 shrink-0"
+                  style={{ width: 28 }}
+                >
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 6,
+                      backgroundColor: hasEntry ? ACTIVE_COLOR : "hsl(var(--muted))",
+                      outline: isToday ? `2px solid ${ACTIVE_COLOR}` : undefined,
+                      outlineOffset: isToday ? "2px" : undefined,
+                    }}
+                  />
+                  <span
+                    style={{ fontSize: 11 }}
+                    className="text-muted-foreground leading-none select-none"
+                  >
+                    {dayNum}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        ))}
+        {/* Leyenda */}
+        <div className="flex items-center gap-3 mt-2" style={{ fontSize: 12 }}>
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <span
+              style={{
+                display: "inline-block",
+                width: 10,
+                height: 10,
+                borderRadius: 3,
+                backgroundColor: "hsl(var(--muted))",
+              }}
+            />
+            Sin entrada
+          </span>
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <span
+              style={{
+                display: "inline-block",
+                width: 10,
+                height: 10,
+                borderRadius: 3,
+                backgroundColor: ACTIVE_COLOR,
+              }}
+            />
+            Con entrada
+          </span>
         </div>
       </div>
 
