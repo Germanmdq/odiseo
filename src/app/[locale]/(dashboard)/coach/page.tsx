@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { checkAccess } from "@/lib/acceso"
-import { UsageHint } from "@/components/usage-hint"
+import { Paywall } from "@/components/paywall"
 import { CoachView } from "./components/coach-view"
 
 export default async function CoachPage({
@@ -12,17 +12,15 @@ export default async function CoachPage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let usosRestantes: number | null = null
   if (user) {
     const acceso = await checkAccess(user.id)
-    if (!acceso.suscripto) usosRestantes = acceso.usosRestantes
+    if (!acceso.allowed) {
+      return <Paywall locale={locale} />
+    }
   }
 
   return (
-    <div className="px-4 md:px-6 space-y-3">
-      {usosRestantes !== null && usosRestantes <= 3 && (
-        <UsageHint usosRestantes={usosRestantes} locale={locale} />
-      )}
+    <div className="px-4 md:px-6">
       <CoachView />
     </div>
   )

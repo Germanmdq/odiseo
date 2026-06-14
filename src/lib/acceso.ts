@@ -35,25 +35,35 @@ export async function checkAccess(userId: string): Promise<AccesoResult> {
     }
   }
 
-  // 2. No subscription — count free uses from user_usage (graceful if missing)
-  let usosUsados = 0
+  // 2. New strategy: first session of the day is free.
+  // If user has ANY usage from a previous day → paywall.
   try {
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
+
     const { count } = await admin
       .from("user_usage")
       .select("*", { count: "exact", head: true })
       .eq("user_id", userId)
-    usosUsados = count ?? 0
+      .lt("created_at", startOfToday.toISOString())
+
+    const hadPreviousSession = (count ?? 0) > 0
+
+    return {
+      allowed: !hadPreviousSession,
+      suscripto: false,
+      plan: null,
+      incluye_talleres: false,
+      usosRestantes: hadPreviousSession ? 0 : null,
+    }
   } catch {
-    // Table doesn't exist yet — grant free access
-  }
-
-  const usosRestantes = Math.max(0, 3 - usosUsados)
-
-  return {
-    allowed: usosRestantes > 0,
-    suscripto: false,
-    plan: null,
-    incluye_talleres: false,
-    usosRestantes,
+    // Table doesn't exist yet — grant access
+    return {
+      allowed: true,
+      suscripto: false,
+      plan: null,
+      incluye_talleres: false,
+      usosRestantes: null,
+    }
   }
 }

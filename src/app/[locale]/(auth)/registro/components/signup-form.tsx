@@ -26,11 +26,14 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
     setConfirmationMessage("")
 
     const formData = new FormData(event.currentTarget)
-    const firstName = String(formData.get("firstName") || "").trim()
-    const lastName = String(formData.get("lastName") || "").trim()
+    const nombrePreferido = String(formData.get("nombrePreferido") || "").trim()
     const email = String(formData.get("email") || "")
     const password = String(formData.get("password") || "")
-    const fullName = [firstName, lastName].filter(Boolean).join(" ")
+
+    if (!nombrePreferido) {
+      setError("Ingresá cómo querés que te llamemos")
+      return
+    }
 
     if (!termsAccepted) {
       setError("Aceptá los términos para crear tu cuenta")
@@ -44,7 +47,8 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
         password,
         options: {
           data: {
-            full_name: fullName,
+            nombre_preferido: nombrePreferido,
+            full_name: nombrePreferido,
           },
           emailRedirectTo: `${window.location.origin}/${locale}/dashboard`,
         },
@@ -55,13 +59,23 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
         return
       }
 
-    if (!data.session) {
-      setConfirmationMessage("Revisá tu correo para confirmar la cuenta")
-      return
-    }
+      // If session is immediately available, save nombre_preferido to profile
+      if (data.session) {
+        try {
+          await fetch("/api/perfil", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombrePreferido }),
+          })
+        } catch {
+          // Non-fatal — nombre_preferido is also in user_metadata as fallback
+        }
+        router.replace(`/${locale}/dashboard`)
+        router.refresh()
+        return
+      }
 
-    router.replace(`/${locale}/dashboard`)
-      router.refresh()
+      setConfirmationMessage("Revisá tu correo para confirmar la cuenta")
     })
   }
 
@@ -87,17 +101,24 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
         <p className="text-muted-foreground text-sm text-balance">{t("subtitle")}</p>
       </div>
-      <div className="grid gap-6">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="grid gap-3">
-            <Label htmlFor="firstName">{t("firstName")}</Label>
-            <Input id="firstName" name="firstName" placeholder="Ana" autoComplete="given-name" required />
-          </div>
-          <div className="grid gap-3">
-            <Label htmlFor="lastName">{t("lastName")}</Label>
-            <Input id="lastName" name="lastName" placeholder="García" autoComplete="family-name" required />
-          </div>
+      <div className="grid gap-5">
+        {/* Nombre preferido — destacado */}
+        <div className="grid gap-2 rounded-lg border-2 border-primary/20 bg-primary/5 p-4">
+          <Label htmlFor="nombrePreferido" className="font-semibold">
+            ¿Cómo querés que te llamemos?
+          </Label>
+          <Input
+            id="nombrePreferido"
+            name="nombrePreferido"
+            placeholder="Tu nombre o como preferís que te llamen"
+            autoComplete="nickname"
+            required
+          />
+          <p className="text-xs text-muted-foreground">
+            El Coach y el Narrador te van a llamar así.
+          </p>
         </div>
+
         <div className="grid gap-3">
           <Label htmlFor="email">{t("email")}</Label>
           <Input id="email" name="email" type="email" placeholder="hola@ejemplo.com" autoComplete="email" required />

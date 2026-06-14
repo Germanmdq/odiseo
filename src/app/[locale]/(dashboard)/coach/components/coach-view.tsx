@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, MessageSquareText, X, AlertCircle } from "lucide-react"
+import { Menu, MessageSquareText, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,6 @@ import { AUTHORS } from "../data"
 
 export function CoachView() {
   const t = useTranslations("coach")
-  const tp = useTranslations("settings.perfil")
   const {
     selectedAuthor,
     setSelectedAuthor,
@@ -123,18 +122,6 @@ export function CoachView() {
   return (
     <TooltipProvider delayDuration={0}>
       <div className="flex h-full min-h-[600px] max-h-[calc(100vh-200px)] flex-col gap-3">
-        {/* nombre_preferido banner */}
-        {nombrePreferido === "" && (
-          <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>
-              {tp("nombrePreferidoBanner")}{" "}
-              <a href="/settings/user" className="underline font-medium">
-                Ir a Perfil
-              </a>
-            </span>
-          </div>
-        )}
 
         <div className="flex flex-1 overflow-hidden rounded-lg border bg-background">
           {/* Mobile overlay */}
@@ -218,16 +205,16 @@ export function CoachView() {
                                 : "justify-start"
                             }`}
                           >
-                            <div className="group flex max-w-[80%] items-end gap-1">
+                            <div className="group flex w-fit max-w-[80%] items-end gap-1">
                               <div
-                                className={`min-w-0 flex-1 rounded-lg px-3 py-2 text-sm break-words ${
+                                className={`rounded-lg px-3 py-2 text-sm break-words whitespace-pre-wrap ${
                                   msg.senderId === "current-user"
                                     ? "bg-primary text-primary-foreground"
                                     : "bg-muted"
                                 }`}
                               >
                                 {msg.content ? (
-                                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                                  <span>{msg.content}</span>
                                 ) : (
                                   <div className="flex items-center gap-1 py-1">
                                     <span className="bg-muted-foreground/70 size-1.5 animate-bounce rounded-full" />

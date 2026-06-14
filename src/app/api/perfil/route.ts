@@ -27,11 +27,13 @@ export async function GET() {
     .maybeSingle()
 
   const profile = (data ?? {}) as ProfileRow
+  const metaNombre = (user.user_metadata?.nombre_preferido as string | undefined) ?? ""
+
   return NextResponse.json({
     email: user.email ?? "",
     fullName: profile.full_name ?? "",
     displayName: profile.display_name ?? "",
-    nombrePreferido: profile.nombre_preferido ?? "",
+    nombrePreferido: profile.nombre_preferido || metaNombre,
     avatarUrl: profile.avatar_url ?? "",
   })
 }
