@@ -31,10 +31,10 @@ export function HeroSection() {
 
           {/* Main Headline */}
           <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-            {t("title1")}
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              {" "}{t("title2")}
+              {t("title1")}
             </span>
+            {t("title2") ? <> {t("title2")}</> : null}
           </h1>
 
           {/* Subheading */}
@@ -45,7 +45,7 @@ export function HeroSection() {
           {/* CTA Buttons */}
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
             <Button size="lg" className="text-base cursor-pointer" asChild>
-              <Link href="/auth/sign-up">
+              <Link href="/es/registro">
                 {t("ctaPrimary")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

@@ -93,8 +93,14 @@ export function TalleresSection() {
 
             {/* Taty */}
             <div className="flex flex-col items-center gap-3">
-              <div className="h-20 w-20 rounded-full overflow-hidden ring-2 ring-border shadow-sm bg-violet-100 flex items-center justify-center">
-                <span className="text-2xl font-bold text-violet-600">TB</span>
+              <div className="h-20 w-20 rounded-full overflow-hidden ring-2 ring-border shadow-sm">
+                <Image
+                  src="/taty-baldi.jpg"
+                  alt="Taty Baldi"
+                  width={80}
+                  height={80}
+                  className="object-cover w-full h-full"
+                />
               </div>
               <div className="text-center">
                 <p className="font-semibold text-foreground">{t("person2Name")}</p>
@@ -106,7 +112,7 @@ export function TalleresSection() {
           {/* CTA */}
           <div className="text-center space-y-2">
             <Button size="lg" className="cursor-pointer" asChild>
-              <Link href="/es/pricing">{t("cta")}</Link>
+              <Link href="/es/registro">{t("cta")}</Link>
             </Button>
             <p className="text-xs text-muted-foreground">{t("ctaNote")}</p>
           </div>

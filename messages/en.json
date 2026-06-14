@@ -375,13 +375,13 @@
       "getStarted": "Get Started Free"
     },
     "hero": {
-      "badge": "Based on the teachings of Neville Goddard",
-      "title1": "Odiseo —",
-      "title2": "where reason doesn't exist.",
-      "subtitle": "Your imagination companion: a space to study, practice, converse, save memories, create plans and turn your inner process into your own book.",
+      "badge": "University of Imagination",
+      "title1": "Odiseo",
+      "title2": "",
+      "subtitle": "Your space to study, practice and transform your life from within. Conversations with masters, guided scenes, complete library, unique workshops and a book you write yourself.",
       "note": "No card. No setup.",
-      "ctaPrimary": "Get Started Free",
-      "ctaSecondary": "Watch how it works",
+      "ctaPrimary": "Start for free",
+      "ctaSecondary": "See how it works",
       "dashboardAlt": "Odiseo preview"
     },
     "stats": {
