@@ -1,0 +1,278 @@
+[
+  {
+    "id": 1,
+    "question": "¿Qué es Odiseo?",
+    "answer": "Odiseo es una plataforma de aprendizaje inmersivo de las enseñanzas de Neville Goddard y otros maestros de la ley mental. Tiene un Coach IA, Creador de escenas, biblioteca de fuentes, evaluaciones de conocimientos y más — todo pensado para llevar la práctica más allá del conocimiento teórico.",
+    "category": "General"
+  },
+  {
+    "id": 2,
+    "question": "¿Para quién es Odiseo?",
+    "answer": "Para cualquier persona que quiera profundizar en las enseñanzas de Neville Goddard, la ley de la asunción y la metafísica práctica. Tanto si es tu primer encuentro con estas ideas como si llevás años estudiándolas, vas a encontrar algo de valor.",
+    "category": "General"
+  },
+  {
+    "id": 3,
+    "question": "¿Necesito conocer las enseñanzas de Neville Goddard para usar Odiseo?",
+    "answer": "No. Podés empezar desde cero. El Coach y los recursos de la plataforma están diseñados para explicar las enseñanzas desde sus fundamentos y guiarte a tu propio ritmo.",
+    "category": "General"
+  },
+  {
+    "id": 4,
+    "question": "¿Qué es la Ley de la Asunción?",
+    "answer": "Es la doctrina central de Neville Goddard: la conciencia es la única realidad, y todo lo que experimentamos es el reflejo de lo que asumimos como verdadero. Al cambiar el estado de conciencia asumido, cambia la experiencia exterior.",
+    "category": "General"
+  },
+  {
+    "id": 5,
+    "question": "¿Quiénes son los maestros del Coach?",
+    "answer": "El Coach puede encarnar la voz de Neville Goddard, Ernest Holmes, Florence Scovel Shinn, Joseph Murphy y otros. Cada uno tiene su propio estilo, vocabulario y perspectiva — pero todos hablan desde la misma raíz: la mente crea la realidad.",
+    "category": "General"
+  },
+  {
+    "id": 6,
+    "question": "¿Qué es el Creador de escenas?",
+    "answer": "Es una herramienta que te ayuda a imaginar y escribir escenas específicas — momentos que asumís como reales en tu mente. Lo usás para diseñar la imagen mental que querés anclar en tu conciencia, con ayuda de IA.",
+    "category": "General"
+  },
+  {
+    "id": 7,
+    "question": "¿En qué idiomas está disponible Odiseo?",
+    "answer": "Actualmente en español. La plataforma está pensada para hablantes de español de cualquier país, con un lenguaje rioplatense de base pero accesible para todos.",
+    "category": "General"
+  },
+  {
+    "id": 8,
+    "question": "¿Hay una app móvil?",
+    "answer": "Por ahora Odiseo funciona desde el navegador, y está optimizado para usarse tanto en computadora como en celular. Una app nativa es algo que está en el horizonte.",
+    "category": "General"
+  },
+  {
+    "id": 9,
+    "question": "¿Cómo creo mi cuenta?",
+    "answer": "Desde la pantalla de registro en odiseo.app. Solo necesitás un email y una contraseña. No hace falta tarjeta de crédito para empezar.",
+    "category": "Mi cuenta"
+  },
+  {
+    "id": 10,
+    "question": "¿Puedo usar Odiseo sin pagar?",
+    "answer": "Sí. Tenés acceso gratuito con usos limitados para explorar la plataforma. Las funciones como el Coach, el Creador de escenas y las evaluaciones tienen un límite de uso en el plan gratuito.",
+    "category": "Mi cuenta"
+  },
+  {
+    "id": 11,
+    "question": "¿Qué incluyen los 3 usos gratuitos?",
+    "answer": "Podés usar el Coach, el Creador de escenas y el Narrador hasta 3 veces en total para conocer la experiencia antes de elegir un plan. Es suficiente para ver cómo funciona y qué valor te aporta.",
+    "category": "Mi cuenta"
+  },
+  {
+    "id": 12,
+    "question": "¿Cómo cambio mi nombre o email?",
+    "answer": "Desde Configuración → Perfil. Ahí podés actualizar tu nombre preferido, tu nombre completo y otras preferencias personales.",
+    "category": "Mi cuenta"
+  },
+  {
+    "id": 13,
+    "question": "¿Cómo elimino mi cuenta?",
+    "answer": "Contactando a soporte. Eliminamos la cuenta y todos tus datos personales en 48 horas hábiles. Envianos un mensaje desde la sección de soporte.",
+    "category": "Mi cuenta"
+  },
+  {
+    "id": 14,
+    "question": "¿Mis datos son privados?",
+    "answer": "Sí. Tus conversaciones con el Coach, tus memorias y tus evaluaciones son privadas — solo vos las ves. No compartimos ni vendemos datos personales.",
+    "category": "Mi cuenta"
+  },
+  {
+    "id": 15,
+    "question": "¿Cuáles son los planes disponibles?",
+    "answer": "Tenemos plan gratuito (exploración), plan mensual y plan anual. Los Talleres son un beneficio exclusivo del plan anual.",
+    "category": "Planes y pagos"
+  },
+  {
+    "id": 16,
+    "question": "¿Cuánto cuesta cada plan?",
+    "answer": "Los precios actualizados los encontrás en la sección Precios dentro de la plataforma o en la página de inicio. Los planes están en dólares.",
+    "category": "Planes y pagos"
+  },
+  {
+    "id": 17,
+    "question": "¿Qué diferencia hay entre el plan mensual y el anual?",
+    "answer": "El plan anual incluye acceso completo a los Talleres además de todos los beneficios del plan mensual, y tiene un descuento significativo respecto a pagar mes a mes.",
+    "category": "Planes y pagos"
+  },
+  {
+    "id": 18,
+    "question": "¿Los Talleres están incluidos en todos los planes?",
+    "answer": "No. Los Talleres son exclusivos del plan anual. Con el plan mensual tenés acceso completo al contenido base de la plataforma, pero no a los cursos de los Talleres.",
+    "category": "Planes y pagos"
+  },
+  {
+    "id": 19,
+    "question": "¿Cómo pago? ¿Qué métodos aceptan?",
+    "answer": "Aceptamos tarjetas de crédito y débito internacionales. El procesamiento de pagos está a cargo de Stripe, plataforma segura usada por millones de empresas a nivel mundial.",
+    "category": "Planes y pagos"
+  },
+  {
+    "id": 20,
+    "question": "¿Puedo cancelar en cualquier momento?",
+    "answer": "Sí. Podés cancelar tu suscripción cuando quieras. Seguís teniendo acceso hasta el final del período que ya pagaste.",
+    "category": "Planes y pagos"
+  },
+  {
+    "id": 21,
+    "question": "¿Hay reembolsos?",
+    "answer": "Sí, dentro de los primeros 7 días de suscripción. Si la experiencia no fue lo que esperabas, contactá a soporte y lo gestionamos sin problema.",
+    "category": "Planes y pagos"
+  },
+  {
+    "id": 22,
+    "question": "¿El precio es en dólares o en pesos?",
+    "answer": "En dólares. Desde Argentina o cualquier país de habla hispana, el cobro se hace en la moneda de tu tarjeta al tipo de cambio vigente.",
+    "category": "Planes y pagos"
+  },
+  {
+    "id": 23,
+    "question": "¿Cómo funciona el Coach?",
+    "answer": "El Coach es un asistente de IA que encarna la voz de diferentes maestros. Le hacés una pregunta, elegís con quién querés hablar, y te responde desde esa perspectiva — usando fuentes reales de esas enseñanzas como base.",
+    "category": "Cómo usar Odiseo"
+  },
+  {
+    "id": 24,
+    "question": "¿Puedo hablar con más de un maestro?",
+    "answer": "Sí. Podés cambiar de maestro en cualquier momento. Cada conversación empieza de cero, así que podés explorar la misma pregunta desde varias perspectivas.",
+    "category": "Cómo usar Odiseo"
+  },
+  {
+    "id": 25,
+    "question": "¿Qué es el Creador de escenas y cómo lo uso?",
+    "answer": "Es una herramienta para imaginar y escribir la escena interna que representa tu deseo cumplido. Elegís el tipo de escena, describís el contexto, y la IA te ayuda a construirla. Luego podés guardarla en tu Memoria.",
+    "category": "Cómo usar Odiseo"
+  },
+  {
+    "id": 26,
+    "question": "¿Qué son las Fuentes?",
+    "answer": "Son conferencias, libros y textos originales de los maestros que usamos como base del Coach. Podés navegar por las fuentes, buscar por tema y guardar fragmentos relevantes en tu Memoria.",
+    "category": "Cómo usar Odiseo"
+  },
+  {
+    "id": 27,
+    "question": "¿Cómo funciona la evaluación de conocimientos?",
+    "answer": "Elegís un tema de las enseñanzas de Neville, definís cuántas preguntas querés responder, y el sistema genera un múltiple choice. Al terminar, recibís tu puntaje, feedback de cada pregunta y la respuesta elaborada más relevante sobre ese tema.",
+    "category": "Cómo usar Odiseo"
+  },
+  {
+    "id": 28,
+    "question": "¿Qué es la Memoria?",
+    "answer": "Es tu repositorio personal de fragmentos guardados. Podés guardar respuestas del Coach, escenas, extractos de fuentes y resultados de evaluaciones. Sirve como diario de práctica y referencia personal.",
+    "category": "Cómo usar Odiseo"
+  },
+  {
+    "id": 29,
+    "question": "¿Cómo se construye Mi libro?",
+    "answer": "Mi libro es un documento personal que se va armando con tus reflexiones, escenas y aprendizajes. Por ahora podés ir guardando en Memoria; la funcionalidad completa de Mi libro está próxima.",
+    "category": "Cómo usar Odiseo"
+  },
+  {
+    "id": 30,
+    "question": "¿Qué son los Planes y cómo los solicito?",
+    "answer": "Los Planes son programas de estudio o práctica personalizados que Germán arma junto con vos. Los solicitás desde la sección Mensajes, describís lo que necesitás, y él te responde con un plan diseñado a medida.",
+    "category": "Cómo usar Odiseo"
+  },
+  {
+    "id": 31,
+    "question": "¿Qué son los Talleres?",
+    "answer": "Son cursos en video grabados por Germán y otros especialistas sobre temas específicos de las enseñanzas. Cada taller tiene varias lecciones y está disponible para usuarios con plan anual.",
+    "category": "Cómo usar Odiseo"
+  },
+  {
+    "id": 32,
+    "question": "¿Qué es la racha y cómo la mantengo?",
+    "answer": "La racha es un contador de días consecutivos en que hacés al menos una evaluación de conocimientos. Se muestra en el sidebar y en el Inicio. La mantenés viva evaluándote todos los días — aunque sea una sola pregunta.",
+    "category": "Cómo usar Odiseo"
+  },
+  {
+    "id": 33,
+    "question": "¿Quiénes dictan los talleres?",
+    "answer": "Principalmente Germán González, fundador de Odiseo, junto a otros especialistas en las enseñanzas de Neville Goddard y la metafísica práctica.",
+    "category": "Talleres"
+  },
+  {
+    "id": 34,
+    "question": "¿Cuántos talleres hay y de qué tratan?",
+    "answer": "La biblioteca de talleres crece de forma continua. Los temas incluyen la Ley de la Asunción, el SATS, la revisión, la promesa mística y temas prácticos de aplicación diaria.",
+    "category": "Talleres"
+  },
+  {
+    "id": 35,
+    "question": "¿Cuántas lecciones tiene cada taller?",
+    "answer": "Varía según el taller. En promedio entre 4 y 10 lecciones en video de entre 20 y 40 minutos. Podés ver el detalle en la página de cada taller.",
+    "category": "Talleres"
+  },
+  {
+    "id": 36,
+    "question": "¿Los talleres son en vivo o grabados?",
+    "answer": "Grabados. Podés acceder en cualquier momento, repetir las lecciones que quieras y avanzar a tu propio ritmo. No hay horarios fijos.",
+    "category": "Talleres"
+  },
+  {
+    "id": 37,
+    "question": "¿Necesito el plan anual para acceder a los talleres?",
+    "answer": "Sí. Los Talleres son un beneficio exclusivo del plan anual de Odiseo.",
+    "category": "Talleres"
+  },
+  {
+    "id": 38,
+    "question": "¿Puedo ver los talleres a mi ritmo?",
+    "answer": "Sí, completamente. No hay fechas límite ni orden obligatorio. Accedés cuando querés y avanzás según tu disposición.",
+    "category": "Talleres"
+  },
+  {
+    "id": 39,
+    "question": "¿Cómo contacto al soporte?",
+    "answer": "Desde la sección Mensajes dentro de la plataforma. También podés escribir directamente a soporte@odiseo.app.",
+    "category": "Soporte"
+  },
+  {
+    "id": 40,
+    "question": "¿Hay un grupo de Telegram?",
+    "answer": "Sí. Tenemos una comunidad en Telegram para practicantes de Odiseo donde compartimos avances, dudas y revelaciones. El link te lo enviamos al activar tu plan.",
+    "category": "Soporte"
+  },
+  {
+    "id": 41,
+    "question": "¿Puedo sugerir mejoras o nuevas funciones?",
+    "answer": "Sí, y te lo agradecemos. Usamos las sugerencias de la comunidad para priorizar qué desarrollamos. Podés enviarlas por Mensajes o a través del grupo de Telegram.",
+    "category": "Soporte"
+  },
+  {
+    "id": 42,
+    "question": "¿Con qué frecuencia se actualiza Odiseo?",
+    "answer": "Constantemente. Publicamos mejoras, nuevas funciones y nuevo contenido de forma regular. Las novedades se comunican por Mensajes y en el grupo de Telegram.",
+    "category": "Soporte"
+  },
+  {
+    "id": 43,
+    "question": "¿Puedo pedir un plan personalizado?",
+    "answer": "Sí. Desde la sección Planes podés describir lo que necesitás — una situación específica, un objetivo, un área de trabajo — y Germán te diseña un plan a medida.",
+    "category": "Soporte"
+  },
+  {
+    "id": 44,
+    "question": "¿Cómo funciona el sistema de Planes con Germán?",
+    "answer": "Le escribís lo que querés trabajar, él arma un plan y te lo envía por Mensajes. Es un intercambio asincrónico: describís tu situación, él diseña, vos implementás a tu ritmo.",
+    "category": "Soporte"
+  },
+  {
+    "id": 45,
+    "question": "¿Hay garantía de satisfacción?",
+    "answer": "Sí. Si dentro de los primeros 7 días sentís que la plataforma no es lo que esperabas, te devolvemos el pago. Sin preguntas.",
+    "category": "Soporte"
+  },
+  {
+    "id": 46,
+    "question": "¿Puedo compartir Odiseo con alguien más?",
+    "answer": "Tu cuenta es personal. Si querés recomendar Odiseo, genial — simplemente invitales a crear su propia cuenta. Cada practicante tiene su propio espacio de trabajo y Memoria.",
+    "category": "Soporte"
+  }
+]

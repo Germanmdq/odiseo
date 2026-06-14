@@ -1,0 +1,253 @@
+"use client"
+
+import * as React from "react"
+import { Send, Sparkles } from "lucide-react"
+import { useTranslations } from "next-intl"
+
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
+
+type NarradorMessage = {
+  id: string
+  role: "user" | "assistant"
+  content: string
+}
+
+function LoadingDots() {
+  return (
+    <div className="flex items-center gap-1 py-1">
+      <span className="bg-muted-foreground/70 size-1.5 animate-bounce rounded-full" />
+      <span className="bg-muted-foreground/70 size-1.5 animate-bounce rounded-full [animation-delay:120ms]" />
+      <span className="bg-muted-foreground/70 size-1.5 animate-bounce rounded-full [animation-delay:240ms]" />
+    </div>
+  )
+}
+
+export function NarradorView() {
+  const t = useTranslations("narrador")
+  const [messages, setMessages] = React.useState<NarradorMessage[]>([])
+  const [input, setInput] = React.useState("")
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
+  const [retryMessage, setRetryMessage] = React.useState<string | null>(null)
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+
+  const suggestions = [
+    t("suggestions.security"),
+    t("suggestions.work"),
+    t("suggestions.abundance"),
+    t("suggestions.sats"),
+  ]
+
+  function updateMessage(messageId: string, updater: (message: NarradorMessage) => NarradorMessage) {
+    setMessages((current) =>
+      current.map((message) => (message.id === messageId ? updater(message) : message))
+    )
+  }
+
+  async function sendMessage(content: string, appendUser = true) {
+    const trimmed = content.trim()
+    if (!trimmed || isLoading) return
+
+    const userMessage: NarradorMessage = {
+      id: `msg-${Date.now()}`,
+      role: "user",
+      content: trimmed,
+    }
+    const assistantMessage: NarradorMessage = {
+      id: `msg-${Date.now()}-assistant`,
+      role: "assistant",
+      content: "",
+    }
+    const nextMessages = appendUser ? [...messages, userMessage] : messages
+
+    if (appendUser) setMessages((current) => [...current, userMessage])
+    setMessages((current) => [...current, assistantMessage])
+    setIsLoading(true)
+    setError(null)
+    setRetryMessage(trimmed)
+    setInput("")
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"
+    }
+
+    try {
+      const response = await fetch("/api/narrador", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: nextMessages.map((message) => ({
+            role: message.role,
+            content: message.content,
+          })),
+        }),
+      })
+
+      if (!response.ok || !response.body) {
+        const errorText = await response.text()
+        throw new Error(errorText || t("errors.connection"))
+      }
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+        updateMessage(assistantMessage.id, (message) => ({
+          ...message,
+          content: `${message.content}${chunk}`,
+        }))
+      }
+    } catch (caught) {
+      const message =
+        caught instanceof Error ? caught.message : t("errors.connection")
+      setError(message)
+      updateMessage(assistantMessage.id, (current) => ({
+        ...current,
+        content: current.content || t("errors.fallback"),
+      }))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  function handleTextareaChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    const value = event.target.value
+    setInput(value)
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 140)}px`
+    }
+  }
+
+  function submitCurrentMessage() {
+    void sendMessage(input)
+  }
+
+  return (
+    <div className="h-full min-h-[600px] max-h-[calc(100vh-200px)] overflow-hidden rounded-lg border bg-background">
+      <div className="flex h-full flex-col">
+        <header className="flex min-h-16 items-center gap-3 border-b px-4">
+          <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Sparkles className="size-5" />
+          </div>
+          <div>
+            <h1 className="font-semibold leading-tight">{t("title")}</h1>
+            <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
+          </div>
+        </header>
+
+        <div className="flex min-h-0 flex-1 flex-col">
+          {messages.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center gap-5 px-4 text-center">
+              <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <Sparkles className="size-6" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">{t("emptyTitle")}</h2>
+                <p className="text-muted-foreground max-w-xl text-sm">
+                  {t("emptySubtitle")}
+                </p>
+              </div>
+              <div className="flex max-w-2xl flex-wrap justify-center gap-2">
+                {suggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => void sendMessage(suggestion)}
+                    disabled={isLoading}
+                    className="rounded-full bg-muted px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <ScrollArea className="flex-1 px-4">
+              <div className="mx-auto max-w-4xl space-y-4 py-4">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={cn(
+                      "flex",
+                      message.role === "user" ? "justify-end" : "justify-start"
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "max-w-[82%] rounded-lg px-4 py-3 text-sm leading-relaxed break-words",
+                        message.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                      )}
+                    >
+                      {message.content ? (
+                        <div className="whitespace-pre-wrap">{message.content}</div>
+                      ) : (
+                        <LoadingDots />
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {error ? (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm">
+                    <p className="text-destructive">{t("errors.visible")}</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => {
+                        if (retryMessage) void sendMessage(retryMessage, false)
+                      }}
+                    >
+                      {t("retry")}
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
+            </ScrollArea>
+          )}
+
+          <div className="border-t p-4">
+            <div className="mx-auto flex max-w-4xl items-end gap-2">
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={handleTextareaChange}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault()
+                    submitCurrentMessage()
+                  }
+                }}
+                placeholder={t("inputPlaceholder")}
+                disabled={isLoading}
+                rows={1}
+                className="max-h-[140px] min-h-10 resize-none"
+              />
+              <Button
+                onClick={submitCurrentMessage}
+                disabled={isLoading || !input.trim()}
+                className="shrink-0"
+              >
+                <Send className="size-4" />
+                <span className="sr-only">{t("send")}</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

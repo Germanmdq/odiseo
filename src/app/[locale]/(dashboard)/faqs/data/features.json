@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "title": "Coach IA",
+    "description": "Conversá con Neville Goddard, Florence Scovel Shinn y otros maestros. El Coach usa RAG sobre cientos de fuentes reales para darte respuestas basadas en sus enseñanzas.",
+    "icon": "Sparkles"
+  },
+  {
+    "id": 2,
+    "title": "Tus datos, tus ojos",
+    "description": "Tu Memoria, tus evaluaciones y tu libro son completamente privados. Nunca compartimos ni vendemos tu información.",
+    "icon": "Shield"
+  },
+  {
+    "id": 3,
+    "title": "Siempre disponible",
+    "description": "Accedés a Odiseo desde cualquier dispositivo, en cualquier momento. Sin apps que instalar, sin interrupciones.",
+    "icon": "Clock"
+  },
+  {
+    "id": 4,
+    "title": "En constante crecimiento",
+    "description": "Sumamos fuentes, talleres y funciones regularmente. Tu suscripción siempre accede a lo último que agregamos.",
+    "icon": "Truck"
+  }
+]

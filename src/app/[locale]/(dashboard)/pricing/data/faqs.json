@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "question": "¿Puedo cancelar cuando quiera?",
+    "answer": "Sí. No hay contratos ni permanencia mínima. Cancelás desde tu perfil y seguís con acceso hasta que venza tu período pagado."
+  },
+  {
+    "id": 2,
+    "question": "¿Qué diferencia hay entre el plan mensual y el anual?",
+    "answer": "El contenido es el mismo. El plan anual incluye además los Talleres en video de Germán y Taty, y sale el equivalente a $3,9 USD por mes — un 57% más barato que pagar mes a mes."
+  },
+  {
+    "id": 3,
+    "question": "¿Cómo pago? ¿Qué medios aceptan?",
+    "answer": "Podés pagar con MercadoPago (tarjeta, transferencia, billetera virtual) o con PayPal. Todos los pagos son seguros y procesados directamente por cada pasarela."
+  },
+  {
+    "id": 4,
+    "question": "¿Los Talleres están disponibles de inmediato?",
+    "answer": "Sí. Al activarse tu plan anual tenés acceso inmediato a todos los talleres en video. No hay espera ni contenido que se desbloquee con el tiempo."
+  },
+  {
+    "id": 5,
+    "question": "¿Tienen prueba gratuita?",
+    "answer": "Podés usar el Coach, el Creador de escenas y otras funciones de forma gratuita hasta agotar los usos de cortesía. Después necesitás un plan para seguir."
+  },
+  {
+    "id": 6,
+    "question": "¿Puedo cambiar de plan mensual a anual más adelante?",
+    "answer": "Sí. En cualquier momento podés suscribirte al plan anual desde la página de precios. Tu acceso se extiende y se activan los Talleres."
+  }
+]

@@ -1,0 +1,23 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import { inter } from "@/lib/fonts";
+
+export const metadata: Metadata = {
+  title: "Odiseo — Universidad de la Imaginación",
+  description: "Tu espacio de práctica diaria basado en las enseñanzas de Neville Goddard.",
+  icons: { icon: "/logo-odiseo.png", apple: "/logo-odiseo.png" },
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html suppressHydrationWarning>
+      <body className={`${inter.variable} ${inter.className} antialiased`}>
+        {children}
+      </body>
+    </html>
+  );
+}
