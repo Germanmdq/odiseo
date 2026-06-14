@@ -38,7 +38,7 @@ export async function GET() {
     .from("memoria")
     .select("id, item_type, title, content, source, created_at")
     .eq("user_id", user.id)
-    .eq("status", "active")
+    .or("status.eq.active,status.is.null")
     .order("created_at", { ascending: false })
 
   if (error) return jsonDbError("Error loading memoria", error)

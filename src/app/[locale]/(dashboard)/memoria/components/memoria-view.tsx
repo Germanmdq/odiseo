@@ -5,6 +5,8 @@ import { Brain, Search, Trash2, X } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
 
+import ReactMarkdown from "react-markdown"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -209,9 +211,11 @@ export function MemoriaView() {
             </DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="max-h-[60vh] px-6 py-4">
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">
-              {selected ? getContentText(selected.content) : ""}
-            </p>
+            <div className="max-w-2xl mx-auto prose prose-sm dark:prose-invert leading-relaxed text-base">
+              <ReactMarkdown>
+                {selected ? getContentText(selected.content) : ""}
+              </ReactMarkdown>
+            </div>
           </ScrollArea>
         </DrawerContent>
       </Drawer>

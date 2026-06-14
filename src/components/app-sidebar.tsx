@@ -5,7 +5,7 @@ import {
   Home,
   Mail,
   MessageSquareText,
-  StickyNote,
+  PenLine,
   Calendar,
   GraduationCap,
   Library,
@@ -72,9 +72,9 @@ const data = {
           icon: Mail,
         },
         {
-          title: "Notas",
-          url: "/notas",
-          icon: StickyNote,
+          title: "Diario",
+          url: "/diario",
+          icon: PenLine,
         },
         {
           title: "Mi actividad",

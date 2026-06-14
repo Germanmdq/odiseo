@@ -72,20 +72,23 @@ type Estado =
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const TEMAS = [
-  "Asunción",
-  "SATS",
-  "Revisión",
-  "Vivir desde el final",
-  "Autoconcepto",
-  "YO SOY",
-  "Fe",
-  "Persistencia",
-  "La Promesa",
-  "Imaginación",
-  "Provisión Divina",
-  "Conciencia",
+const TEMAS_CON_EMOJI = [
+  { tema: "Asunción", emoji: "🌅" },
+  { tema: "SATS", emoji: "🌙" },
+  { tema: "Revisión", emoji: "✏️" },
+  { tema: "Vivir desde el final", emoji: "🎯" },
+  { tema: "Autoconcepto", emoji: "🪞" },
+  { tema: "YO SOY", emoji: "✨" },
+  { tema: "Fe", emoji: "🕊️" },
+  { tema: "Persistencia", emoji: "💪" },
+  { tema: "La Promesa", emoji: "🌟" },
+  { tema: "Imaginación", emoji: "🧠" },
+  { tema: "Provisión Divina", emoji: "🌿" },
+  { tema: "Conciencia", emoji: "👁️" },
+  { tema: "__sorpresa", emoji: "🎲", label: "Sorprendeme" },
 ]
+
+const TEMAS = TEMAS_CON_EMOJI.filter(t => t.tema !== "__sorpresa").map(t => t.tema)
 
 const CANTIDADES = [1, 3, 5, 10]
 
@@ -127,47 +130,43 @@ function SetupScreen({
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8 py-6">
+    <div className="mx-auto max-w-3xl space-y-8 py-6">
       <div>
         <h2 className="mb-4 text-xl font-semibold">¿Sobre qué querés evaluarte hoy?</h2>
-        <div className="flex flex-wrap gap-2">
-          {TEMAS.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTemaSeleccionado(t)}
-              className={cn(
-                "rounded-full border px-3 py-1.5 text-sm transition-colors",
-                temaSeleccionado === t
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "bg-background hover:bg-muted"
-              )}
-            >
-              {t}
-            </button>
-          ))}
-          <button
-            onClick={() => setTemaSeleccionado("__sorpresa")}
-            className={cn(
-              "rounded-full border px-3 py-1.5 text-sm transition-colors",
-              temaSeleccionado === "__sorpresa"
-                ? "border-primary bg-primary text-primary-foreground"
-                : "bg-background hover:bg-muted"
-            )}
-          >
-            🎲 Sorprendeme
-          </button>
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+          {TEMAS_CON_EMOJI.map(({ tema, emoji, label }) => {
+            const isSelected = temaSeleccionado === tema
+            return (
+              <button
+                key={tema}
+                onClick={() => setTemaSeleccionado(tema)}
+                className={cn(
+                  "flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all",
+                  "hover:border-primary/50 hover:bg-primary/5",
+                  isSelected
+                    ? "border-primary bg-primary/10 ring-1 ring-primary"
+                    : "border-border bg-background"
+                )}
+              >
+                <span className="text-3xl leading-none">{emoji}</span>
+                <span className="text-xs font-medium leading-tight">
+                  {label ?? tema}
+                </span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
       <div>
-        <h3 className="mb-3 text-sm font-medium">Cantidad de preguntas</h3>
+        <h3 className="mb-3 text-sm font-medium text-muted-foreground">Cantidad de preguntas</h3>
         <div className="flex gap-2">
           {CANTIDADES.map((c) => (
             <button
               key={c}
               onClick={() => setCantidad(c)}
               className={cn(
-                "h-10 w-14 rounded-md border text-sm font-medium transition-colors",
+                "h-12 w-16 rounded-lg border text-base font-semibold transition-colors",
                 cantidad === c
                   ? "border-primary bg-primary text-primary-foreground"
                   : "bg-background hover:bg-muted"
@@ -180,9 +179,13 @@ function SetupScreen({
       </div>
 
       <div className="flex items-center justify-between">
-        <Button size="lg" disabled={!temaSeleccionado} onClick={handleStart}>
-          Empezar
-        </Button>
+        {temaSeleccionado ? (
+          <Button size="lg" onClick={handleStart}>
+            Empezar
+          </Button>
+        ) : (
+          <p className="text-sm text-muted-foreground italic">Elegí un tema para empezar</p>
+        )}
         {estado.racha > 0 ? (
           <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Flame className="h-4 w-4 text-orange-500" />
