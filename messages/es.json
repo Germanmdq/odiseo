@@ -400,8 +400,8 @@
     },
     "about": {
       "badge": "Sobre Odiseo",
-      "title": "Diseñado para tu práctica interior",
-      "subtitle": "Un espacio para estudiar, practicar, conversar y convertir tu proceso interior en un libro propio.",
+      "title": "Diseñado para tu práctica",
+      "subtitle": "Un espacio para estudiar, practicar, conversar y convertir tu proceso en un libro propio.",
       "pillar1Title": "Estudiar",
       "pillar1Desc": "Conferencias, libros y biblia metafísica de Neville Goddard.",
       "pillar2Title": "Practicar",
@@ -410,7 +410,7 @@
       "pillar3Desc": "Diario personal y memoria que persiste entre sesiones.",
       "pillar4Title": "Transformar",
       "pillar4Desc": "Convertí tu proceso en un libro propio.",
-      "tagline": "Hecho con amor para la práctica interior",
+      "tagline": "Hecho con amor para tu práctica",
       "ctaPrimary": "Entrá gratis",
       "ctaSecondary": "Conocé las herramientas"
     },
@@ -510,7 +510,7 @@
       "newsletterDesc": "Novedades de Odiseo, artículos y recursos enviados a tu correo.",
       "emailPlaceholder": "Tu email",
       "subscribe": "Suscribirse",
-      "brandDesc": "Tu compañero de imaginación para estudiar, practicar y convertir tu proceso interior en un libro propio.",
+      "brandDesc": "Tu compañero de imaginación para estudiar, practicar y convertir tu proceso en un libro propio.",
       "platformGroup": "Plataforma",
       "featuresLink": "Herramientas",
       "coachLink": "Coach",
