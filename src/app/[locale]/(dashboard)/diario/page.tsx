@@ -1,20 +1,21 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent } from "@/components/ui/card"
-import { Trash2, PenLine } from "lucide-react"
+import { useEffect, useRef, useState, useCallback } from "react"
+import { Trash2, PenLine, Check, X, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 
 type Nota = { id: string; content: string; created_at: string; updated_at: string }
 
-function dateKey(iso: string) {
+const ACTIVE_COLOR = "#E8401A"
+const DAY_LABELS_SHORT = ["D", "L", "M", "X", "J", "V", "S"]
+
+function utcDateKey(iso: string) {
   return iso.slice(0, 10)
 }
 
 function formatFechaLarga(iso: string) {
-  return new Date(iso).toLocaleDateString("es-AR", {
+  const d = new Date(iso)
+  return d.toLocaleDateString("es-AR", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -22,14 +23,24 @@ function formatFechaLarga(iso: string) {
   })
 }
 
-function formatFechaCorta(iso: string) {
+function formatRelativa(iso: string) {
+  const now = Date.now()
+  const diff = now - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "Ahora mismo"
+  if (mins < 60) return `Hace ${mins} min`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `Hace ${hrs} h`
+  const days = Math.floor(hrs / 24)
+  if (days === 1) return "Ayer"
+  if (days < 7) return `Hace ${days} días`
   return new Date(iso).toLocaleDateString("es-AR", { day: "numeric", month: "short" })
 }
 
-function build15Days() {
+function build30Days(): string[] {
   const days: string[] = []
   const today = new Date()
-  for (let i = 14; i >= 0; i--) {
+  for (let i = 29; i >= 0; i--) {
     const d = new Date(today)
     d.setDate(d.getDate() - i)
     days.push(d.toISOString().slice(0, 10))
@@ -37,15 +48,16 @@ function build15Days() {
   return days
 }
 
-const DAY_LABELS = ["D", "L", "M", "X", "J", "V", "S"]
-const ACTIVE_COLOR = "#E8401A"
-
 export default function DiarioPage() {
   const [notas, setNotas] = useState<Nota[]>([])
   const [loading, setLoading] = useState(true)
   const [nueva, setNueva] = useState("")
   const [guardando, setGuardando] = useState(false)
-  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [editId, setEditId] = useState<string | null>(null)
+  const [editContent, setEditContent] = useState("")
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     fetch("/api/notas")
@@ -55,8 +67,15 @@ export default function DiarioPage() {
       .finally(() => setLoading(false))
   }, [])
 
+  const adjustHeight = useCallback(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = "auto"
+    el.style.height = Math.max(200, el.scrollHeight) + "px"
+  }, [])
+
   async function handleGuardar() {
-    if (!nueva.trim()) return
+    if (!nueva.trim() || guardando) return
     setGuardando(true)
     try {
       const r = await fetch("/api/notas", {
@@ -67,6 +86,9 @@ export default function DiarioPage() {
       const nota = await r.json() as Nota
       setNotas(prev => [nota, ...prev])
       setNueva("")
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "200px"
+      }
     } catch {
       toast.error("Error al guardar")
     } finally {
@@ -74,151 +96,274 @@ export default function DiarioPage() {
     }
   }
 
+  async function handleEditar(id: string) {
+    if (!editContent.trim()) return
+    try {
+      const r = await fetch(`/api/notas/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editContent }),
+      })
+      const actualizada = await r.json() as Nota
+      setNotas(prev => prev.map(n => n.id === id ? actualizada : n))
+      setEditId(null)
+      setEditContent("")
+    } catch {
+      toast.error("Error al guardar")
+    }
+  }
+
   async function handleEliminar(id: string) {
     try {
       await fetch(`/api/notas/${id}`, { method: "DELETE" })
       setNotas(prev => prev.filter(n => n.id !== id))
-      setConfirmId(null)
+      setConfirmDeleteId(null)
+      if (expandedId === id) setExpandedId(null)
     } catch {
       toast.error("Error al eliminar")
     }
   }
 
-  const days15 = build15Days()
-  const activeDays = new Set(notas.map(n => dateKey(n.created_at)))
+  function scrollToEntry(id: string) {
+    setTimeout(() => {
+      document.getElementById(`entry-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }, 50)
+  }
 
+  const days30 = build30Days()
   const todayKey = new Date().toISOString().slice(0, 10)
+
+  // Map: dateKey → first nota ID (for scroll)
+  const notasByDay = new Map<string, string>()
+  for (const n of [...notas].reverse()) {
+    const key = utcDateKey(n.created_at)
+    notasByDay.set(key, n.id)
+  }
 
   return (
     <div className="space-y-8 px-4 lg:px-6 max-w-2xl">
       <div>
-        <h1 className="text-3xl font-bold">Diario</h1>
-        <p className="text-muted-foreground">Tu práctica diaria, en palabras.</p>
+        <h1 className="text-2xl font-bold">Diario</h1>
+        <p className="text-muted-foreground text-sm">Tu práctica diaria, en palabras.</p>
       </div>
 
-      {/* 15-day grid */}
+      {/* 30-day compact calendar */}
       <div>
-        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Últimos 15 días</h2>
-        <div className="flex gap-1.5 flex-wrap">
-          {days15.map(day => {
+        <p className="text-xs text-muted-foreground mb-2">Últimos 30 días</p>
+        <div className="flex flex-wrap gap-1">
+          {days30.map(day => {
+            const hasEntry = notasByDay.has(day)
             const isToday = day === todayKey
-            const hasEntry = activeDays.has(day)
-            const dayOfWeek = new Date(day + "T12:00:00").getDay()
+            const dow = new Date(day + "T12:00:00").getDay()
             return (
-              <div key={day} className="flex flex-col items-center gap-0.5">
+              <button
+                key={day}
+                type="button"
+                title={day}
+                onClick={() => {
+                  const id = notasByDay.get(day)
+                  if (id) {
+                    setExpandedId(id)
+                    scrollToEntry(id)
+                  }
+                }}
+                disabled={!hasEntry}
+                className="flex flex-col items-center gap-0.5 group"
+              >
                 <div
-                  className="w-8 h-8 rounded-md flex items-center justify-center text-[10px] font-medium transition-colors"
+                  className="w-6 h-6 rounded transition-opacity"
                   style={{
-                    backgroundColor: hasEntry ? ACTIVE_COLOR : undefined,
-                    color: hasEntry ? "#fff" : undefined,
+                    backgroundColor: hasEntry ? ACTIVE_COLOR : "hsl(var(--muted))",
+                    opacity: hasEntry ? 1 : 0.5,
                     outline: isToday ? `2px solid ${ACTIVE_COLOR}` : undefined,
                     outlineOffset: isToday ? "2px" : undefined,
                   }}
-                  title={day}
+                />
+                <span className="text-[8px] text-muted-foreground leading-none">
+                  {dow === 0 || dow === 6 ? DAY_LABELS_SHORT[dow] : ""}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+        <div className="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground">
+          <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(var(--muted))", opacity: 0.5 }} />
+          <span>Sin entrada</span>
+          <div className="w-3 h-3 rounded ml-2" style={{ backgroundColor: ACTIVE_COLOR }} />
+          <span>Con entrada</span>
+        </div>
+      </div>
+
+      {/* Área de escritura */}
+      <div className="space-y-1">
+        <div className="relative">
+          <textarea
+            ref={textareaRef}
+            placeholder="¿Qué querés registrar hoy?..."
+            value={nueva}
+            onChange={e => {
+              setNueva(e.target.value)
+              adjustHeight()
+            }}
+            onKeyDown={e => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault()
+                handleGuardar()
+              }
+            }}
+            className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            style={{ minHeight: "200px" }}
+          />
+          {nueva.trim() && (
+            <button
+              type="button"
+              onClick={handleGuardar}
+              disabled={guardando}
+              className="absolute top-2 right-2 rounded-md bg-primary text-primary-foreground p-1.5 hover:opacity-90 transition-opacity disabled:opacity-50"
+              title="Guardar (⌘+Enter)"
+            >
+              <Check className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+        <p className="text-[11px] text-muted-foreground text-right">⌘+Enter para guardar</p>
+      </div>
+
+      {/* Lista de entradas */}
+      {loading ? (
+        <p className="text-muted-foreground text-sm py-8 text-center">Cargando...</p>
+      ) : notas.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <PenLine className="h-8 w-8 text-muted-foreground/30 mb-3" />
+          <p className="text-muted-foreground text-sm">Todavía no tenés entradas.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {notas.map(nota => {
+            const isExpanded = expandedId === nota.id
+            const isEditing = editId === nota.id
+            const isConfirmDelete = confirmDeleteId === nota.id
+            return (
+              <div
+                key={nota.id}
+                id={`entry-${nota.id}`}
+                className="rounded-lg border bg-card transition-all"
+              >
+                {/* Collapsed / header */}
+                <button
+                  type="button"
+                  className="w-full flex items-start gap-3 p-4 text-left"
+                  onClick={() => {
+                    setExpandedId(isExpanded ? null : nota.id)
+                    setEditId(null)
+                    setConfirmDeleteId(null)
+                  }}
                 >
-                  {!hasEntry && (
-                    <span className="text-muted-foreground/50 text-[10px]">
-                      {new Date(day + "T12:00:00").getDate()}
-                    </span>
-                  )}
-                  {hasEntry && (
-                    <span className="text-[11px]">
-                      {new Date(day + "T12:00:00").getDate()}
-                    </span>
-                  )}
-                </div>
-                <span className="text-[9px] text-muted-foreground">{DAY_LABELS[dayOfWeek]}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted-foreground mb-1">{formatRelativa(nota.created_at)}</p>
+                    <p className="text-sm text-foreground/80 line-clamp-2 whitespace-pre-wrap">
+                      {nota.content}
+                    </p>
+                  </div>
+                  <ChevronDown
+                    className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5 transition-transform"
+                    style={{ transform: isExpanded ? "rotate(180deg)" : undefined }}
+                  />
+                </button>
+
+                {/* Expanded */}
+                {isExpanded && (
+                  <div className="border-t px-4 pb-4 space-y-3">
+                    <p className="text-xs text-muted-foreground pt-3">{formatFechaLarga(nota.created_at)}</p>
+
+                    {isEditing ? (
+                      <div className="space-y-2">
+                        <textarea
+                          value={editContent}
+                          onChange={e => setEditContent(e.target.value)}
+                          rows={6}
+                          className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          autoFocus
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditar(nota.id)}
+                            className="text-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:opacity-90 cursor-pointer"
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setEditId(null); setEditContent("") }}
+                            className="text-xs px-3 py-1.5 rounded-md border hover:bg-muted cursor-pointer text-muted-foreground"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">
+                        {nota.content}
+                      </p>
+                    )}
+
+                    {!isEditing && (
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => { setEditId(nota.id); setEditContent(nota.content) }}
+                          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
+                        >
+                          <PenLine className="h-3 w-3" />
+                          Editar
+                        </button>
+                        <span className="text-muted-foreground/30">·</span>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedId(null)}
+                          className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                        >
+                          Cerrar
+                        </button>
+                        <span className="text-muted-foreground/30">·</span>
+                        {isConfirmDelete ? (
+                          <span className="flex items-center gap-1.5">
+                            <span className="text-xs text-muted-foreground">¿Eliminar?</span>
+                            <button
+                              type="button"
+                              onClick={() => handleEliminar(nota.id)}
+                              className="text-xs text-destructive hover:opacity-80 cursor-pointer"
+                            >
+                              Sí
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                            >
+                              No
+                            </button>
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDeleteId(nota.id)}
+                            className="text-xs text-muted-foreground hover:text-destructive flex items-center gap-1 cursor-pointer"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            Borrar
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )
           })}
         </div>
-      </div>
-
-      {/* Nueva entrada */}
-      <div className="space-y-3">
-        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Nueva entrada</h2>
-        <Textarea
-          placeholder="¿Qué querés registrar hoy?..."
-          value={nueva}
-          onChange={e => setNueva(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleGuardar() }}
-          rows={5}
-          className="resize-none text-sm leading-relaxed"
-        />
-        <div className="flex justify-end">
-          <Button
-            onClick={handleGuardar}
-            disabled={guardando || !nueva.trim()}
-            className="cursor-pointer gap-2"
-          >
-            <PenLine className="h-4 w-4" />
-            Guardar entrada
-          </Button>
-        </div>
-      </div>
-
-      {/* Entradas anteriores */}
-      <div className="space-y-3">
-        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Entradas</h2>
-        {loading ? (
-          <p className="text-muted-foreground text-sm py-8 text-center">Cargando...</p>
-        ) : notas.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <PenLine className="h-10 w-10 text-muted-foreground/30 mb-3" />
-            <p className="text-muted-foreground text-sm">Todavía no tenés entradas. Escribí la primera arriba.</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {notas.map(nota => (
-              <Card key={nota.id} className="group">
-                <CardContent className="p-4">
-                  {confirmId === nota.id ? (
-                    <div className="space-y-3">
-                      <p className="text-sm text-muted-foreground">¿Eliminar esta entrada?</p>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleEliminar(nota.id)}
-                          className="cursor-pointer"
-                        >
-                          Eliminar
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setConfirmId(null)}
-                          className="cursor-pointer"
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {formatFechaLarga(nota.created_at)}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmId(nota.id)}
-                          className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity rounded p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                      <p className="text-sm leading-relaxed line-clamp-3 whitespace-pre-wrap">
-                        {nota.content}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   )
 }

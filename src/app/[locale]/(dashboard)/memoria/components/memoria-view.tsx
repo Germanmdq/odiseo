@@ -4,19 +4,10 @@ import * as React from "react"
 import { Brain, Search, Trash2, X } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
+import Link from "next/link"
+import { useLocale } from "next-intl"
 
-import ReactMarkdown from "react-markdown"
-
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer"
 
 type Memoria = {
   id: string
@@ -35,12 +26,14 @@ const TYPE_LABELS: Record<string, string> = {
   manual: "Manual",
   questions: "Preguntas",
   book: "Mi libro",
+  evaluacion: "Evaluación",
 }
 
 const TYPE_COLORS: Record<string, string> = {
   coach: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
   narrador: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",
   pregunta: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",
+  evaluacion: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",
   plan: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
   manual: "bg-muted text-muted-foreground",
 }
@@ -60,11 +53,11 @@ function getTypeBadgeClass(tipo: string): string {
 }
 
 export function MemoriaView() {
+  const locale = useLocale()
   const [memorias, setMemorias] = React.useState<Memoria[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [search, setSearch] = React.useState("")
-  const [selected, setSelected] = React.useState<Memoria | null>(null)
   const [deletingId, setDeletingId] = React.useState<string | null>(null)
 
   React.useEffect(() => {
@@ -78,13 +71,14 @@ export function MemoriaView() {
       .finally(() => setLoading(false))
   }, [])
 
-  async function handleDelete(id: string) {
+  async function handleDelete(e: React.MouseEvent, id: string) {
+    e.preventDefault()
+    e.stopPropagation()
     setDeletingId(id)
     try {
       const res = await fetch(`/api/memoria/${id}`, { method: "DELETE" })
       if (!res.ok) return
       setMemorias((prev) => prev.filter((m) => m.id !== id))
-      if (selected?.id === id) setSelected(null)
     } finally {
       setDeletingId(null)
     }
@@ -152,10 +146,10 @@ export function MemoriaView() {
           {filtered.map((m) => {
             const text = getContentText(m.content)
             return (
-              <div
+              <Link
                 key={m.id}
-                className="group relative rounded-lg border bg-card p-4 cursor-pointer hover:shadow-sm transition-shadow"
-                onClick={() => setSelected(m)}
+                href={`/${locale}/memoria/${m.id}`}
+                className="group relative rounded-lg border bg-card p-4 hover:shadow-sm hover:border-primary/30 transition-all block"
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <span
@@ -165,10 +159,7 @@ export function MemoriaView() {
                   </span>
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      void handleDelete(m.id)
-                    }}
+                    onClick={(e) => void handleDelete(e, m.id)}
                     disabled={deletingId === m.id}
                     className="shrink-0 opacity-0 group-hover:opacity-100 rounded p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
                     title="Eliminar"
@@ -185,40 +176,11 @@ export function MemoriaView() {
                     locale: es,
                   })}
                 </p>
-              </div>
+              </Link>
             )
           })}
         </div>
       )}
-
-      <Drawer open={!!selected} onOpenChange={(open) => { if (!open) setSelected(null) }}>
-        <DrawerContent>
-          <DrawerHeader className="border-b pb-4">
-            <DrawerTitle className="flex items-center gap-2 text-base">
-              <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${selected ? getTypeBadgeClass(selected.item_type) : ""}`}
-              >
-                {selected ? getTypeLabel(selected.item_type, selected.source) : ""}
-              </span>
-              <span className="text-muted-foreground text-xs font-normal">
-                {selected
-                  ? formatDistanceToNow(new Date(selected.created_at), {
-                      addSuffix: true,
-                      locale: es,
-                    })
-                  : ""}
-              </span>
-            </DrawerTitle>
-          </DrawerHeader>
-          <ScrollArea className="max-h-[60vh] px-6 py-4">
-            <div className="max-w-2xl mx-auto prose prose-sm dark:prose-invert leading-relaxed text-base">
-              <ReactMarkdown>
-                {selected ? getContentText(selected.content) : ""}
-              </ReactMarkdown>
-            </div>
-          </ScrollArea>
-        </DrawerContent>
-      </Drawer>
     </div>
   )
 }

@@ -131,6 +131,14 @@ function SetupScreen({
 
   return (
     <div className="mx-auto max-w-3xl space-y-8 py-6">
+      {/* Racha arriba */}
+      {estado.racha > 0 && (
+        <div className="flex items-center gap-2 text-sm font-medium" style={{ color: "#E8401A" }}>
+          <Flame className="h-4 w-4" />
+          <span>{estado.racha} {estado.racha === 1 ? "día" : "días"} de racha</span>
+        </div>
+      )}
+
       <div>
         <h2 className="mb-4 text-xl font-semibold">¿Sobre qué querés evaluarte hoy?</h2>
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
@@ -178,24 +186,13 @@ function SetupScreen({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div>
         {temaSeleccionado ? (
           <Button size="lg" onClick={handleStart}>
             Empezar
           </Button>
         ) : (
           <p className="text-sm text-muted-foreground italic">Elegí un tema para empezar</p>
-        )}
-        {estado.racha > 0 ? (
-          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Flame className="h-4 w-4 text-orange-500" />
-            Racha actual:{" "}
-            <span className="font-medium">
-              {estado.racha} día{estado.racha !== 1 ? "s" : ""}
-            </span>
-          </p>
-        ) : (
-          <p className="text-sm text-muted-foreground">Empezá tu racha hoy</p>
         )}
       </div>
     </div>
@@ -571,22 +568,25 @@ export function PreguntasView() {
         )}
 
         {(estado.etapa === "generando" || estado.etapa === "enviando") && (
-          <div className="flex flex-col items-center gap-3 py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            <p className="text-muted-foreground">
-              {estado.etapa === "generando"
-                ? `Preparando tu evaluación sobre ${estado.tema}...`
-                : "Calculando resultado..."}
-            </p>
+          <div className="flex flex-col items-center gap-4 py-20">
+            <Loader2 className="h-9 w-9 animate-spin" style={{ color: "#E8401A" }} />
+            <div className="text-center space-y-1">
+              <p className="font-medium">
+                {estado.etapa === "generando"
+                  ? `Preparando tu evaluación sobre ${estado.tema}`
+                  : "Calculando resultado"}
+              </p>
+              <p className="text-sm text-muted-foreground">Esto puede tardar unos segundos…</p>
+            </div>
           </div>
         )}
 
         {estado.etapa === "error" && (
           <div className="mx-auto max-w-md space-y-4 py-12 text-center">
-            <p className="text-destructive">{estado.mensaje}</p>
+            <p className="text-destructive font-medium">Hubo un error al generar las preguntas.</p>
+            <p className="text-sm text-muted-foreground">{estado.mensaje}</p>
             <div className="flex flex-col gap-2">
               <Button
-                variant="outline"
                 onClick={() => handleStart(estado.tema, estado.cantidad)}
               >
                 Intentar de nuevo
@@ -595,7 +595,7 @@ export function PreguntasView() {
                 variant="ghost"
                 onClick={() => setEstado({ etapa: "setup", racha: 0, puntosTotal: 0 })}
               >
-                Volver al inicio
+                Elegir otro tema
               </Button>
             </div>
           </div>

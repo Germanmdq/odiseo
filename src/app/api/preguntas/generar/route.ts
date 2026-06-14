@@ -73,7 +73,7 @@ function extractAndParse(text: string): unknown {
 }
 
 function validatePreguntas(data: unknown, expected: number): data is Pregunta[] {
-  if (!Array.isArray(data) || data.length !== expected) return false
+  if (!Array.isArray(data) || data.length < 1 || data.length > expected + 2) return false
   return data.every((p) => {
     if (typeof p !== "object" || p === null) return false
     const obj = p as Record<string, unknown>

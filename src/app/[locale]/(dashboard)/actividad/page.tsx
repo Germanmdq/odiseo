@@ -4,39 +4,42 @@ import { useEffect, useState } from "react"
 import { Flame } from "lucide-react"
 
 const ACTIVE_COLOR = "#E8401A"
-const INACTIVE_COLOR = "hsl(var(--muted))"
-const WEEKS = 52
 
 function getDateKey(date: Date) {
   return date.toISOString().slice(0, 10)
 }
 
-function buildGrid() {
+function build30Days(): string[] {
+  const days: string[] = []
   const today = new Date()
-  // Start from the Sunday 52 weeks ago
-  const start = new Date(today)
-  start.setDate(today.getDate() - WEEKS * 7 + 1)
-  // Align to Sunday
-  start.setDate(start.getDate() - start.getDay())
-
-  const weeks: string[][] = []
-  const cursor = new Date(start)
-  for (let w = 0; w < WEEKS; w++) {
-    const week: string[] = []
-    for (let d = 0; d < 7; d++) {
-      week.push(getDateKey(cursor))
-      cursor.setDate(cursor.getDate() + 1)
-    }
-    weeks.push(week)
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(today)
+    d.setDate(d.getDate() - i)
+    days.push(getDateKey(d))
   }
-  return weeks
+  return days
 }
 
-const MONTH_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+function formatRelativa(iso: string) {
+  const now = Date.now()
+  const diff = now - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "Ahora mismo"
+  if (mins < 60) return `Hace ${mins} min`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `Hace ${hrs} h`
+  const days = Math.floor(hrs / 24)
+  if (days === 1) return "Ayer"
+  if (days < 7) return `Hace ${days} días`
+  return new Date(iso).toLocaleDateString("es-AR", { day: "numeric", month: "short" })
+}
+
+type RecentEvent = { label: string; date: string; created_at: string }
 
 export default function ActividadPage() {
   const [activeDays, setActiveDays] = useState<Set<string>>(new Set())
   const [streak, setStreak] = useState(0)
+  const [recentEvents, setRecentEvents] = useState<RecentEvent[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -45,105 +48,96 @@ export default function ActividadPage() {
       .then(d => {
         setActiveDays(new Set(d.days ?? []))
         setStreak(d.streak ?? 0)
+        setRecentEvents(d.recentEvents ?? [])
       })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 
-  const grid = buildGrid()
-
-  // Month labels: find first week where month changes
-  const monthPositions: { label: string; col: number }[] = []
-  grid.forEach((week, i) => {
-    const month = new Date(week[0]).getMonth()
-    if (i === 0 || new Date(grid[i - 1][0]).getMonth() !== month) {
-      monthPositions.push({ label: MONTH_LABELS[month], col: i })
-    }
-  })
+  const days30 = build30Days()
+  const todayKey = getDateKey(new Date())
 
   return (
-    <div className="space-y-6 px-4 lg:px-6">
-      <div>
-        <h1 className="text-3xl font-bold">Mi actividad</h1>
-        <p className="text-muted-foreground">Días que practicaste en Odiseo.</p>
+    <div className="space-y-8 px-4 lg:px-6 max-w-2xl">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Mi actividad</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">
+            Cada cuadrado es un día que practicaste en Odiseo.
+          </p>
+        </div>
+        {streak > 0 && (
+          <div className="flex items-center gap-1.5 shrink-0 font-semibold text-sm" style={{ color: ACTIVE_COLOR }}>
+            <Flame className="h-5 w-5" />
+            <span>{streak} {streak === 1 ? "día" : "días"} de racha</span>
+          </div>
+        )}
       </div>
 
-      {/* Streak */}
-      <div className="flex items-center gap-2 text-lg font-semibold">
-        <Flame className="h-5 w-5" style={{ color: ACTIVE_COLOR }} />
-        <span>
-          Racha actual: <span style={{ color: ACTIVE_COLOR }}>{streak} {streak === 1 ? "día" : "días"}</span>
-        </span>
-      </div>
-
+      {/* 30-day compact grid */}
       {loading ? (
-        <div className="h-32 flex items-center text-muted-foreground text-sm">Cargando...</div>
+        <div className="h-20 flex items-center text-muted-foreground text-sm">Cargando...</div>
       ) : (
-        <div className="overflow-x-auto">
-          <div className="inline-block">
-            {/* Month labels */}
-            <div className="flex mb-1 ml-8">
-              {grid.map((_, i) => {
-                const mp = monthPositions.find(m => m.col === i)
-                return (
-                  <div key={i} className="w-3.5 text-[10px] text-muted-foreground shrink-0">
-                    {mp ? mp.label : ""}
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className="flex gap-0.5">
-              {/* Day labels */}
-              <div className="flex flex-col gap-0.5 mr-1 pt-0">
-                {["D", "L", "M", "X", "J", "V", "S"].map((d, i) => (
-                  <div key={i} className="h-3.5 text-[10px] text-muted-foreground flex items-center">
-                    {i % 2 === 1 ? d : ""}
-                  </div>
-                ))}
-              </div>
-
-              {/* Grid */}
-              {grid.map((week, wi) => (
-                <div key={wi} className="flex flex-col gap-0.5">
-                  {week.map((day, di) => {
-                    const isActive = activeDays.has(day)
-                    const isFuture = day > getDateKey(new Date())
-                    return (
-                      <div
-                        key={di}
-                        title={day}
-                        className="w-3.5 h-3.5 rounded-sm shrink-0 transition-opacity"
-                        style={{
-                          backgroundColor: isFuture
-                            ? "transparent"
-                            : isActive
-                            ? ACTIVE_COLOR
-                            : INACTIVE_COLOR,
-                          opacity: isFuture ? 0 : 1,
-                        }}
-                      />
-                    )
-                  })}
-                </div>
-              ))}
-            </div>
-
-            {/* Legend */}
-            <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground ml-8">
-              <span>Menos</span>
-              {[0.15, 0.4, 0.65, 1].map((opacity, i) => (
+        <div>
+          <div className="flex flex-wrap gap-1.5">
+            {days30.map(day => {
+              const isActive = activeDays.has(day)
+              const isToday = day === todayKey
+              return (
                 <div
-                  key={i}
-                  className="w-3.5 h-3.5 rounded-sm"
-                  style={{ backgroundColor: ACTIVE_COLOR, opacity }}
+                  key={day}
+                  title={day}
+                  className="w-6 h-6 rounded-sm transition-opacity"
+                  style={{
+                    backgroundColor: isActive ? ACTIVE_COLOR : "hsl(var(--muted))",
+                    opacity: isActive ? 1 : 0.45,
+                    outline: isToday ? `2px solid ${ACTIVE_COLOR}` : undefined,
+                    outlineOffset: isToday ? "2px" : undefined,
+                  }}
                 />
-              ))}
-              <span>Más</span>
-            </div>
+              )
+            })}
+          </div>
+          <div className="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground">
+            <span>Menos</span>
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "hsl(var(--muted))", opacity: 0.45 }} />
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: ACTIVE_COLOR, opacity: 0.4 }} />
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: ACTIVE_COLOR, opacity: 0.7 }} />
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: ACTIVE_COLOR }} />
+            <span>Más</span>
           </div>
         </div>
       )}
+
+      {/* Actividad reciente */}
+      <div>
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          Actividad reciente
+        </h2>
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Cargando...</p>
+        ) : recentEvents.length === 0 ? (
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Todavía no registramos actividad. Usá el Coach, el Diario o Evaluación para que aparezca acá.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {recentEvents.map((ev, i) => (
+              <div key={i} className="flex items-center gap-3 text-sm">
+                <div
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: ACTIVE_COLOR }}
+                />
+                <span className="flex-1 text-foreground/80">{ev.label}</span>
+                <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                  {formatRelativa(ev.created_at)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
