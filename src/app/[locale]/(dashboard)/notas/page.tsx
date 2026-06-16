@@ -23,6 +23,18 @@ export default function NotasPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
+    const raw = sessionStorage.getItem("odiseo_reutilizar")
+    if (raw) {
+      try {
+        const { content } = JSON.parse(raw) as { content: string }
+        sessionStorage.removeItem("odiseo_reutilizar")
+        setNueva(content)
+        textareaRef.current?.focus()
+      } catch {}
+    }
+  }, [])
+
+  useEffect(() => {
     fetch("/api/notas")
       .then(r => r.json())
       .then(d => setNotas(Array.isArray(d) ? d : []))

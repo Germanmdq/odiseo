@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,6 +10,8 @@ import { useTranslations } from 'next-intl'
 
 export function TalleresSection() {
   const t = useTranslations("landing.talleres")
+  const params = useParams()
+  const locale = (params.locale as string) ?? "es"
 
   const talleres = [
     { num: 1, title: t("taller1Title"), desc: t("taller1Desc") },
@@ -38,12 +41,12 @@ export function TalleresSection() {
           {talleres.map((taller) => (
             <Card
               key={taller.num}
-              className="group shadow-xs hover:shadow-md transition-shadow py-0"
+              className="group py-0 border-0 rounded-[20px] bg-[#F7F7F7] shadow-[0_4px_6px_rgba(0,0,0,0.07),0_10px_15px_rgba(0,0,0,0.1),0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 hover:shadow-[0_8px_12px_rgba(0,0,0,0.1),0_20px_40px_rgba(0,0,0,0.15),0_40px_80px_rgba(0,0,0,0.1)] transition-all duration-200"
             >
               <CardContent className="p-6">
                 <div className="flex flex-col gap-5 min-h-[220px]">
                   <div className="flex items-start justify-between">
-                    <span className="text-6xl font-black leading-none text-primary/20 select-none tabular-nums">
+                    <span className="text-6xl font-black leading-none text-primary select-none tabular-nums">
                       {String(taller.num).padStart(2, "0")}
                     </span>
                     <Badge variant="secondary" className="text-xs shrink-0 mt-1">
@@ -112,7 +115,7 @@ export function TalleresSection() {
           {/* CTA */}
           <div className="text-center space-y-2">
             <Button size="lg" className="cursor-pointer" asChild>
-              <Link href="/es/registro">{t("cta")}</Link>
+              <Link href={`/${locale}/registro`}>{t("cta")}</Link>
             </Button>
             <p className="text-xs text-muted-foreground">{t("ctaNote")}</p>
           </div>

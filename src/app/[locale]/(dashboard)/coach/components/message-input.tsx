@@ -1,31 +1,10 @@
 "use client"
 
 import { useState, useRef } from "react"
-import {
-  Send,
-  Paperclip,
-  Smile,
-  Image as ImageIcon,
-  FileText,
-  Mic,
-  MoreHorizontal
-} from "lucide-react"
-
+import { Send, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from "@/components/ui/tooltip"
+import { Button } from "@/components/ui/button"
 
 interface MessageInputProps {
   onSendMessage: (content: string) => void
@@ -36,185 +15,64 @@ interface MessageInputProps {
 export function MessageInput({
   onSendMessage,
   disabled = false,
-  placeholder = "Type a message..."
+  placeholder = "Escribí un mensaje...",
 }: MessageInputProps) {
   const [message, setMessage] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const handleSendMessage = () => {
-    const trimmedMessage = message.trim()
-    if (trimmedMessage && !disabled) {
-      onSendMessage(trimmedMessage)
-      setMessage("")
-      setIsTyping(false)
-
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto"
-      }
+  const handleSend = () => {
+    const trimmed = message.trim()
+    if (!trimmed || disabled) return
+    onSendMessage(trimmed)
+    setMessage("")
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      handleSendMessage()
+      handleSend()
     }
   }
 
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value
-    setMessage(value)
-
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMessage(e.target.value)
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto"
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`
     }
-
-    if (value.trim() && !isTyping) {
-      setIsTyping(true)
-    } else if (!value.trim() && isTyping) {
-      setIsTyping(false)
-    }
-  }
-
-  const handleFileUpload = (type: "image" | "file") => {
-    console.log(`Upload ${type}`)
   }
 
   return (
-    <div className="border-t p-4">
-      <div className="flex items-end gap-2">
-        {/* Attachment button */}
-        <TooltipProvider>
-          <DropdownMenu>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={disabled}
-                    className="cursor-pointer disabled:cursor-not-allowed"
-                  >
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Attach file</p>
-              </TooltipContent>
-            </Tooltip>
-            <DropdownMenuContent side="top" align="start">
-              <DropdownMenuItem
-                onClick={() => handleFileUpload("image")}
-                className="cursor-pointer"
-              >
-                <ImageIcon className="h-4 w-4 mr-2" />
-                Photo or video
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleFileUpload("file")}
-                className="cursor-pointer"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Document
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </TooltipProvider>
-
-        {/* Message input */}
-        <div className="flex-1 relative">
-          <Textarea
-            ref={textareaRef}
-            placeholder={placeholder}
-            value={message}
-            onChange={handleTextareaChange}
-            onKeyDown={handleKeyPress}
-            disabled={disabled}
-            className={cn(
-              "min-h-[40px] max-h-[120px] resize-none cursor-text disabled:cursor-not-allowed",
-              "pr-20"
-            )}
-            rows={1}
-          />
-
-          {/* Input action buttons */}
-          <div className="absolute right-2 bottom-2 flex items-center gap-1">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={disabled}
-                    className="h-6 w-6 p-0 cursor-pointer disabled:cursor-not-allowed"
-                  >
-                    <Smile className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Add emoji</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={disabled}
-                    className="h-6 w-6 p-0 cursor-pointer disabled:cursor-not-allowed"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>More options</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </div>
-
-        {/* Send / voice button */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              {message.trim() ? (
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={disabled}
-                  className="cursor-pointer disabled:cursor-not-allowed"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  disabled={disabled}
-                  className="cursor-pointer disabled:cursor-not-allowed"
-                >
-                  <Mic className="h-4 w-4" />
-                </Button>
-              )}
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{message.trim() ? "Send message" : "Voice message"}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-
-      {isTyping && (
-        <div className="text-xs text-muted-foreground mt-2">
-          You are typing...
-        </div>
-      )}
+    <div className="flex shrink-0 items-end gap-2 border-t border-[#EEEEEE] bg-white px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:rounded-b-[1.6rem]">
+      <Textarea
+        ref={textareaRef}
+        suppressHydrationWarning
+        placeholder={disabled ? "Esperando respuesta..." : placeholder}
+        value={message}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        rows={1}
+        className={cn(
+          "min-h-[42px] max-h-[110px] flex-1 resize-none rounded-2xl border-[#D9D9D9] bg-white text-[16px] leading-[1.35] text-black placeholder:text-black/30 focus:border-[#FF2B0A]/40 sm:text-sm",
+          disabled && "opacity-60"
+        )}
+      />
+      <Button
+        type="button"
+        size="icon"
+        onClick={handleSend}
+        disabled={disabled || !message.trim()}
+        className="shrink-0 cursor-pointer rounded-2xl bg-[#FF2B0A] text-white hover:bg-[#e02500] disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        {disabled ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Send className="h-4 w-4" />
+        )}
+      </Button>
     </div>
   )
 }

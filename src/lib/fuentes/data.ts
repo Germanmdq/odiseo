@@ -7,20 +7,14 @@ import type { FuenteDetail, FuenteSummary, FuenteType } from "./types"
 
 type StudyMaterialRow = {
   id: string
+  fuente_id: string | null
   slug: string | null
   source_filename: string | null
   title_es: string | null
-  title_en: string | null
-  original_title: string | null
   year: string | null
   material_type: string | null
   language: string | null
-  summary_es: string | null
-  summary_en: string | null
   content_es?: string | null
-  content_en?: string | null
-  topics?: unknown
-  tags?: unknown
   is_published: boolean | null
 }
 
@@ -42,33 +36,28 @@ const BOOK_SOURCE_FILENAMES = new Set([
   "613-resurreccion.md",
 ])
 
-function asStrings(value: unknown): string[] {
-  if (!Array.isArray(value)) return []
-  return value.filter((v): v is string => typeof v === "string" && v.length > 0)
-}
-
 function getFuenteType(
   materialType: string | null,
   title: string,
   sourceFilename?: string | null
 ): FuenteType {
   if (sourceFilename && BOOK_SOURCE_FILENAMES.has(sourceFilename)) return "libro"
-  if (materialType === "book") return "libro"
+  if (materialType === "book" || materialType === "libro") return "libro"
   if (/radio/i.test(title) || materialType === "radio") return "radio"
   return "conferencia"
 }
 
 function toSummary(row: StudyMaterialRow): FuenteSummary {
-  const name = row.title_es || row.title_en || row.original_title || "Sin título"
+  const name = row.title_es || "Sin título"
 
   return {
     id: row.id,
-    sourceKey: row.id,
+    sourceKey: row.fuente_id ?? row.id,
     name,
     type: getFuenteType(row.material_type, name, row.source_filename),
     year: row.year,
     wordCount: 0,
-    summary: row.summary_es || row.summary_en,
+    summary: null,
     tags: [],
   }
 }
@@ -80,28 +69,45 @@ function sortSources(sources: FuenteSummary[]) {
 async function getFuenteSummariesUncached(): Promise<FuenteSummary[]> {
   const supabase = createAdminClient()
 
-  const { data, error } = await supabase
-    .from("study_materials")
-    .select(
-      "id,source_filename,title_es,title_en,original_title,year,material_type,summary_es,summary_en,topics,tags,is_published"
-    )
-    .eq("is_published", true)
+  const [materialsRes, artifactsRes] = await Promise.all([
+    supabase
+      .from("study_materials")
+      .select("id,fuente_id,source_filename,title_es,year,material_type,is_published")
+      .eq("is_published", true),
+    supabase
+      .from("content_artifacts")
+      .select("fuente_id,tags")
+      .not("fuente_id", "is", null),
+  ])
 
-  if (error) {
-    throw new Error(error.message)
+  if (materialsRes.error) throw new Error(materialsRes.error.message)
+
+  // Build tag set per fuente_id from content_artifacts
+  const tagsByFuente = new Map<string, Set<string>>()
+  for (const row of artifactsRes.data ?? []) {
+    const fid = (row as { fuente_id: string | null; tags: unknown }).fuente_id
+    const rawTags = (row as { fuente_id: string | null; tags: unknown }).tags
+    if (!fid || !Array.isArray(rawTags)) continue
+    const bucket = tagsByFuente.get(fid) ?? new Set<string>()
+    for (const tag of rawTags) {
+      if (typeof tag === "string" && tag.length) bucket.add(tag)
+    }
+    tagsByFuente.set(fid, bucket)
   }
 
-  const summaries = ((data ?? []) as unknown as StudyMaterialRow[]).map((row) => ({
-    ...toSummary(row),
-    tags: [...asStrings(row.topics), ...asStrings(row.tags)].slice(0, 4),
-  }))
+  const summaries = ((materialsRes.data ?? []) as unknown as StudyMaterialRow[]).map((row) => {
+    const base = toSummary(row)
+    const fid = row.fuente_id ?? row.id
+    const tagSet = tagsByFuente.get(fid)
+    return { ...base, tags: tagSet ? Array.from(tagSet).slice(0, 5) : [] }
+  })
 
   return sortSources(summaries)
 }
 
 export const getFuenteSummaries = unstable_cache(
   getFuenteSummariesUncached,
-  ["fuente-summaries-v3"],
+  ["fuente-summaries-v6"],
   { revalidate: 3600 }
 )
 
@@ -109,32 +115,26 @@ async function getFuenteDetailUncached(sourceKey: string): Promise<FuenteDetail 
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from("study_materials")
-    .select(
-      "id,slug,source_filename,title_es,title_en,original_title,year,material_type,language,summary_es,summary_en,content_es,content_en,topics,tags,is_published"
-    )
-    .eq("id", sourceKey)
+    .select("id,fuente_id,slug,source_filename,title_es,year,material_type,language,content_es,is_published")
+    .eq("fuente_id", sourceKey)
     .eq("is_published", true)
     .maybeSingle()
 
-  if (error) {
-    throw new Error(error.message)
-  }
-
+  if (error) throw new Error(error.message)
   if (!data) return null
 
   const row = data as unknown as StudyMaterialRow
 
   return {
     ...toSummary(row),
-    tags: [...asStrings(row.topics), ...asStrings(row.tags)].slice(0, 4),
-    originalTitle: row.original_title,
+    originalTitle: null,
     sourceFilename: row.source_filename,
-    fullText: row.content_es || row.content_en || "",
+    fullText: row.content_es || "",
   }
 }
 
 export const getFuenteDetail = unstable_cache(
   getFuenteDetailUncached,
-  ["fuente-detail-v3"],
+  ["fuente-detail-v5"],
   { revalidate: 3600 }
 )

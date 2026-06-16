@@ -27,7 +27,7 @@ interface CoachActions {
 }
 
 export const useCoach = create<CoachState & CoachActions>((set) => ({
-  selectedAuthor: "neville",
+  selectedAuthor: "asistente",
   messages: {},
   searchQuery: "",
   setSelectedAuthor: (id) => set({ selectedAuthor: id }),

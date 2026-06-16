@@ -1,23 +1,17 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { createClient } from "@/lib/supabase/client"
 import { useLocale, useTranslations } from "next-intl"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-export function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
+export function SignupForm() {
   const t = useTranslations("auth.registro")
   const locale = useLocale()
   const router = useRouter()
   const [error, setError] = useState("")
   const [confirmationMessage, setConfirmationMessage] = useState("")
-  const [termsAccepted, setTermsAccepted] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -26,19 +20,9 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
     setConfirmationMessage("")
 
     const formData = new FormData(event.currentTarget)
-    const nombrePreferido = String(formData.get("nombrePreferido") || "").trim()
+    const nombre = String(formData.get("nombre_preferido") || "")
     const email = String(formData.get("email") || "")
     const password = String(formData.get("password") || "")
-
-    if (!nombrePreferido) {
-      setError("Ingresá cómo querés que te llamemos")
-      return
-    }
-
-    if (!termsAccepted) {
-      setError("Aceptá los términos para crear tu cuenta")
-      return
-    }
 
     startTransition(async () => {
       const supabase = createClient()
@@ -46,10 +30,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
         email,
         password,
         options: {
-          data: {
-            nombre_preferido: nombrePreferido,
-            full_name: nombrePreferido,
-          },
+          data: { nombre_preferido: nombre },
           emailRedirectTo: `${window.location.origin}/${locale}/dashboard`,
         },
       })
@@ -59,17 +40,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
         return
       }
 
-      // If session is immediately available, save nombre_preferido to profile
       if (data.session) {
-        try {
-          await fetch("/api/perfil", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nombrePreferido }),
-          })
-        } catch {
-          // Non-fatal — nombre_preferido is also in user_metadata as fallback
-        }
         router.replace(`/${locale}/dashboard`)
         router.refresh()
         return
@@ -79,114 +50,130 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
     })
   }
 
+  function handleGoogle() {
+    const supabase = createClient()
+    void supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/${locale}/auth/callback?next=/${locale}/dashboard`,
+      },
+    })
+  }
+
   if (confirmationMessage) {
     return (
-      <div className={cn("flex flex-col gap-6 text-center", className)}>
-        <div className="flex flex-col items-center gap-2">
-          <h1 className="text-2xl font-bold">Revisá tu correo</h1>
-          <p className="text-muted-foreground text-sm text-balance">
-            {confirmationMessage}
-          </p>
+      <div className="flex flex-col gap-6 text-center">
+        <div>
+          <h1 className="text-[30px] font-bold tracking-[-0.02em] text-black">Revisá tu correo</h1>
+          <p className="text-[#777] text-[15px] mt-2.5">{confirmationMessage}</p>
         </div>
-        <Button asChild className="w-full">
-          <Link href={`/${locale}/login`}>Volver al login</Link>
-        </Button>
+        <Link
+          href={`/${locale}/login`}
+          className="w-full bg-black text-white rounded-full py-3 text-sm font-semibold text-center hover:bg-[#222] transition-colors"
+        >
+          Volver al login
+        </Link>
       </div>
     )
   }
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={handleSubmit}>
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="text-muted-foreground text-sm text-balance">{t("subtitle")}</p>
-      </div>
-      <div className="grid gap-5">
-        {/* Nombre preferido — destacado */}
-        <div className="grid gap-2 rounded-lg border-2 border-primary/20 bg-primary/5 p-4">
-          <Label htmlFor="nombrePreferido" className="font-semibold">
-            ¿Cómo querés que te llamemos?
-          </Label>
-          <Input
-            id="nombrePreferido"
-            name="nombrePreferido"
-            placeholder="Tu nombre o como preferís que te llamen"
-            autoComplete="nickname"
-            required
+    <div>
+      <h1 className="text-[30px] font-bold tracking-[-0.02em] text-black leading-tight">
+        {t("title")}
+      </h1>
+      <p className="text-[#777] text-[15px] mt-2.5">{t("subtitle")}</p>
+
+      {/* Google */}
+      <button
+        type="button"
+        onClick={handleGoogle}
+        className="mt-7 w-full flex items-center justify-center gap-2.5 border-2 border-black rounded-full py-3 bg-white text-black text-sm font-semibold hover:bg-[#F4F4F4] transition-colors cursor-pointer"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-[18px] w-[18px]">
+          <path
+            d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+            fill="currentColor"
           />
-          <p className="text-xs text-muted-foreground">
-            El Coach y el Narrador te van a llamar así.
-          </p>
+        </svg>
+        {t("continueWithGoogle")}
+      </button>
+
+      {/* Divider */}
+      <div className="flex items-center gap-3.5 my-5">
+        <div className="flex-1 h-px bg-[#E0E0E0]" />
+        <span className="text-[#999] text-[11px] font-semibold tracking-[0.1em] uppercase">{t("orContinueWith")}</span>
+        <div className="flex-1 h-px bg-[#E0E0E0]" />
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="nombre_preferido" className="text-sm font-semibold text-black">Nombre</label>
+          <input
+            id="nombre_preferido"
+            name="nombre_preferido"
+            type="text"
+            placeholder="German Gonzalez"
+            autoComplete="name"
+            className="border-2 border-black rounded-xl px-4 py-2.5 text-sm text-black placeholder:text-[#ABABAB] outline-none focus:border-[#FF2B0A] transition-colors"
+          />
         </div>
 
-        <div className="grid gap-3">
-          <Label htmlFor="email">{t("email")}</Label>
-          <Input id="email" name="email" type="email" placeholder="hola@ejemplo.com" autoComplete="email" required />
-        </div>
-        <div className="grid gap-3">
-          <Label htmlFor="password">{t("password")}</Label>
-          <Input id="password" name="password" type="password" autoComplete="new-password" required />
-        </div>
-        <div className="flex items-start space-x-2">
-          <Checkbox
-            id="terms"
-            className="mt-0.5"
-            checked={termsAccepted}
-            onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="email" className="text-sm font-semibold text-black">{t("email")}</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="hola@ejemplo.com"
+            autoComplete="email"
+            required
+            className="border-2 border-black rounded-xl px-4 py-2.5 text-sm text-black placeholder:text-[#ABABAB] outline-none focus:border-[#FF2B0A] transition-colors"
           />
-          <Label htmlFor="terms" className="text-sm leading-snug">
-            {t("termsCheck")}{" "}
-            <Link href="#" className="underline underline-offset-4 hover:text-primary">
-              {t("termsLink")}
-            </Link>{" "}
-            {t("and")}{" "}
-            <Link href="#" className="underline underline-offset-4 hover:text-primary">
-              {t("privacyLink")}
-            </Link>
-          </Label>
         </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="password" className="text-sm font-semibold text-black">{t("password")}</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="new-password"
+            required
+            className="border-2 border-black rounded-xl px-4 py-2.5 text-sm text-black placeholder:text-[#ABABAB] outline-none focus:border-[#FF2B0A] transition-colors"
+          />
+        </div>
+
         {error && (
-          <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p className="rounded-xl border border-[#FF2B0A]/30 bg-[#FF2B0A]/08 px-3 py-2 text-sm text-[#FF2B0A]">
             {error}
           </p>
         )}
-        <Button type="submit" className="w-full cursor-pointer" disabled={isPending}>
-          {isPending ? "Creando cuenta..." : t("submit")}
-        </Button>
-        <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-          <span className="bg-background text-muted-foreground relative z-10 px-2">
-            {t("orContinueWith")}
-          </span>
-        </div>
-        <Button
-          variant="outline"
-          className="w-full cursor-pointer"
-          type="button"
-          onClick={() => {
-            const supabase = createClient()
-            supabase.auth.signInWithOAuth({
-              provider: 'google',
-              options: {
-                redirectTo: `${window.location.origin}/${locale}/auth/callback?next=/${locale}/dashboard`,
-              },
-            })
-          }}
+
+        <button
+          type="submit"
+          disabled={isPending}
+          className="w-full bg-[#FF2B0A] text-white rounded-full py-3 text-sm font-semibold shadow-[0_4px_14px_rgba(255,43,10,0.4)] hover:bg-[#d42209] hover:shadow-[0_6px_20px_rgba(255,43,10,0.5)] transition-all disabled:opacity-60 cursor-pointer mt-1"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4">
-            <path
-              d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-              fill="currentColor"
-            />
-          </svg>
-          {t("continueWithGoogle")}
-        </Button>
-      </div>
-      <div className="text-center text-sm">
+          {isPending ? "Creando cuenta..." : t("submit")}
+        </button>
+      </form>
+
+      <p className="text-[12px] text-[#999] text-center mt-5 leading-[1.5]">
+        Al entrar aceptás los{" "}
+        <Link href="#" className="text-black underline underline-offset-4 hover:text-[#FF2B0A]">términos</Link>
+        {" "}y la{" "}
+        <Link href="#" className="text-black underline underline-offset-4 hover:text-[#FF2B0A]">política de privacidad</Link>.
+      </p>
+
+      <p className="text-[12px] text-[#999] text-center mt-3">
         {t("hasAccount")}{" "}
-        <Link href={`/${locale}/login`} className="underline underline-offset-4">
+        <Link href={`/${locale}/login`} className="text-black underline underline-offset-4 hover:text-[#FF2B0A]">
           {t("signIn")}
         </Link>
-      </div>
-    </form>
+      </p>
+    </div>
   )
 }

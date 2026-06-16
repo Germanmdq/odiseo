@@ -5,9 +5,12 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 
 export function CTASection() {
   const t = useTranslations("landing.cta")
+  const params = useParams()
+  const locale = (params.locale as string) ?? "es"
 
   return (
     <section className='py-16 lg:py-24 bg-muted/80'>
@@ -37,13 +40,13 @@ export function CTASection() {
               {/* CTA Buttons */}
               <div className='flex flex-col justify-center gap-4 sm:flex-row sm:gap-6'>
                 <Button size='lg' className='cursor-pointer px-8 py-6 text-lg font-medium' asChild>
-                  <Link href='/auth/sign-up'>
+                  <Link href={`/${locale}/registro`}>
                     {t("ctaPrimary")}
                     <ArrowRight className='ms-2 size-5' />
                   </Link>
                 </Button>
                 <Button variant='outline' size='lg' className='cursor-pointer px-8 py-6 text-lg font-medium group' asChild>
-                  <Link href='/auth/sign-in'>
+                  <Link href={`/${locale}/login`}>
                     {t("ctaSecondary")}
                     <ArrowRight className='ms-2 size-4 transition-transform group-hover:translate-x-1' />
                   </Link>

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from 'next/image'
 import {
   MessageSquareText,
   Mic,
@@ -12,13 +13,15 @@ import {
   ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Image3D } from '@/components/image-3d'
 import { useTranslations } from 'next-intl'
 
 export function FeaturesSection() {
   const t = useTranslations("landing.features")
+  const params = useParams()
+  const locale = (params.locale as string) ?? "es"
 
   const block1Features = [
     { icon: MessageSquareText, title: t("f1Title"), description: t("f1Desc") },
@@ -49,105 +52,111 @@ export function FeaturesSection() {
         </div>
 
         {/* First Feature Section */}
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-8 xl:gap-16 mb-24">
-          {/* Left Image */}
-          <Image3D
-            lightSrc="/feature-1-light.png"
-            darkSrc="/feature-1-dark.png"
-            alt="Coach y Narrador"
-            direction="left"
-          />
-          {/* Right Content */}
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-                {t("block1Title")}
-              </h3>
-              <p className="text-muted-foreground text-base text-pretty">
-                {t("block1Desc")}
-              </p>
+        <div className="mb-24 max-w-5xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1 min-w-0 space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+                  {t("block1Title")}
+                </h3>
+                <p className="text-muted-foreground text-base text-pretty">
+                  {t("block1Desc")}
+                </p>
+              </div>
+
+              <ul className="grid gap-4 sm:grid-cols-2">
+                {block1Features.map((feature, index) => (
+                  <li key={index} className="group hover:bg-accent/5 flex items-start gap-3 p-2 rounded-lg transition-colors">
+                    <div className="mt-0.5 flex shrink-0 items-center justify-center">
+                      <feature.icon className="size-5 text-primary" aria-hidden="true" />
+                    </div>
+                    <div>
+                      <h3 className="text-foreground font-medium">{feature.title}</h3>
+                      <p className="text-muted-foreground mt-1 text-sm">{feature.description}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex flex-col sm:flex-row gap-4 pe-4 pt-2">
+                <Button size="lg" className="cursor-pointer" asChild>
+                  <Link href={`/${locale}/registro`} className='flex items-center'>
+                    {t("cta1Primary")}
+                    <ArrowRight className="ms-2 size-4" aria-hidden="true" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" className="cursor-pointer" asChild>
+                  <Link href={`/${locale}/coach`}>
+                    {t("cta1Secondary")}
+                  </Link>
+                </Button>
+              </div>
             </div>
-
-            <ul className="grid gap-4 sm:grid-cols-2">
-              {block1Features.map((feature, index) => (
-                <li key={index} className="group hover:bg-accent/5 flex items-start gap-3 p-2 rounded-lg transition-colors">
-                  <div className="mt-0.5 flex shrink-0 items-center justify-center">
-                    <feature.icon className="size-5 text-primary" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h3 className="text-foreground font-medium">{feature.title}</h3>
-                    <p className="text-muted-foreground mt-1 text-sm">{feature.description}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <div className="flex flex-col sm:flex-row gap-4 pe-4 pt-2">
-              <Button size="lg" className="cursor-pointer" asChild>
-                <Link href="/auth/sign-up" className='flex items-center'>
-                  {t("cta1Primary")}
-                  <ArrowRight className="ms-2 size-4" aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="cursor-pointer" asChild>
-                <Link href="/coach">
-                  {t("cta1Secondary")}
-                </Link>
-              </Button>
+            <div className="w-full md:w-[40%] shrink-0">
+              <Image
+                src="/landing/screenshot-1.jpg"
+                alt="Coach y Narrador"
+                width={600}
+                height={400}
+                className="w-full h-auto rounded-2xl"
+                style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+              />
             </div>
           </div>
         </div>
 
-        {/* Second Feature Section - Flipped Layout */}
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-8 xl:gap-16">
-          {/* Left Content */}
-          <div className="space-y-6 order-2 lg:order-1">
-            <div className="space-y-4">
-              <h3 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-                {t("block2Title")}
-              </h3>
-              <p className="text-muted-foreground text-base text-pretty">
-                {t("block2Desc")}
-              </p>
+        {/* Second Feature Section */}
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="w-full md:w-[40%] shrink-0 order-last md:order-first">
+              <Image
+                src="/landing/screenshot-2.jpg"
+                alt="Memoria y registro"
+                width={600}
+                height={400}
+                className="w-full h-auto rounded-2xl"
+                style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+              />
             </div>
+            <div className="flex-1 min-w-0 space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+                  {t("block2Title")}
+                </h3>
+                <p className="text-muted-foreground text-base text-pretty">
+                  {t("block2Desc")}
+                </p>
+              </div>
 
-            <ul className="grid gap-4 sm:grid-cols-2">
-              {block2Features.map((feature, index) => (
-                <li key={index} className="group hover:bg-accent/5 flex items-start gap-3 p-2 rounded-lg transition-colors">
-                  <div className="mt-0.5 flex shrink-0 items-center justify-center">
-                    <feature.icon className="size-5 text-primary" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h3 className="text-foreground font-medium">{feature.title}</h3>
-                    <p className="text-muted-foreground mt-1 text-sm">{feature.description}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+              <ul className="grid gap-4 sm:grid-cols-2">
+                {block2Features.map((feature, index) => (
+                  <li key={index} className="group hover:bg-accent/5 flex items-start gap-3 p-2 rounded-lg transition-colors">
+                    <div className="mt-0.5 flex shrink-0 items-center justify-center">
+                      <feature.icon className="size-5 text-primary" aria-hidden="true" />
+                    </div>
+                    <div>
+                      <h3 className="text-foreground font-medium">{feature.title}</h3>
+                      <p className="text-muted-foreground mt-1 text-sm">{feature.description}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
 
-            <div className="flex flex-col sm:flex-row gap-4 pe-4 pt-2">
-              <Button size="lg" className="cursor-pointer" asChild>
-                <Link href="/auth/sign-up" className='flex items-center'>
-                  {t("cta2Primary")}
-                  <ArrowRight className="ms-2 size-4" aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="cursor-pointer" asChild>
-                <a href="#features">
-                  {t("cta2Secondary")}
-                </a>
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4 pe-4 pt-2">
+                <Button size="lg" className="cursor-pointer" asChild>
+                  <Link href={`/${locale}/registro`} className='flex items-center'>
+                    {t("cta2Primary")}
+                    <ArrowRight className="ms-2 size-4" aria-hidden="true" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" className="cursor-pointer" asChild>
+                  <a href="#features">
+                    {t("cta2Secondary")}
+                  </a>
+                </Button>
+              </div>
             </div>
           </div>
-
-          {/* Right Image */}
-          <Image3D
-            lightSrc="/feature-2-light.png"
-            darkSrc="/feature-2-dark.png"
-            alt="Memoria y registro"
-            direction="right"
-            className="order-1 lg:order-2"
-          />
         </div>
       </div>
     </section>

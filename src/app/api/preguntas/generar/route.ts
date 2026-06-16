@@ -13,7 +13,50 @@ type Pregunta = {
   explicacion: string
 }
 
-function buildPrompt(tema: string, cantidad: number): string {
+type TipoPregunta = "multiple" | "verdadero_falso" | "respuesta_breve"
+
+function buildPrompt(tema: string, cantidad: number, tipo: TipoPregunta): string {
+  if (tipo === "verdadero_falso") {
+    return `Generá exactamente ${cantidad} afirmaciones de VERDADERO O FALSO sobre "${tema}" basadas en las enseñanzas de Neville Goddard.
+
+Cada pregunta debe:
+- Presentar una afirmación que el usuario debe evaluar como verdadera o falsa según Neville
+- Usar solo dos opciones: a = "Verdadero", b = "Falso", c = "", d = ""
+- Variar entre afirmaciones verdaderas y falsas
+- La explicacion debe aclarar por qué es verdadero o falso, en 1-2 líneas
+
+Respondé SOLO con un JSON válido, sin texto adicional ni backticks:
+[
+  {
+    "pregunta": "string — una afirmación sobre la enseñanza",
+    "opciones": { "a": "Verdadero", "b": "Falso", "c": "", "d": "" },
+    "correcta": "a",
+    "explicacion": "string — por qué es verdadero o falso"
+  }
+]`
+  }
+
+  if (tipo === "respuesta_breve") {
+    return `Generá exactamente ${cantidad} preguntas de RESPUESTA BREVE sobre "${tema}" basadas en las enseñanzas de Neville Goddard.
+
+Para cada pregunta:
+- "pregunta": una pregunta abierta que requiere explicar un concepto
+- "opciones.a": la respuesta correcta y concisa (2-4 frases)
+- "opciones.b", "c", "d": cadenas vacías ""
+- "correcta": siempre "a"
+- "explicacion": contexto adicional o cita relevante
+
+Respondé SOLO con un JSON válido, sin texto adicional ni backticks:
+[
+  {
+    "pregunta": "string — pregunta abierta",
+    "opciones": { "a": "string — respuesta correcta", "b": "", "c": "", "d": "" },
+    "correcta": "a",
+    "explicacion": "string — contexto adicional"
+  }
+]`
+  }
+
   return `Generá exactamente ${cantidad} preguntas de evaluación sobre "${tema}" basadas en las enseñanzas de Neville Goddard.
 
 Cada pregunta debe:
@@ -43,7 +86,7 @@ async function callChat(prompt: string): Promise<string> {
     body: JSON.stringify({
       model: NVIDIA_CHAT_MODEL,
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
+      temperature: 0.4,
       max_tokens: 4000,
       stream: false,
     }),
@@ -90,9 +133,12 @@ function validatePreguntas(data: unknown, expected: number): data is Pregunta[] 
 }
 
 export async function POST(request: NextRequest) {
-  const body = (await request.json()) as { tema?: string; cantidad?: number }
+  const body = (await request.json()) as { tema?: string; cantidad?: number; tipo?: string }
   const tema = body.tema?.trim()
   const cantidad = typeof body.cantidad === "number" ? body.cantidad : 0
+  const tipo = (["multiple", "verdadero_falso", "respuesta_breve"].includes(body.tipo ?? "")
+    ? body.tipo
+    : "multiple") as TipoPregunta
 
   if (!tema || cantidad < 1 || cantidad > 10) {
     return NextResponse.json({ error: "tema y cantidad (1-10) son requeridos" }, { status: 400 })
@@ -103,7 +149,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "NVIDIA_API_KEY no configurada" }, { status: 500 })
   }
 
-  const prompt = buildPrompt(tema, cantidad)
+  const prompt = buildPrompt(tema, cantidad, tipo)
 
   for (let attempt = 0; attempt < 2; attempt++) {
     let raw: string

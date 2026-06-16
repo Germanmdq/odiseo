@@ -286,7 +286,7 @@
     }
   },
   "preguntas": {
-    "title": "Questions & answers",
+    "title": "Put myself to the test",
     "subtitle": "{count} answered questions.",
     "searchPlaceholder": "What are you wondering today?",
     "searchButton": "Search",
@@ -385,18 +385,15 @@
       "dashboardAlt": "Odiseo preview"
     },
     "stats": {
-      "stat1Value": "606",
+      "stat1Value": "1,000+",
       "stat1Label": "Lectures & books",
       "stat1Desc": "Primary source content",
-      "stat2Value": "2,000+",
+      "stat2Value": "786",
       "stat2Label": "Real testimonials",
       "stat2Desc": "Documented cases",
-      "stat3Value": "1,000+",
-      "stat3Label": "Biblical quotes",
-      "stat3Desc": "Explained as states",
-      "stat4Value": "100+",
-      "stat4Label": "Questions answered",
-      "stat4Desc": "With the Coach"
+      "stat3Value": "1,498",
+      "stat3Label": "Biblical explanations",
+      "stat3Desc": "Interpreted as states"
     },
     "about": {
       "badge": "About Odiseo",

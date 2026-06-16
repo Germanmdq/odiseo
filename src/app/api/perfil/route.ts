@@ -52,29 +52,26 @@ export async function PUT(req: NextRequest) {
 
   const admin = createAdminClient()
 
-  // Try updating with nombre_preferido first
-  const { error } = await admin
-    .from("profiles")
-    .update({
-      full_name: body.fullName ?? undefined,
-      display_name: body.nombrePreferido || body.fullName || undefined,
-      nombre_preferido: body.nombrePreferido ?? undefined,
+  // Save nombre_preferido to auth metadata — always works regardless of profiles schema
+  if (body.nombrePreferido !== undefined) {
+    await admin.auth.admin.updateUserById(user.id, {
+      user_metadata: { nombre_preferido: body.nombrePreferido },
     })
-    .eq("id", user.id)
+  }
 
-  if (error) {
-    if (error.code === "42703") {
-      // Column doesn't exist yet — run migration, then update without it
-      const { error: e2 } = await admin
-        .from("profiles")
-        .update({
-          full_name: body.fullName ?? undefined,
-          display_name: body.nombrePreferido || body.fullName || undefined,
-        })
-        .eq("id", user.id)
-      if (e2) return NextResponse.json({ error: e2.message }, { status: 500 })
-    } else {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+  // Best-effort update on profiles — try all known columns first, fall back to full_name only
+  const fullUpdate: Record<string, string | undefined> = {}
+  if (body.fullName !== undefined) fullUpdate.full_name = body.fullName
+  if (body.nombrePreferido !== undefined) {
+    fullUpdate.nombre_preferido = body.nombrePreferido
+    fullUpdate.display_name = body.nombrePreferido || body.fullName || undefined
+  }
+
+  if (Object.keys(fullUpdate).length > 0) {
+    const { error } = await admin.from("profiles").update(fullUpdate).eq("id", user.id)
+    if (error && body.fullName !== undefined) {
+      // Columns may not exist — retry with only full_name which is guaranteed to be there
+      await admin.from("profiles").update({ full_name: body.fullName }).eq("id", user.id)
     }
   }
 

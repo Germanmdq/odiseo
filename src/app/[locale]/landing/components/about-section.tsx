@@ -1,6 +1,7 @@
 "use client"
 
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -10,6 +11,8 @@ import { useTranslations } from 'next-intl'
 
 export function AboutSection() {
   const t = useTranslations("landing.about")
+  const params = useParams()
+  const locale = (params.locale as string) ?? "es"
 
   const pillars = [
     { icon: BookOpen,     title: t("pillar1Title"), description: t("pillar1Desc") },
@@ -37,7 +40,7 @@ export function AboutSection() {
         {/* Pillars Grid */}
         <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 xl:grid-cols-4 mb-12">
           {pillars.map((pillar, index) => (
-            <Card key={index} className='group shadow-xs py-2'>
+            <Card key={index} className='group py-2 border-0 rounded-[20px] bg-[#F7F7F7] shadow-[0_4px_6px_rgba(0,0,0,0.07),0_10px_15px_rgba(0,0,0,0.1),0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 hover:shadow-[0_8px_12px_rgba(0,0,0,0.1),0_20px_40px_rgba(0,0,0,0.15),0_40px_80px_rgba(0,0,0,0.1)] transition-all duration-200'>
               <CardContent className='p-8'>
                 <div className='flex flex-col items-center text-center'>
                   <CardDecorator>
@@ -58,7 +61,7 @@ export function AboutSection() {
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="cursor-pointer" asChild>
-              <Link href="/auth/sign-up">
+              <Link href={`/${locale}/registro`}>
                 {t("ctaPrimary")}
               </Link>
             </Button>

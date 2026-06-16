@@ -1,46 +1,55 @@
 import { createClient } from "@/lib/supabase/server"
+import Image from "next/image"
 import Link from "next/link"
 import {
-  MessageSquareText, Sparkles, Brain, Library,
-  ScrollText, GraduationCap, FileText, PenLine, HelpCircle, Flame,
-  MessageCircle,
+  ArrowRight,
+  BookOpen,
+  Brain,
+  MessageSquare,
+  User,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-
-const QUICK_APPS = [
-  { title: "Coach", desc: "Conversaciones con los maestros.", href: "/coach", icon: MessageSquareText },
-  { title: "Creador de escenas", desc: "Escenas vívidas con IA.", href: "/creador-de-escenas", icon: Sparkles },
-  { title: "Fuentes", desc: "Conferencias y libros.", href: "/fuentes", icon: Library },
-  { title: "Diario", desc: "Tu práctica diaria escrita.", href: "/diario", icon: PenLine },
-  { title: "Memoria", desc: "Todo lo que guardaste.", href: "/memoria", icon: Brain },
-  { title: "Evaluar", desc: "Ponete a prueba.", href: "/preguntas", icon: HelpCircle },
-]
+import { OdiseoHubCard } from "@/components/odiseo-hub-card"
 
 function getSaludo(hour: number): string {
-  if (hour >= 6 && hour < 13) return "Buenos días"
-  if (hour >= 13 && hour < 20) return "Buenas tardes"
+  if (hour >= 6 && hour < 12) return "Buenos días"
+  if (hour >= 12 && hour < 19) return "Buenas tardes"
   return "Buenas noches"
 }
 
-function getStreakSubtitle(streak: number): string {
-  if (streak === 0) return "¿Con qué querés trabajar hoy?"
-  if (streak < 7) return `🔥 Llevás ${streak} ${streak === 1 ? "día" : "días"} seguidos. Seguí así.`
-  return `🔥 ${streak} días de racha. Eso es compromiso real.`
-}
-
-type ActivityEvent = {
-  event_date: string
-  event_type: string
-}
-
-const EVENT_LABELS: Record<string, string> = {
-  coach: "Usaste el Coach",
-  narrador: "Creaste una escena",
-  pregunta: "Te evaluaste",
-  nota: "Escribiste en el Diario",
-  memoria: "Guardaste una memoria",
-}
+const CARDS = [
+  {
+    title: "Conversar",
+    desc: "Coach, Creador de escenas y Ponerme a prueba",
+    href: "/conversar",
+    icon: MessageSquare,
+    image: "/dashboard/conversar.jpg",
+    kicker: "Coach",
+  },
+  {
+    title: "Mi espacio",
+    desc: "Diario, Mensajes, Notas, Planes y más",
+    href: "/mi-espacio",
+    icon: User,
+    image: "/dashboard/mi-espacio.jpg",
+    kicker: "Mi espacio",
+  },
+  {
+    title: "Estudio",
+    desc: "Fuentes, Testimonios, Biblia y Talleres",
+    href: "/estudio",
+    icon: BookOpen,
+    image: "/dashboard/estudio.jpg",
+    kicker: "Biblioteca",
+  },
+  {
+    title: "Yo",
+    desc: "Memoria y Perfil",
+    href: "/yo",
+    icon: Brain,
+    image: "/dashboard/yo.jpg",
+    kicker: "Memoria",
+  },
+]
 
 export default async function DashboardPage({
   params,
@@ -51,130 +60,80 @@ export default async function DashboardPage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let nombre = "por acá"
-  let streak = 0
-  let recentEvents: ActivityEvent[] = []
+  let nombre = ""
 
   if (user) {
-    const [profileRes, actividadRes] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select("nombre_preferido, display_name, full_name")
-        .eq("id", user.id)
-        .maybeSingle(),
-      supabase
-        .from("daily_activity_events")
-        .select("event_date, event_type")
-        .eq("user_id", user.id)
-        .order("event_date", { ascending: false })
-        .limit(60),
-    ])
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("nombre_preferido, display_name, full_name")
+      .eq("id", user.id)
+      .maybeSingle()
 
-    const profile = profileRes.data
-    nombre = profile?.nombre_preferido || profile?.display_name || profile?.full_name ||
-      user.user_metadata?.nombre_preferido || "por acá"
-
-    const events = actividadRes.data ?? []
-
-    // Calculate streak
-    const activeDates = new Set(events.map((e: ActivityEvent) => e.event_date))
-    const today = new Date()
-    for (let i = 0; i < 60; i++) {
-      const d = new Date(today)
-      d.setDate(d.getDate() - i)
-      const key = d.toISOString().slice(0, 10)
-      if (activeDates.has(key)) {
-        streak++
-      } else if (i > 0) {
-        break
-      }
-    }
-
-    // Recent events: last 4 unique dates
-    const seen = new Set<string>()
-    for (const ev of events) {
-      if (seen.size >= 4) break
-      const key = `${ev.event_date}-${ev.event_type}`
-      if (!seen.has(key)) {
-        seen.add(key)
-        recentEvents.push(ev)
-      }
-    }
+    nombre =
+      profile?.nombre_preferido ||
+      profile?.display_name ||
+      profile?.full_name ||
+      user.user_metadata?.nombre_preferido ||
+      ""
   }
 
-  // Determine greeting based on Argentina time (UTC-3)
-  const nowUTC = new Date()
-  const hourAR = ((nowUTC.getUTCHours() - 3 + 24) % 24)
+  const hourAR = (new Date().getUTCHours() - 3 + 24) % 24
   const saludo = getSaludo(hourAR)
-  const subtitulo = getStreakSubtitle(streak)
 
   return (
-    <div className="flex-1 space-y-8 px-4 lg:px-6">
-      {/* Greeting */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{saludo}, {nombre}.</h1>
-        <p className="text-muted-foreground mt-1">{subtitulo}</p>
-      </div>
+    <div className="relative mx-auto grid min-h-[calc(100vh-6.5rem)] w-full max-w-7xl grid-rows-[auto_1fr] gap-4 overflow-hidden px-4 pb-4 lg:px-6">
+      {/* Hero */}
+      <section className="relative min-h-[190px] overflow-hidden rounded-[20px] bg-[#F4F4F4] shadow-[0_4px_6px_rgba(0,0,0,0.07),0_10px_15px_rgba(0,0,0,0.1),0_20px_40px_rgba(0,0,0,0.08)] p-5 sm:min-h-[210px] sm:p-6 lg:min-h-[230px] lg:p-7">
+        {/* Background */}
+        <div className="absolute inset-0 bg-black" />
 
-      {/* Quick access grid */}
-      <div>
-        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Acceso rápido</h2>
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
-          {QUICK_APPS.map((app) => (
-            <Link key={app.href} href={`/${locale}${app.href}`}>
-              <Card className="h-full hover:border-primary/50 transition-colors cursor-pointer group">
-                <CardHeader className="pb-2 pt-4 px-4">
-                  <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary mb-2 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                    <app.icon className="size-4" />
-                  </div>
-                  <CardTitle className="text-sm font-semibold leading-tight">{app.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="px-4 pb-4">
-                  <CardDescription className="text-xs">{app.desc}</CardDescription>
-                </CardContent>
-              </Card>
+        <div className="relative max-w-2xl">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border-2 border-white bg-black px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
+            <span className="size-2 rounded-full bg-[#FF2B0A]" />
+            Inicio
+          </div>
+
+          <h1 className="max-w-xl text-3xl font-bold tracking-[-0.045em] text-white text-balance sm:text-4xl lg:text-5xl">
+            {saludo}{nombre ? `, ${nombre}` : ""}.
+          </h1>
+
+          <p className="mt-3 max-w-xl text-sm leading-6 text-white/70 sm:text-base">
+            Entrá a conversar, estudiar, registrar tu proceso o seguir creando desde las herramientas que ya tenés en Odiseo.
+          </p>
+
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href={`/${locale}/conversar`}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full border-2 border-white bg-white px-5 text-sm font-semibold text-black transition hover:bg-[#FF2B0A] hover:border-[#FF2B0A] hover:text-white"
+            >
+              Comenzar práctica
+              <ArrowRight className="size-4" />
             </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent activity */}
-      {recentEvents.length > 0 && (
-        <div>
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Actividad reciente</h2>
-          <div className="space-y-2">
-            {recentEvents.map((ev, i) => (
-              <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Flame className="h-3.5 w-3.5 shrink-0" style={{ color: "#E8401A" }} />
-                <span>{EVENT_LABELS[ev.event_type] ?? ev.event_type}</span>
-                <span className="ml-auto text-xs tabular-nums">
-                  {new Date(ev.event_date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })}
-                </span>
-              </div>
-            ))}
+            <Link
+              href={`/${locale}/estudio`}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full border-2 border-white/60 px-5 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
+            >
+              Explorar estudio
+            </Link>
           </div>
         </div>
-      )}
+      </section>
 
-      {/* Planes card */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <FileText className="size-4" />
-            </div>
-            <div>
-              <CardTitle className="text-base">Tu plan personalizado</CardTitle>
-              <CardDescription>Contanos tu deseo y Germán te prepara un plan a medida.</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Button asChild size="sm" className="cursor-pointer">
-            <Link href={`/${locale}/planes`}>Solicitar mi plan</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      <section className="grid min-h-0 grid-cols-1 gap-4 md:grid-cols-2">
+        {CARDS.map((card) => (
+          <OdiseoHubCard
+            key={card.href}
+            href={`/${locale}${card.href}`}
+            title={card.title}
+            desc={card.desc}
+            icon={card.icon}
+            image={card.image}
+            kicker={card.kicker}
+            compact
+            priority
+          />
+        ))}
+      </section>
     </div>
   )
 }

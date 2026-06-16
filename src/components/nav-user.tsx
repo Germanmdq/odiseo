@@ -1,11 +1,12 @@
 "use client"
 
 import {
+  Bell,
   CreditCard,
   EllipsisVertical,
   LogOut,
-  User,
   Palette,
+  User,
 } from "lucide-react"
 import Link from "next/link"
 import { useLocale } from "next-intl"
@@ -24,9 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar"
 
 export function NavUser({
@@ -38,7 +37,6 @@ export function NavUser({
     avatar: string
   }
 }) {
-  const { isMobile } = useSidebar()
   const locale = useLocale()
   const router = useRouter()
 
@@ -52,74 +50,86 @@ export function NavUser({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
-            >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg">
-                <Logo size={28} />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
-                </span>
-              </div>
-              <EllipsisVertical className="ml-auto size-4" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
+        <div className="flex w-full items-center gap-1 px-1 py-1">
+          {/* Avatar + nombre → perfil */}
+          <Link
+            href={`/${locale}/configuracion/perfil`}
+            className="flex flex-1 items-center gap-2 rounded-md px-1 py-1 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors min-w-0"
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <div className="h-8 w-8 rounded-lg flex items-center justify-center">
-                  <Logo size={28} />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="text-muted-foreground truncate text-xs">
-                    {user.email}
-                  </span>
-                </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href={`/${locale}/settings/user`}>
-                  <User className="size-4" />
-                  Perfil
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href={`/${locale}/settings/billing`}>
-                  <CreditCard className="size-4" />
-                  Suscripción
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href={`/${locale}/settings/appearance`}>
-                  <Palette className="size-4" />
-                  Apariencia
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="cursor-pointer text-destructive focus:text-destructive"
-              onClick={handleSignOut}
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+              <Logo size={28} />
+            </div>
+            <div className="grid flex-1 text-left text-sm leading-tight min-w-0">
+              <span className="truncate font-medium">{user.name}</span>
+              <span className="text-muted-foreground truncate text-xs">{user.email}</span>
+            </div>
+          </Link>
+
+          {/* Menú "..." */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors cursor-pointer"
+                aria-label="Opciones de cuenta"
+              >
+                <EllipsisVertical className="size-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-56 rounded-lg"
+              side="right"
+              align="end"
+              sideOffset={8}
             >
-              <LogOut className="size-4" />
-              Cerrar sesión
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0">
+                    <Logo size={28} />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight min-w-0">
+                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="text-muted-foreground truncate text-xs">{user.email}</span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href={`/${locale}/configuracion/perfil`}>
+                    <User className="size-4" />
+                    Perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href={`/${locale}/configuracion/suscripcion`}>
+                    <CreditCard className="size-4" />
+                    Suscripción
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href={`/${locale}/configuracion/apariencia`}>
+                    <Palette className="size-4" />
+                    Apariencia
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href={`/${locale}/configuracion/notificaciones`}>
+                    <Bell className="size-4" />
+                    Notificaciones
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="cursor-pointer text-destructive focus:text-destructive"
+                onClick={handleSignOut}
+              >
+                <LogOut className="size-4" />
+                Cerrar sesión
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </SidebarMenuItem>
     </SidebarMenu>
   )

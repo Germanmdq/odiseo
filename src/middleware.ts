@@ -22,6 +22,7 @@ const publicSegments = new Set([
   'forgot-password-2',
   'forgot-password-3',
   'errors',
+  'blog',
 ]);
 
 function getLocaleAndSegment(pathname: string) {

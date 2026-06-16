@@ -42,8 +42,8 @@ export function Paywall({ locale = "es" }: PaywallProps) {
       <div className="max-w-lg space-y-3">
         <h2 className="text-2xl font-bold">Ya sentiste lo que es Odiseo</h2>
         <p className="text-muted-foreground">
-          Para seguir con el Coach, el Creador de escenas y acceder a toda la
-          biblioteca sin límites, elegí tu plan:
+          Tu primera sesión fue gratuita. Para seguir usando el Coach, el
+          Creador de escenas y toda la biblioteca sin límites, elegí tu plan:
         </p>
       </div>
 

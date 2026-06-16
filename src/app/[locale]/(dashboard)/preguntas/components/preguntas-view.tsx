@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils"
 
 type Opcion = "a" | "b" | "c" | "d"
 
+type TipoPregunta = "multiple" | "verdadero_falso" | "respuesta_breve"
+
 type Pregunta = {
   pregunta: string
   opciones: Record<Opcion, string>
@@ -51,46 +53,28 @@ type EvaluacionHistorial = {
 
 type Estado =
   | { etapa: "setup"; racha: number; puntosTotal: number }
-  | { etapa: "generando"; tema: string; cantidad: number }
-  | { etapa: "error"; mensaje: string; tema: string; cantidad: number }
+  | { etapa: "generando"; tema: string; cantidad: number; tipo: TipoPregunta }
+  | { etapa: "error"; mensaje: string; tema: string; cantidad: number; tipo: TipoPregunta }
   | {
       etapa: "evaluando"
       preguntas: Pregunta[]
       tema: string
+      tipo: TipoPregunta
       indice: number
       elegidas: (Opcion | null)[]
       mostrandoFeedback: boolean
     }
-  | { etapa: "enviando"; preguntas: Pregunta[]; tema: string; elegidas: Opcion[] }
+  | { etapa: "enviando"; preguntas: Pregunta[]; tema: string; elegidas: Opcion[]; tipo: TipoPregunta }
   | {
       etapa: "resultado"
       tema: string
       preguntas: Pregunta[]
       elegidas: Opcion[]
       resultado: ResultadoAPI
+      tipo: TipoPregunta
     }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-
-const TEMAS_CON_EMOJI = [
-  { tema: "Asunción", emoji: "🌅" },
-  { tema: "SATS", emoji: "🌙" },
-  { tema: "Revisión", emoji: "✏️" },
-  { tema: "Vivir desde el final", emoji: "🎯" },
-  { tema: "Autoconcepto", emoji: "🪞" },
-  { tema: "YO SOY", emoji: "✨" },
-  { tema: "Fe", emoji: "🕊️" },
-  { tema: "Persistencia", emoji: "💪" },
-  { tema: "La Promesa", emoji: "🌟" },
-  { tema: "Imaginación", emoji: "🧠" },
-  { tema: "Provisión Divina", emoji: "🌿" },
-  { tema: "Conciencia", emoji: "👁️" },
-  { tema: "__sorpresa", emoji: "🎲", label: "Sorprendeme" },
-]
-
-const TEMAS = TEMAS_CON_EMOJI.filter(t => t.tema !== "__sorpresa").map(t => t.tema)
-
-const CANTIDADES = [1, 3, 5, 10]
 
 const OPCIONES: Opcion[] = ["a", "b", "c", "d"]
 
@@ -98,6 +82,12 @@ const HITO_MSGS: Record<number, string> = {
   3: "🔥 3 días seguidos. ¡Estás en racha!",
   7: "⚡ ¡Una semana entera! Racha de 7 días.",
   30: "🏆 ¡30 días! Sos un practicante comprometido.",
+}
+
+const TIPO_LABELS: Record<TipoPregunta, string> = {
+  multiple: "Opción múltiple (4 opciones)",
+  verdadero_falso: "Verdadero o falso",
+  respuesta_breve: "Respuesta breve",
 }
 
 function performanceMsg(correctas: number, total: number, tema: string): string {
@@ -108,73 +98,87 @@ function performanceMsg(correctas: number, total: number, tema: string): string 
   return "Esta enseñanza tiene más profundidad de lo que parece. Vale la pena releerla."
 }
 
+const selectClass =
+  "w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring appearance-none cursor-pointer"
+
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function SetupScreen({
   estado,
   onStart,
+  initialTema = "",
 }: {
   estado: Extract<Estado, { etapa: "setup" }>
-  onStart: (tema: string, cantidad: number) => void
+  onStart: (tema: string, cantidad: number, tipo: TipoPregunta) => void
+  initialTema?: string
 }) {
-  const [tema, setTema] = React.useState("")
+  const [tema, setTema] = React.useState(initialTema)
   const [cantidad, setCantidad] = React.useState(5)
+  const [tipo, setTipo] = React.useState<TipoPregunta>("multiple")
 
   function handleStart() {
     const t = tema.trim()
     if (!t) return
-    onStart(t, cantidad)
+    onStart(t, cantidad, tipo)
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-8 py-6">
-      {/* Racha arriba */}
-      {estado.racha > 0 && (
-        <div className="flex items-center gap-2 text-sm font-medium" style={{ color: "#E8401A" }}>
-          <Flame className="h-4 w-4" />
-          <span>{estado.racha} {estado.racha === 1 ? "día" : "días"} de racha</span>
+    <div className="mx-auto max-w-lg py-6">
+      <div className="rounded-2xl border bg-card p-8 shadow-sm space-y-6">
+        {estado.racha > 0 && (
+          <div className="flex items-center gap-2 text-sm font-medium" style={{ color: "#E8401A" }}>
+            <Flame className="h-4 w-4" />
+            <span>{estado.racha} {estado.racha === 1 ? "día" : "días"} de racha</span>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <label className="text-xl font-semibold block">
+            ¿Sobre qué tema querés evaluarte?
+          </label>
+          <input
+            type="text"
+            value={tema}
+            onChange={e => setTema(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") handleStart() }}
+            placeholder="Ej: la revisión, vivir desde el final, el autoconcepto..."
+            className="w-full rounded-lg border border-input bg-background px-4 py-3 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            autoFocus
+          />
         </div>
-      )}
 
-      <div className="space-y-2">
-        <label className="text-xl font-semibold block">
-          ¿Sobre qué tema querés evaluarte?
-        </label>
-        <input
-          type="text"
-          value={tema}
-          onChange={e => setTema(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter") handleStart() }}
-          placeholder="Ej: la revisión, vivir desde el final, el autoconcepto..."
-          className="w-full rounded-lg border border-input bg-background px-4 py-3 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          autoFocus
-        />
-      </div>
-
-      <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">Cantidad de preguntas</p>
-        <div className="flex gap-2">
-          {CANTIDADES.map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => setCantidad(c)}
-              className={cn(
-                "h-11 w-14 rounded-lg border text-base font-semibold transition-colors",
-                cantidad === c
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "bg-background hover:bg-muted"
-              )}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm text-muted-foreground block">Cantidad de preguntas</label>
+            <select
+              value={cantidad}
+              onChange={e => setCantidad(Number(e.target.value))}
+              className={selectClass}
             >
-              {c}
-            </button>
-          ))}
-        </div>
-      </div>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </div>
 
-      <Button size="lg" onClick={handleStart} disabled={!tema.trim()}>
-        Empezar evaluación
-      </Button>
+          <div className="space-y-2">
+            <label className="text-sm text-muted-foreground block">Tipo de preguntas</label>
+            <select
+              value={tipo}
+              onChange={e => setTipo(e.target.value as TipoPregunta)}
+              className={selectClass}
+            >
+              {(Object.entries(TIPO_LABELS) as [TipoPregunta, string][]).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <Button size="lg" className="w-full" onClick={handleStart} disabled={!tema.trim()}>
+          Empezar evaluación
+        </Button>
+      </div>
     </div>
   )
 }
@@ -190,12 +194,19 @@ function EvaluandoScreen({
   onSiguiente: () => void
   onVerResultado: () => void
 }) {
-  const { preguntas, indice, elegidas, mostrandoFeedback } = estado
+  const { preguntas, indice, elegidas, mostrandoFeedback, tipo } = estado
   const pregunta = preguntas[indice]
   const elegida = elegidas[indice]
   const respondidas = elegidas.filter(Boolean).length
   const correctasHasta = elegidas.filter((e, i) => e !== null && e === preguntas[i].correcta).length
   const esUltima = indice === preguntas.length - 1
+  const [respuestaLibre, setRespuestaLibre] = React.useState("")
+
+  React.useEffect(() => {
+    setRespuestaLibre("")
+  }, [indice])
+
+  const opcionesVisibles: Opcion[] = tipo === "verdadero_falso" ? ["a", "b"] : OPCIONES
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 py-4">
@@ -215,36 +226,69 @@ function EvaluandoScreen({
         <p className="text-base font-medium leading-relaxed">{pregunta.pregunta}</p>
       </div>
 
-      <div className="space-y-2">
-        {OPCIONES.map((key) => (
-          <button
-            key={key}
+      {tipo === "respuesta_breve" ? (
+        <div className="space-y-3">
+          <textarea
+            value={respuestaLibre}
+            onChange={e => setRespuestaLibre(e.target.value)}
             disabled={mostrandoFeedback}
-            onClick={() => onElegir(key)}
-            className={cn(
-              "w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors",
-              "disabled:cursor-default",
-              !mostrandoFeedback && "hover:bg-muted/60",
-              mostrandoFeedback && key === pregunta.correcta
-                ? "border-green-500 bg-green-50 dark:bg-green-950/40"
-                : "",
-              mostrandoFeedback && key === elegida && key !== pregunta.correcta
-                ? "border-red-500 bg-red-50 dark:bg-red-950/40"
-                : ""
-            )}
-          >
-            <span className="mr-2 font-semibold uppercase">{key}.</span>
-            {pregunta.opciones[key]}
-          </button>
-        ))}
-      </div>
+            placeholder="Escribí tu respuesta aquí..."
+            className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none disabled:opacity-60"
+            rows={4}
+          />
+          {!mostrandoFeedback && (
+            <Button
+              onClick={() => onElegir("a")}
+              disabled={!respuestaLibre.trim()}
+            >
+              Ver respuesta
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {opcionesVisibles.map((key) => (
+            <button
+              key={key}
+              disabled={mostrandoFeedback}
+              onClick={() => onElegir(key)}
+              className={cn(
+                "w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors",
+                "disabled:cursor-default",
+                !mostrandoFeedback && "hover:bg-muted/60",
+                mostrandoFeedback && key === pregunta.correcta
+                  ? "border-green-500 bg-green-50 dark:bg-green-950/40"
+                  : "",
+                mostrandoFeedback && key === elegida && key !== pregunta.correcta
+                  ? "border-red-500 bg-red-50 dark:bg-red-950/40"
+                  : ""
+              )}
+            >
+              <span className="mr-2 font-semibold uppercase">{key}.</span>
+              {pregunta.opciones[key]}
+            </button>
+          ))}
+        </div>
+      )}
 
       {mostrandoFeedback && (
         <div className="animate-in fade-in space-y-1 rounded-lg border bg-muted/40 p-4 text-sm">
-          <p className="font-medium">
-            {elegida === pregunta.correcta ? "✓ Correcto" : "✗ Incorrecto"}
-          </p>
-          <p className="text-muted-foreground">{pregunta.explicacion}</p>
+          {tipo === "respuesta_breve" ? (
+            <>
+              <p className="font-medium">Respuesta esperada</p>
+              <p className="text-muted-foreground">{pregunta.opciones["a"]}</p>
+              {pregunta.explicacion && (
+                <p className="text-muted-foreground mt-1">{pregunta.explicacion}</p>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="font-medium">
+                {elegida === pregunta.correcta ? "✓ Correcto" : "✗ Incorrecto"}
+              </p>
+              <p className="text-muted-foreground">{pregunta.explicacion}</p>
+            </>
+          )}
         </div>
       )}
 
@@ -416,6 +460,18 @@ export function PreguntasView() {
     racha: 0,
     puntosTotal: 0,
   })
+  const [initialTema, setInitialTema] = React.useState("")
+
+  React.useEffect(() => {
+    const raw = sessionStorage.getItem("odiseo_reutilizar")
+    if (raw) {
+      try {
+        const { content } = JSON.parse(raw) as { content: string }
+        sessionStorage.removeItem("odiseo_reutilizar")
+        setInitialTema(content.slice(0, 150))
+      } catch {}
+    }
+  }, [])
 
   React.useEffect(() => {
     fetch("/api/rachas")
@@ -430,14 +486,14 @@ export function PreguntasView() {
       .catch(() => {})
   }, [])
 
-  async function handleStart(tema: string, cantidad: number) {
-    setEstado({ etapa: "generando", tema, cantidad })
+  async function handleStart(tema: string, cantidad: number, tipo: TipoPregunta) {
+    setEstado({ etapa: "generando", tema, cantidad, tipo })
 
     try {
       const res = await fetch("/api/preguntas/generar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tema, cantidad }),
+        body: JSON.stringify({ tema, cantidad, tipo }),
       })
       const data = (await res.json()) as { preguntas?: Pregunta[]; error?: string }
 
@@ -447,6 +503,7 @@ export function PreguntasView() {
           mensaje: data.error ?? "No se pudieron generar las preguntas.",
           tema,
           cantidad,
+          tipo,
         })
         return
       }
@@ -455,6 +512,7 @@ export function PreguntasView() {
         etapa: "evaluando",
         preguntas: data.preguntas,
         tema,
+        tipo,
         indice: 0,
         elegidas: new Array<null>(data.preguntas.length).fill(null),
         mostrandoFeedback: false,
@@ -465,6 +523,7 @@ export function PreguntasView() {
         mensaje: "No se pudieron generar las preguntas. Intentá de nuevo.",
         tema,
         cantidad,
+        tipo,
       })
     }
   }
@@ -483,11 +542,11 @@ export function PreguntasView() {
 
   async function handleVerResultado() {
     if (estado.etapa !== "evaluando") return
-    const { preguntas, tema, elegidas } = estado
+    const { preguntas, tema, elegidas, tipo } = estado
     const finales = elegidas as Opcion[]
     const correctas = finales.filter((e, i) => e === preguntas[i].correcta).length
 
-    setEstado({ etapa: "enviando", preguntas, tema, elegidas: finales })
+    setEstado({ etapa: "enviando", preguntas, tema, elegidas: finales, tipo })
 
     try {
       const res = await fetch("/api/preguntas/resultado", {
@@ -506,13 +565,14 @@ export function PreguntasView() {
         toast(HITO_MSGS[resultado.hito], { duration: 5000 })
       }
 
-      setEstado({ etapa: "resultado", tema, preguntas, elegidas: finales, resultado })
+      setEstado({ etapa: "resultado", tema, preguntas, elegidas: finales, resultado, tipo })
     } catch {
       setEstado({
         etapa: "resultado",
         tema,
         preguntas,
         elegidas: finales,
+        tipo,
         resultado: {
           racha_actual: 0,
           racha_maxima: 0,
@@ -525,8 +585,7 @@ export function PreguntasView() {
   }
 
   function handleReintentar() {
-    const base: Estado = { etapa: "setup", racha: 0, puntosTotal: 0 }
-    setEstado(base)
+    setEstado({ etapa: "setup", racha: 0, puntosTotal: 0 })
     fetch("/api/rachas")
       .then((r) => r.json())
       .then((d: { racha_actual?: number; puntos_totales?: number }) => {
@@ -544,7 +603,7 @@ export function PreguntasView() {
 
       <TabsContent value="evaluar">
         {estado.etapa === "setup" && (
-          <SetupScreen estado={estado} onStart={handleStart} />
+          <SetupScreen estado={estado} onStart={handleStart} initialTema={initialTema} />
         )}
 
         {(estado.etapa === "generando" || estado.etapa === "enviando") && (
@@ -566,9 +625,7 @@ export function PreguntasView() {
             <p className="text-destructive font-medium">Hubo un error al generar las preguntas.</p>
             <p className="text-sm text-muted-foreground">{estado.mensaje}</p>
             <div className="flex flex-col gap-2">
-              <Button
-                onClick={() => handleStart(estado.tema, estado.cantidad)}
-              >
+              <Button onClick={() => handleStart(estado.tema, estado.cantidad, estado.tipo)}>
                 Intentar de nuevo
               </Button>
               <Button

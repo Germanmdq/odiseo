@@ -7,6 +7,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { DataTable, DataTableColumnHeader } from "@/components/data-table"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { CompartirEn } from "@/components/compartir-en"
 import { formatBodyParagraphs } from "@/lib/format-body"
 import type { ContentArtifact } from "@/lib/content-artifacts/types"
 
@@ -120,6 +121,10 @@ function TestimonioDrawer({
             {join([...item.conferenciasCitadas, ...item.librosCitados], item.sourceTable || "—")}
           </p>
         </div>
+      </div>
+
+      <div className="pt-2 border-t">
+        <CompartirEn contenido={item.body} titulo={item.title} origen="testimonio" label="Usar este contenido" />
       </div>
     </div>
   )

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
+export const dynamic = "force-dynamic"
 
 const NVIDIA_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
 const NVIDIA_CHAT_MODEL = "meta/llama-3.3-70b-instruct"
@@ -44,7 +45,9 @@ export async function POST(request: NextRequest) {
   if (!apiKey) return Response.json({ error: "Falta NVIDIA_API_KEY" }, { status: 500 })
 
   const body = (await request.json()) as { tema?: string }
-  const tema = body.tema?.trim()
+  const rawTema = body.tema?.trim() ?? ""
+  // Truncate to avoid excessive token usage / timeouts
+  const tema = rawTema.slice(0, 2000)
 
   if (!tema) {
     return Response.json({ error: "El tema es requerido" }, { status: 400 })

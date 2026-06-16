@@ -1,16 +1,12 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/client"
 import { useLocale, useTranslations } from "next-intl"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
+export function LoginForm() {
   const t = useTranslations("auth.login")
   const locale = useLocale()
   const router = useRouter()
@@ -27,10 +23,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
 
     startTransition(async () => {
       const supabase = createClient()
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
 
       if (authError) {
         setError("Email o contraseña incorrectos")
@@ -42,71 +35,102 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
     })
   }
 
+  function handleGoogle() {
+    const supabase = createClient()
+    void supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/${locale}/auth/callback?next=/${locale}/dashboard`,
+      },
+    })
+  }
+
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={handleSubmit}>
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="text-muted-foreground text-sm text-balance">{t("subtitle")}</p>
+    <div>
+      <h1 className="text-[30px] font-bold tracking-[-0.02em] text-black leading-tight">
+        {t("title")}
+      </h1>
+      <p className="text-[#777] text-[15px] mt-2.5">{t("subtitle")}</p>
+
+      {/* Google */}
+      <button
+        type="button"
+        onClick={handleGoogle}
+        className="mt-7 w-full flex items-center justify-center gap-2.5 border-2 border-black rounded-full py-3 bg-white text-black text-sm font-semibold hover:bg-[#F4F4F4] transition-colors cursor-pointer"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-[18px] w-[18px]">
+          <path
+            d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+            fill="currentColor"
+          />
+        </svg>
+        {t("continueWithGoogle")}
+      </button>
+
+      {/* Divider */}
+      <div className="flex items-center gap-3.5 my-5">
+        <div className="flex-1 h-px bg-[#E0E0E0]" />
+        <span className="text-[#999] text-[11px] font-semibold tracking-[0.1em] uppercase">{t("orContinueWith")}</span>
+        <div className="flex-1 h-px bg-[#E0E0E0]" />
       </div>
-      <div className="grid gap-6">
-        <div className="grid gap-3">
-          <Label htmlFor="email">{t("email")}</Label>
-          <Input id="email" name="email" type="email" placeholder="hola@ejemplo.com" autoComplete="email" required />
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="email" className="text-sm font-semibold text-black">{t("email")}</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="hola@ejemplo.com"
+            autoComplete="email"
+            required
+            className="border-2 border-black rounded-xl px-4 py-2.5 text-sm text-black placeholder:text-[#ABABAB] outline-none focus:border-[#FF2B0A] transition-colors"
+          />
         </div>
-        <div className="grid gap-3">
-          <div className="flex items-center">
-            <Label htmlFor="password">{t("password")}</Label>
+
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="text-sm font-semibold text-black">{t("password")}</label>
             <Link
               href={`/${locale}/recuperar`}
-              className="ml-auto text-sm underline-offset-4 hover:underline"
+              className="text-sm text-[#777] hover:text-[#FF2B0A] transition-colors"
             >
               {t("forgotPassword")}
             </Link>
           </div>
-          <Input id="password" name="password" type="password" autoComplete="current-password" required />
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            required
+            className="border-2 border-black rounded-xl px-4 py-2.5 text-sm text-black placeholder:text-[#ABABAB] outline-none focus:border-[#FF2B0A] transition-colors"
+          />
         </div>
+
         {error && (
-          <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p className="rounded-xl border border-[#FF2B0A]/30 bg-[#FF2B0A]/08 px-3 py-2 text-sm text-[#FF2B0A]">
             {error}
           </p>
         )}
-        <Button type="submit" className="w-full cursor-pointer" disabled={isPending}>
-          {isPending ? "Ingresando..." : t("submit")}
-        </Button>
-        <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-          <span className="bg-background text-muted-foreground relative z-10 px-2">
-            {t("orContinueWith")}
-          </span>
-        </div>
-        <Button
-          variant="outline"
-          className="w-full cursor-pointer"
-          type="button"
-          onClick={() => {
-            const supabase = createClient()
-            supabase.auth.signInWithOAuth({
-              provider: 'google',
-              options: {
-                redirectTo: `${window.location.origin}/${locale}/auth/callback?next=/${locale}/dashboard`,
-              },
-            })
-          }}
+
+        <button
+          type="submit"
+          disabled={isPending}
+          className="w-full bg-[#FF2B0A] text-white rounded-full py-3 text-sm font-semibold shadow-[0_4px_14px_rgba(255,43,10,0.4)] hover:bg-[#d42209] hover:shadow-[0_6px_20px_rgba(255,43,10,0.5)] transition-all disabled:opacity-60 cursor-pointer mt-1"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4">
-            <path
-              d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-              fill="currentColor"
-            />
-          </svg>
-          {t("continueWithGoogle")}
-        </Button>
-      </div>
-      <div className="text-center text-sm">
+          {isPending ? "Ingresando..." : t("submit")}
+        </button>
+      </form>
+
+      <p className="text-[12px] text-[#999] text-center mt-5 leading-[1.5]">
         {t("noAccount")}{" "}
-        <Link href={`/${locale}/registro`} className="underline underline-offset-4">
+        <Link href={`/${locale}/registro`} className="text-black underline underline-offset-4 hover:text-[#FF2B0A]">
           {t("signUp")}
         </Link>
-      </div>
-    </form>
+      </p>
+    </div>
   )
 }

@@ -3,10 +3,12 @@
 import * as React from "react"
 import { Send, Sparkles } from "lucide-react"
 import { useTranslations } from "next-intl"
+import ReactMarkdown from "react-markdown"
 
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
+import { CompartirEn } from "@/components/compartir-en"
 import { cn } from "@/lib/utils"
 
 type NarradorMessage = {
@@ -179,8 +181,8 @@ export function NarradorView() {
                   <div
                     key={message.id}
                     className={cn(
-                      "flex",
-                      message.role === "user" ? "justify-end" : "justify-start"
+                      "flex flex-col items-start gap-1",
+                      message.role === "user" ? "items-end" : "items-start"
                     )}
                   >
                     <div
@@ -188,15 +190,22 @@ export function NarradorView() {
                         "max-w-[82%] rounded-lg px-4 py-3 text-sm leading-relaxed break-words",
                         message.role === "user"
                           ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
+                          : "bg-muted prose prose-sm dark:prose-invert max-w-none"
                       )}
                     >
                       {message.content ? (
-                        <div className="whitespace-pre-wrap">{message.content}</div>
+                        message.role === "user" ? (
+                          <span className="whitespace-pre-wrap">{message.content}</span>
+                        ) : (
+                          <ReactMarkdown>{message.content}</ReactMarkdown>
+                        )
                       ) : (
                         <LoadingDots />
                       )}
                     </div>
+                    {message.role === "assistant" && message.content && !isLoading ? (
+                      <CompartirEn contenido={message.content} origen="narrador" size="xs" label="Usar este relato" />
+                    ) : null}
                   </div>
                 ))}
 

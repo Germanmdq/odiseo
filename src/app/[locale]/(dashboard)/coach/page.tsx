@@ -20,7 +20,7 @@ export default async function CoachPage({
   }
 
   return (
-    <div className="px-4 md:px-6">
+    <div className="px-0 md:px-6 h-[100dvh] md:h-[calc(100dvh-var(--header-height)-4rem)] overflow-hidden">
       <CoachView />
     </div>
   )

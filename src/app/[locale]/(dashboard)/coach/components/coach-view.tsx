@@ -1,20 +1,68 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Menu, MessageSquareText, X } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+
 import { useTranslations } from "next-intl"
+import { useParams } from "next/navigation"
+import Link from "next/link"
+import ReactMarkdown, { type Components } from "react-markdown"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { GuardarEnMemoriaButton } from "@/components/guardar-en-memoria-button"
+import { CompartirEn } from "@/components/compartir-en"
+import { SugerenciasCoach, getSugerencias, extraerTema } from "@/components/sugerencias-coach"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import { MessageInput } from "./message-input"
-import { AuthorList } from "./author-list"
 import { CoachHeader } from "./coach-header"
 import { useCoach } from "../use-coach"
 import { AUTHORS } from "../data"
 
+// ─── Saludo inicial ──────────────────────────────────────────────────────────
+
+function getInitialGreeting(nombre: string): string {
+  const greeting = nombre ? `Hola, ${nombre}.` : "Hola."
+  return `${greeting} Soy tu Asistente de imaginación.\n\n¿De qué querés hablar hoy?`
+}
+
+// ─── ReactMarkdown renderers ─────────────────────────────────────────────────
+
+const aiComponents: Components = {
+  a: ({ href, children }) => (
+    <Link
+      href={href ?? "#"}
+      className="font-semibold text-[#FF2B0A] underline underline-offset-2 break-words"
+    >
+      {children}
+    </Link>
+  ),
+  p: ({ children }) => (
+    <p className="mb-2 last:mb-0 leading-[1.45]">
+      {children}
+    </p>
+  ),
+  strong: ({ children }) => (
+    <strong className="font-bold text-black">
+      {children}
+    </strong>
+  ),
+}
+
+// ─── Tipos ──────────────────────────────────────────────────────────────────
+
+type DisplayMessage = {
+  id: string
+  content: string
+  timestamp: string
+  senderId: string
+  isInitial?: boolean
+}
+
+// ─── Componente ─────────────────────────────────────────────────────────────
+
 export function CoachView() {
   const t = useTranslations("coach")
+  const params = useParams()
+  const locale = (params?.locale as string) ?? "es"
+
   const {
     selectedAuthor,
     setSelectedAuthor,
@@ -22,11 +70,14 @@ export function CoachView() {
     addMessage,
     updateMessage,
   } = useCoach()
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
   const [loadingAuthor, setLoadingAuthor] = useState<string | null>(null)
   const [errorByAuthor, setErrorByAuthor] = useState<Record<string, string | null>>({})
   const [retryByAuthor, setRetryByAuthor] = useState<Record<string, string | null>>({})
+  const [mostrarSugerencias, setMostrarSugerencias] = useState<Record<string, boolean>>({})
+  const [ultimoMensaje, setUltimoMensaje] = useState<Record<string, string>>({})
   const [nombrePreferido, setNombrePreferido] = useState<string | null>(null)
+  const scrollBottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch("/api/perfil")
@@ -37,10 +88,53 @@ export function CoachView() {
       .catch(() => setNombrePreferido(""))
   }, [])
 
+  // Leer contexto compartido desde otra herramienta
+  useEffect(() => {
+    const raw = sessionStorage.getItem("odiseo_reutilizar")
+    if (!raw) return
+    try {
+      const { content, origen } = JSON.parse(raw) as { content: string; origen: string }
+      sessionStorage.removeItem("odiseo_reutilizar")
+      const urlParams = new URLSearchParams(window.location.search)
+      const autorParam = urlParams.get("autor")
+      if (autorParam) setSelectedAuthor(autorParam)
+      setTimeout(() => {
+        void handleSendMessage(
+          `Trabajemos con esto que generé en el ${origen === "creador" ? "Creador de escenas" : "otra herramienta"}:\n\n${content}`,
+          true
+        )
+      }, 300)
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const currentAuthor = AUTHORS.find((a) => a.id === selectedAuthor) ?? null
   const currentMessages = selectedAuthor ? (messages[selectedAuthor] ?? []) : []
   const isLoading = loadingAuthor === selectedAuthor
   const currentError = errorByAuthor[selectedAuthor]
+
+  // Mensaje inicial hardcodeado — solo se muestra una vez cargado el perfil
+  const initialGreeting: DisplayMessage | null =
+    selectedAuthor && nombrePreferido !== null
+      ? {
+          id: `initial-${selectedAuthor}`,
+          content: getInitialGreeting(nombrePreferido),
+          timestamp: "",
+          senderId: selectedAuthor,
+          isInitial: true,
+        }
+      : null
+
+  const displayMessages: DisplayMessage[] = initialGreeting
+    ? [initialGreeting, ...(currentMessages as DisplayMessage[])]
+    : (currentMessages as DisplayMessage[])
+
+  // Auto-scroll al fondo con cada nuevo mensaje
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const container = scrollBottomRef.current?.parentElement?.parentElement
+    if (container) container.scrollTop = container.scrollHeight
+  }, [displayMessages])
 
   const handleSendMessage = async (content: string, appendUser = true) => {
     if (!selectedAuthor) return
@@ -71,6 +165,8 @@ export function CoachView() {
     setLoadingAuthor(authorId)
     setErrorByAuthor((current) => ({ ...current, [authorId]: null }))
     setRetryByAuthor((current) => ({ ...current, [authorId]: content }))
+    setMostrarSugerencias((current) => ({ ...current, [authorId]: false }))
+    setUltimoMensaje((current) => ({ ...current, [authorId]: content }))
 
     try {
       const response = await fetch("/api/coach", {
@@ -101,6 +197,12 @@ export function CoachView() {
           content: `${message.content}${chunk}`,
         }))
       }
+
+      sessionStorage.setItem(
+        "odiseo_reutilizar",
+        JSON.stringify({ content, origen: "coach", autor: authorId })
+      )
+      setMostrarSugerencias((current) => ({ ...current, [authorId]: true }))
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No pude responder ahora."
@@ -121,121 +223,108 @@ export function CoachView() {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="flex h-full min-h-[600px] max-h-[calc(100vh-200px)] flex-col gap-3">
-
-        <div className="flex flex-1 overflow-hidden rounded-lg border bg-background">
+    <div className="flex h-full min-h-0 overflow-hidden sm:pb-6">
+      <div className="relative flex w-full flex-1 overflow-hidden bg-white sm:rounded-[1.6rem] sm:shadow-[0_20px_60px_rgba(0,0,0,0.18),0_8px_20px_rgba(0,0,0,0.10),0_2px_6px_rgba(0,0,0,0.06)]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_100%,rgba(255,43,10,0.04),transparent_40%)]" />
           {/* Mobile overlay */}
-          {isSidebarOpen && (
-            <div
-              className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-              onClick={() => setIsSidebarOpen(false)}
-            />
-          )}
-
-          {/* Author list sidebar */}
-          <div
-            className={`
-              w-100 flex-shrink-0 border-r bg-background
-              ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-              fixed inset-y-0 left-0 z-50
-              lg:relative lg:block
-              transition-transform duration-300 ease-in-out
-            `}
-          >
-            <div className="lg:hidden p-4 border-b flex items-center justify-between bg-background">
-              <h2 className="text-lg font-semibold">{t("conversations")}</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsSidebarOpen(false)}
-                className="cursor-pointer"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <AuthorList
-              selectedAuthor={selectedAuthor}
-              onSelectAuthor={(id) => {
-                setSelectedAuthor(id)
-                setIsSidebarOpen(false)
-              }}
-            />
-          </div>
-
           {/* Chat panel */}
-          <div className="flex min-w-0 flex-1 flex-col bg-background">
+          <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
             {/* Header row */}
-            <div className="flex h-16 items-center border-b bg-background px-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsSidebarOpen(true)}
-                className="cursor-pointer lg:hidden mr-2"
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
+            <div className="flex h-14 shrink-0 items-center border-b border-[#EEEEEE] bg-white px-3 sm:h-16 sm:px-4">
+              <SidebarTrigger className="mr-2 md:hidden" />
               <div className="flex-1 min-w-0">
                 <CoachHeader author={currentAuthor} />
               </div>
             </div>
 
             {/* Messages area */}
-            <div className="flex min-h-0 flex-1 flex-col">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
               {selectedAuthor ? (
                 <>
-                  {currentMessages.length === 0 ? (
-                    <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
-                      <MessageSquareText className="size-8 opacity-30" />
-                      <p className="text-sm">
-                        {currentAuthor
-                          ? t("emptyState", { name: currentAuthor.name })
-                          : ""}
-                      </p>
+                  {displayMessages.length === 0 ? (
+                    // Breve estado de carga mientras se fetchea el perfil
+                    <div className="flex flex-1 items-center justify-center">
+                      <div className="flex items-center gap-1">
+                        <span className="bg-muted-foreground/40 size-1.5 animate-bounce rounded-full" />
+                        <span className="bg-muted-foreground/40 size-1.5 animate-bounce rounded-full [animation-delay:120ms]" />
+                        <span className="bg-muted-foreground/40 size-1.5 animate-bounce rounded-full [animation-delay:240ms]" />
+                      </div>
                     </div>
                   ) : (
-                    <ScrollArea className="flex-1 px-4">
-                      <div className="space-y-3 py-4">
-                        {currentMessages.map((msg) => (
+                    <div className="min-h-0 flex-1 overflow-y-auto px-3 sm:px-4">
+                      <div className="w-full space-y-3 py-3 sm:space-y-4 sm:py-4">
+                        {displayMessages.map((msg) => (
                           <div
                             key={msg.id}
-                            className={`flex ${
-                              msg.senderId === "current-user"
-                                ? "justify-end"
-                                : "justify-start"
+                            className={`flex flex-col w-full mb-2 ${
+                              msg.senderId === "current-user" ? "items-end" : "items-start"
                             }`}
                           >
-                            <div className="group flex w-fit max-w-[80%] items-end gap-1">
+                            <div
+                              className={`group relative flex min-w-0 items-end gap-2 ${
+                                msg.senderId === "current-user"
+                                  ? "max-w-[92%] flex-row-reverse sm:max-w-[85%]"
+                                  : "w-full max-w-full flex-row sm:max-w-[85%]"
+                              }`}
+                            >
                               <div
-                                className={`rounded-lg px-3 py-2 text-sm break-words whitespace-pre-wrap ${
+                                className={`min-w-0 max-w-full rounded-2xl px-3.5 py-2.5 text-[16px] leading-[1.45] font-[450] break-words shadow-sm [overflow-wrap:anywhere] sm:px-4 sm:py-3 sm:text-[15px] sm:font-normal ${
                                   msg.senderId === "current-user"
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted"
+                                    ? "w-fit bg-black text-white rounded-br-sm"
+                                    : "w-full border border-[#EEEEEE] bg-[#F4F4F4] text-black prose prose-sm prose-p:my-0 max-w-none rounded-bl-sm"
                                 }`}
                               >
                                 {msg.content ? (
-                                  <span>{msg.content}</span>
+                                  msg.senderId === "current-user" ? (
+                                    <span className="whitespace-pre-wrap">{msg.content}</span>
+                                  ) : (
+                                    <ReactMarkdown components={aiComponents}>
+                                      {msg.content}
+                                    </ReactMarkdown>
+                                  )
                                 ) : (
                                   <div className="flex items-center gap-1 py-1">
-                                    <span className="bg-muted-foreground/70 size-1.5 animate-bounce rounded-full" />
-                                    <span className="bg-muted-foreground/70 size-1.5 animate-bounce rounded-full [animation-delay:120ms]" />
-                                    <span className="bg-muted-foreground/70 size-1.5 animate-bounce rounded-full [animation-delay:240ms]" />
+                                    <span className="bg-black/30 size-1.5 animate-bounce rounded-full" />
+                                    <span className="bg-black/30 size-1.5 animate-bounce rounded-full [animation-delay:120ms]" />
+                                    <span className="bg-black/30 size-1.5 animate-bounce rounded-full [animation-delay:240ms]" />
                                   </div>
                                 )}
                               </div>
-                              {msg.senderId !== "current-user" && msg.content ? (
-                                <GuardarEnMemoriaButton
-                                  contenido={msg.content}
-                                  origenTipo="coach"
-                                  origenMeta={{ autorId: selectedAuthor ?? "" }}
-                                  source={`Coach — ${currentAuthor?.name ?? selectedAuthor ?? ""}`}
-                                />
+                              {/* CompartirEn */}
+                              {msg.senderId !== "current-user" && msg.content && !msg.isInitial ? (
+                                <div className="hidden sm:flex opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mb-1">
+                                  <CompartirEn
+                                    contenido={msg.content}
+                                    origen="coach"
+                                    size="xs"
+                                    variante="coach"
+                                    label="Usar esta conversación"
+                                  />
+                                </div>
                               ) : null}
                             </div>
+
+                            {/* Chip de perfil: solo en el mensaje inicial cuando no hay nombre */}
+                            {msg.isInitial && !nombrePreferido && (
+                              <Link
+                                href={`/${locale}/configuracion/perfil`}
+                                className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
+                              >
+                                → Completá tu nombre en Perfil
+                              </Link>
+                            )}
                           </div>
                         ))}
+                        {mostrarSugerencias[selectedAuthor ?? ""] && !isLoading ? (
+                          <div className="w-full min-w-0 overflow-hidden">
+                            <SugerenciasCoach
+                              sugerencias={getSugerencias(ultimoMensaje[selectedAuthor ?? ""] ?? "")}
+                              tema={extraerTema(ultimoMensaje[selectedAuthor ?? ""] ?? "")}
+                            />
+                          </div>
+                        ) : null}
                         {currentError ? (
-                          <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm">
+                          <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm">
                             <p className="text-destructive">
                               No pude completar la respuesta. Probá de nuevo en un momento.
                             </p>
@@ -252,19 +341,22 @@ export function CoachView() {
                             </Button>
                           </div>
                         ) : null}
+                        <div ref={scrollBottomRef} />
                       </div>
-                    </ScrollArea>
+                    </div>
                   )}
 
-                  <MessageInput
-                    onSendMessage={(message) => void handleSendMessage(message)}
-                    disabled={isLoading}
-                    placeholder={
-                      currentAuthor
-                        ? t("inputPlaceholder", { name: currentAuthor.name })
-                        : t("inputPlaceholderDefault")
-                    }
-                  />
+                  <div className="shrink-0 border-t border-[#EEEEEE] bg-white">
+                    <MessageInput
+                      onSendMessage={(message) => void handleSendMessage(message)}
+                      disabled={isLoading}
+                      placeholder={
+                        currentAuthor
+                          ? t("inputPlaceholder", { name: currentAuthor.name })
+                          : t("inputPlaceholderDefault")
+                      }
+                    />
+                  </div>
                 </>
               ) : (
                 <div className="flex flex-1 items-center justify-center">
@@ -275,9 +367,9 @@ export function CoachView() {
                 </div>
               )}
             </div>
-          </div>
         </div>
       </div>
+    </div>
     </TooltipProvider>
   )
 }

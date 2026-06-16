@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
+import { usePathname } from "next/navigation";
 import { AppSidebar } from "@/components/app-sidebar";
+import { AppMobileNav } from "@/components/app-mobile-nav";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -14,6 +16,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { config } = useSidebarConfig();
+  const pathname = usePathname();
+  const hideFooter = /\/(dashboard|coach|creador-de-escenas|narrador)\/?$/.test(pathname);
+  const isCoachRoute = pathname.includes("/coach") || pathname.includes("/conversar");
 
   return (
     <SidebarProvider
@@ -31,30 +36,30 @@ export default function DashboardLayout({
             collapsible={config.collapsible}
             side={config.side}
           />
-          <SidebarInset>
+          <SidebarInset className="odiseo-dashboard-shell">
             <SiteHeader />
             <div className="flex flex-1 flex-col">
               <div className="@container/main flex flex-1 flex-col gap-2">
-                <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+                <div className={`flex flex-col gap-4 md:gap-6 md:py-6 ${isCoachRoute ? "py-0 pb-0 h-[100dvh] md:h-auto" : "py-4 pb-24"}`}>
                   {children}
                 </div>
               </div>
             </div>
-            <SiteFooter />
+            {!hideFooter && <SiteFooter />}
           </SidebarInset>
         </>
       ) : (
         <>
-          <SidebarInset>
+          <SidebarInset className="odiseo-dashboard-shell">
             <SiteHeader />
             <div className="flex flex-1 flex-col">
               <div className="@container/main flex flex-1 flex-col gap-2">
-                <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+                <div className={`flex flex-col gap-4 md:gap-6 md:py-6 ${isCoachRoute ? "py-0 pb-0 h-[100dvh] md:h-auto" : "py-4 pb-24"}`}>
                   {children}
                 </div>
               </div>
             </div>
-            <SiteFooter />
+            {!hideFooter && <SiteFooter />}
           </SidebarInset>
           <AppSidebar
             variant={config.variant}
@@ -64,6 +69,7 @@ export default function DashboardLayout({
         </>
       )}
 
+      <AppMobileNav />
       <Toaster richColors position="top-center" />
     </SidebarProvider>
   );

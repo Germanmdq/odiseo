@@ -9,46 +9,13 @@ type ThemeProviderProps = {
   children: React.ReactNode
   defaultTheme?: Theme
   storageKey?: string
+  forcedTheme?: Theme
 }
 
-export function ThemeProvider({
-  children,
-  defaultTheme = "system",
-  storageKey = "vite-ui-theme",
-  ...props
-}: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(
-    () => (typeof window !== "undefined" && localStorage.getItem(storageKey) as Theme) || defaultTheme
-  )
-
-  React.useEffect(() => {
-    if (typeof window === "undefined") return
-
-    const root = window.document.documentElement
-
-    root.classList.remove("light", "dark")
-
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light"
-
-      root.classList.add(systemTheme)
-      return
-    }
-
-    root.classList.add(theme)
-  }, [theme])
-
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      if (typeof window !== "undefined") {
-        localStorage.setItem(storageKey, theme)
-      }
-      setTheme(theme)
-    },
+    theme: "dark" as Theme,
+    setTheme: () => {},
   }
 
   return (

@@ -48,9 +48,8 @@ export async function GET(req: NextRequest) {
       .limit(20),
     admin
       .from("study_materials")
-      .select("id, title")
-      .ilike("title", pattern)
-      .eq("material_type", "lecture")
+      .select("id, fuente_id, title_es")
+      .ilike("title_es", pattern)
       .limit(5),
   ])
 
@@ -79,7 +78,7 @@ export async function GET(req: NextRequest) {
       url: "/fuentes",
       items: (materialsRes.data ?? []).map((r) => ({
         id: r.id as string,
-        title: (r.title ?? "") as string,
+        title: ((r as Record<string, unknown>).title_es ?? "") as string,
         excerpt: "",
         url: "/fuentes",
       })),

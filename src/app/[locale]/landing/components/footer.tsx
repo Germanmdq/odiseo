@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { useParams } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,13 +32,15 @@ const socialLinks = [
 
 export function LandingFooter() {
   const t = useTranslations("landing.footer")
+  const params = useParams()
+  const locale = (params.locale as string) ?? "es"
 
   const footerLinks = {
     platform: [
       { name: t("featuresLink"), href: '#features' },
-      { name: t("coachLink"),    href: '/coach' },
-      { name: t("diarioLink"),   href: '/dashboard' },
-      { name: t("planesLink"),   href: '/dashboard' },
+      { name: t("coachLink"),    href: `/${locale}/coach` },
+      { name: t("diarioLink"),   href: `/${locale}/dashboard` },
+      { name: t("planesLink"),   href: `/${locale}/dashboard` },
     ],
     resources: [
       { name: t("blogLink"), href: '#blog' },

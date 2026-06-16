@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: var(--font-inter);
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -78,37 +78,37 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: #FFFFFF;
+  --foreground: #000000;
+  --card: #FFFFFF;
+  --card-foreground: #000000;
+  --popover: #FFFFFF;
+  --popover-foreground: #000000;
+  --primary: #FF2B0A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F4F4F4;
+  --secondary-foreground: #000000;
+  --muted: #FAFAFA;
+  --muted-foreground: #8A8A8A;
+  --accent: #FF2B0A;
+  --accent-foreground: #FFFFFF;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --border: #000000;
+  --input: #FFFFFF;
+  --ring: #FF2B0A;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #FF2B0A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #000000;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #000000;
+  --sidebar-ring: #FF2B0A;
 }
 
 @layer base {
@@ -117,9 +117,139 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* Primary button glow */
+.dark .bg-primary {
+  box-shadow: 0 4px 14px rgba(255, 43, 10, 0.4);
+}
+.dark .bg-primary:hover {
+  box-shadow: 0 6px 20px rgba(255, 43, 10, 0.5);
+}
+
+.odiseo-app-sidebar {
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: rgba(0, 0, 0, 0.86);
+  --sidebar-accent: #000000;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(0, 0, 0, 0.8);
+  --sidebar-ring: rgba(255, 43, 10, 0.5);
+}
+
+.odiseo-app-sidebar [data-slot="sidebar-inner"] {
+  background-color: #FFFFFF;
+  background-image: radial-gradient(#D9D9D9 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+  border-right: 2px solid #000000;
+  box-shadow: none;
+}
+
+.odiseo-app-sidebar [data-sidebar="group"] {
+  padding-block: 0.2rem;
+}
+
+.odiseo-app-sidebar [data-sidebar="group-label"] {
+  color: rgba(0, 0, 0, 0.38);
+}
+
+.odiseo-app-sidebar [data-sidebar="group-label"]:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.68);
+}
+
+.odiseo-app-sidebar [data-sidebar="menu-button"] {
+  color: rgba(0, 0, 0, 0.62);
+}
+
+.odiseo-app-sidebar [data-sidebar="menu-button"]:hover {
+  background: transparent;
+  border: 1.5px solid #FF2B0A;
+  border-radius: 999px;
+  color: #FF2B0A;
+}
+
+.odiseo-app-sidebar [data-sidebar="menu-button"][data-active="true"] {
+  background: #000000;
+  border-radius: 999px;
+  box-shadow: none;
+  color: #FFFFFF;
+}
+
+.odiseo-app-sidebar [data-sidebar="footer"] [data-sidebar="menu"] {
+  border-top: 1.5px solid rgba(0, 0, 0, 0.15);
+  padding-top: 0.5rem;
+}
+
+.odiseo-brand-button:hover {
+  background: rgba(255, 43, 10, 0.06) !important;
+}
+
+.odiseo-dashboard-shell {
+  background: #FAFAFA;
+}
+
+.odiseo-dashboard-shell [data-slot="site-header"],
+.odiseo-dashboard-shell > header {
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(0, 0, 0, 1);
+  backdrop-filter: blur(18px);
+}
+
+.odiseo-dashboard-shell .bg-card {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.odiseo-dashboard-shell .bg-background {
+  background-color: transparent;
+}
+
+.odiseo-dashboard-shell .border,
+.odiseo-dashboard-shell [data-slot="table-container"],
+.odiseo-dashboard-shell table,
+.odiseo-dashboard-shell th,
+.odiseo-dashboard-shell td {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+.odiseo-dashboard-shell input,
+.odiseo-dashboard-shell textarea,
+.odiseo-dashboard-shell select,
+.odiseo-dashboard-shell [role="combobox"] {
+  border-color: rgba(0, 0, 0, 0.8) !important;
+  background-color: #FFFFFF !important;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.odiseo-dashboard-shell input::placeholder,
+.odiseo-dashboard-shell textarea::placeholder {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.odiseo-dashboard-shell thead,
+.odiseo-dashboard-shell [data-slot="table-header"] {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.odiseo-dashboard-shell tbody tr:hover {
+  background: rgba(255, 43, 10, 0.04);
+}
+
+.odiseo-dashboard-shell [data-slot="tabs-list"] {
+  background: rgba(244, 244, 244, 0.9);
+  border: 1.5px solid rgba(0, 0, 0, 0.2);
+}
+
+.odiseo-dashboard-shell [data-slot="tabs-trigger"][data-state="active"] {
+  background: #000000;
+  color: #FFFFFF;
+}
+
+.odiseo-dashboard-shell [data-slot="badge"] {
+  border-color: rgba(0, 0, 0, 0.3);
 }
 
 /* Ensure consistent font rendering across different DPI levels */

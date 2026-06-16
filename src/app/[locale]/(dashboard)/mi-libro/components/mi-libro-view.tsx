@@ -5,6 +5,7 @@ import {
   BookOpen,
   ChevronDown,
   ChevronUp,
+  Pencil,
   PlusCircle,
   Sparkles,
   Trash2,
@@ -13,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { CompartirEn } from "@/components/compartir-en"
 
 type Capitulo = {
   id: string
@@ -122,7 +124,8 @@ function CapituloCard({
         )}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <CompartirEn contenido={contenido} titulo={titulo} origen="mi-libro" size="xs" label="Usar este capítulo" />
         <Button
           size="sm"
           onClick={() => void handleSave()}
@@ -136,10 +139,16 @@ function CapituloCard({
   )
 }
 
+const LIBRO_TITULO_KEY = "odiseo_libro_titulo"
+
 export function MiLibroView() {
   const [capitulos, setCapitulos] = React.useState<Capitulo[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+  const [libroTitulo, setLibroTitulo] = React.useState("")
+  const [editandoTitulo, setEditandoTitulo] = React.useState(false)
+  const [showNuevoLibro, setShowNuevoLibro] = React.useState(false)
+  const [nuevoLibroTitulo, setNuevoLibroTitulo] = React.useState("")
 
   // IA generation state
   const [temaInput, setTemaInput] = React.useState("")
@@ -148,6 +157,35 @@ export function MiLibroView() {
   const [draftContenido, setDraftContenido] = React.useState("")
   const [showDraft, setShowDraft] = React.useState(false)
   const [savingDraft, setSavingDraft] = React.useState(false)
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem(LIBRO_TITULO_KEY)
+    if (saved) setLibroTitulo(saved)
+  }, [])
+
+  function handleGuardarTitulo() {
+    localStorage.setItem(LIBRO_TITULO_KEY, libroTitulo)
+    setEditandoTitulo(false)
+  }
+
+  function handleNuevoLibro() {
+    if (!nuevoLibroTitulo.trim()) return
+    localStorage.setItem(LIBRO_TITULO_KEY, nuevoLibroTitulo.trim())
+    setLibroTitulo(nuevoLibroTitulo.trim())
+    setNuevoLibroTitulo("")
+    setShowNuevoLibro(false)
+  }
+
+  React.useEffect(() => {
+    const raw = sessionStorage.getItem("odiseo_reutilizar")
+    if (raw) {
+      try {
+        const { content } = JSON.parse(raw) as { content: string }
+        sessionStorage.removeItem("odiseo_reutilizar")
+        setTemaInput(content.slice(0, 200))
+      } catch {}
+    }
+  }, [])
 
   React.useEffect(() => {
     fetch("/api/mi-libro")
@@ -305,31 +343,94 @@ export function MiLibroView() {
 
   return (
     <div className="space-y-6">
+      {/* Título del libro */}
+      <div className="rounded-xl border bg-card px-5 py-4 space-y-2">
+        {editandoTitulo ? (
+          <div className="flex gap-2 items-center">
+            <input
+              type="text"
+              value={libroTitulo}
+              onChange={(e) => setLibroTitulo(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleGuardarTitulo() }}
+              placeholder="Título de tu libro"
+              autoFocus
+              className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-lg font-bold placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <Button size="sm" onClick={handleGuardarTitulo}>Guardar</Button>
+            <button type="button" onClick={() => setEditandoTitulo(false)} className="text-xs text-muted-foreground hover:text-foreground">Cancelar</button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-xl font-bold truncate">
+              {libroTitulo || <span className="text-muted-foreground font-normal text-base">Sin título — hacé clic para nombrar tu libro</span>}
+            </h2>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setEditandoTitulo(true)}
+                className="rounded p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                title="Editar título"
+              >
+                <Pencil className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowNuevoLibro(true)}
+                className="rounded px-2.5 py-1 text-xs text-muted-foreground border hover:text-foreground hover:bg-muted transition-colors"
+              >
+                Nuevo libro
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Modal Nuevo libro */}
+      {showNuevoLibro && (
+        <div className="rounded-xl border bg-card px-5 py-4 space-y-3">
+          <p className="text-sm font-medium">¿Cómo se llama el nuevo libro?</p>
+          <p className="text-xs text-muted-foreground">Los capítulos actuales quedan guardados. El nuevo libro empieza desde acá con un título nuevo.</p>
+          <div className="flex flex-wrap gap-2">
+            <input
+              type="text"
+              value={nuevoLibroTitulo}
+              onChange={(e) => setNuevoLibroTitulo(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleNuevoLibro() }}
+              placeholder="Título del nuevo libro"
+              autoFocus
+              className="min-w-0 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <Button size="sm" onClick={handleNuevoLibro} disabled={!nuevoLibroTitulo.trim()}>Crear</Button>
+            <button type="button" onClick={() => { setShowNuevoLibro(false); setNuevoLibroTitulo("") }} className="text-xs text-muted-foreground hover:text-foreground">Cancelar</button>
+          </div>
+        </div>
+      )}
+
       {/* Crear nuevo capítulo */}
       {!showDraft ? (
         <div className="rounded-xl border bg-card p-5 space-y-4">
           <div className="space-y-1">
-            <p className="font-semibold">Crear capítulo con IA</p>
+            <p className="font-semibold">Crear capítulo con el Asistente</p>
             <p className="text-sm text-muted-foreground">
               Escribí un tema y la IA genera un capítulo basado en las enseñanzas de Neville.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               value={temaInput}
               onChange={(e) => setTemaInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handleGenerar() }}
               placeholder="¿Sobre qué querés escribir un capítulo?"
-              className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
             <Button
               onClick={() => void handleGenerar()}
               disabled={!temaInput.trim() || generating}
-              className="gap-2 shrink-0"
+              className="gap-2 sm:shrink-0 w-full sm:w-auto"
             >
               <Sparkles className="size-4" />
-              Generar con IA
+              Generar con el Asistente
             </Button>
           </div>
           <div className="flex items-center gap-2">

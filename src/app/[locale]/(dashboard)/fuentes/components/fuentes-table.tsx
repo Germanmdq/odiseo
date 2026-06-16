@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Share2, Bookmark, BookmarkCheck, MessageSquare, Wand2 } from "lucide-react"
 import type { ColumnDef } from "@tanstack/react-table"
+import { useParams, useRouter } from "next/navigation"
 
 import { DataTable, DataTableColumnHeader } from "@/components/data-table"
 import { Button } from "@/components/ui/button"
@@ -12,6 +13,12 @@ import {
   DrawerContent,
   DrawerTitle,
 } from "@/components/ui/drawer"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Select,
   SelectContent,
@@ -63,6 +70,8 @@ type FuentesLabels = {
   }
 }
 
+type SaveState = "idle" | "saving" | "saved" | "error"
+
 function FuenteDrawer({
   source,
   labels,
@@ -72,6 +81,10 @@ function FuenteDrawer({
 }) {
   const [detail, setDetail] = React.useState<FuenteDetail | null>(null)
   const [error, setError] = React.useState(false)
+  const [saveState, setSaveState] = React.useState<SaveState>("idle")
+  const router = useRouter()
+  const params = useParams()
+  const locale = (params.locale as string) ?? "es"
 
   React.useEffect(() => {
     const controller = new AbortController()
@@ -80,8 +93,8 @@ function FuenteDrawer({
       setDetail(null)
       setError(false)
 
-      const params = new URLSearchParams({ sourceKey: source.sourceKey })
-      const response = await fetch(`/api/fuentes/source?${params}`, {
+      const searchParams = new URLSearchParams({ sourceKey: source.sourceKey })
+      const response = await fetch(`/api/fuentes/source?${searchParams}`, {
         signal: controller.signal,
       })
 
@@ -103,43 +116,99 @@ function FuenteDrawer({
     return () => controller.abort()
   }, [source.sourceKey])
 
+  async function handleGuardar() {
+    if (saveState !== "idle" || !detail) return
+    setSaveState("saving")
+    try {
+      const res = await fetch("/api/memoria", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contenido: `${detail.name}\n\n${detail.fullText.slice(0, 500)}`,
+          origenTipo: "fuente",
+          origenMeta: { fuente_id: source.sourceKey },
+          source: detail.name,
+        }),
+      })
+      if (!res.ok) throw new Error()
+      setSaveState("saved")
+      setTimeout(() => setSaveState("idle"), 3000)
+    } catch {
+      setSaveState("error")
+      setTimeout(() => setSaveState("idle"), 2000)
+    }
+  }
+
   const typeLine = detail ? labels.types[detail.type] : labels.types[source.type]
   const yearLine = detail ? detail.year : source.year
 
+  const SaveIcon = saveState === "saved" ? BookmarkCheck : Bookmark
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Back button */}
-      <div className="border-b px-4 py-3 shrink-0">
+      {/* Header */}
+      <div className="border-b px-4 py-3 shrink-0 flex items-center justify-between">
         <DrawerClose asChild>
           <Button variant="ghost" size="sm" className="gap-1.5 text-sm">
             <ArrowLeft className="h-4 w-4" />
             {labels.drawer.back}
           </Button>
         </DrawerClose>
+
+        {detail && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-1.5 text-sm">
+                <Share2 className="h-4 w-4" />
+                Usar en...
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem
+                onClick={handleGuardar}
+                disabled={saveState === "saving" || saveState === "saved"}
+                className="gap-2"
+              >
+                <SaveIcon className="h-4 w-4" />
+                {saveState === "saved"
+                  ? "Guardado"
+                  : saveState === "saving"
+                    ? "Guardando..."
+                    : saveState === "error"
+                      ? "Error al guardar"
+                      : "Guardar en Memoria"}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="gap-2"
+                onClick={() => router.push(`/${locale}/coach?contexto=${source.sourceKey}`)}
+              >
+                <MessageSquare className="h-4 w-4" />
+                Conversar sobre esto
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="gap-2"
+                onClick={() => router.push(`/${locale}/creador-de-escenas?contexto=${source.sourceKey}`)}
+              >
+                <Wand2 className="h-4 w-4" />
+                Crear escena desde aquí
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
-      {/* Scrollable body — mx-auto max-w-3xl constrains the reading column */}
+      {/* Scrollable body */}
       <div className="flex-1 overflow-y-auto py-10">
         <div className="mx-auto max-w-3xl px-6">
-          {/* Title */}
           <h1 className="text-center text-3xl font-bold leading-tight">
             {source.name}
           </h1>
 
-          {/* Metadata: type · year */}
           <p className="text-muted-foreground mt-3 text-center text-sm">
             {typeLine}
             {yearLine ? ` · ${yearLine}` : ""}
           </p>
 
-          {/* Original title */}
-          {detail?.originalTitle ? (
-            <p className="text-muted-foreground mt-1 text-center text-sm italic">
-              &ldquo;{detail.originalTitle}&rdquo;
-            </p>
-          ) : null}
-
-          {/* Divider */}
           <div className="border-b my-8" />
 
           {error ? (
@@ -275,11 +344,6 @@ export function FuentesTable({
             value: "conferencias",
             label: labels.tabs.conferences,
             filter: (row) => row.type === "conferencia" || row.type === "radio",
-          },
-          {
-            value: "libros",
-            label: labels.tabs.books,
-            filter: (row) => row.type === "libro",
           },
         ]}
       />
