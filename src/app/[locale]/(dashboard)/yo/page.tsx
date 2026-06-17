@@ -13,7 +13,7 @@ const CARDS = [
   },
   {
     title: "Perfil",
-    desc: "Tu nombre, email, suscripción, apariencia y notificaciones.",
+    desc: "Tu nombre, email, suscripción y notificaciones.",
     href: "/configuracion/perfil",
     icon: Settings,
     image: "/dashboard/secciones/perfil.jpg",

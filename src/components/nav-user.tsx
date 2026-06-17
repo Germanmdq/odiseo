@@ -123,12 +123,6 @@ export function NavUser({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link href={`/${locale}/configuracion/apariencia`}>
-                    <Palette className="size-4" />
-                    Apariencia
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer">
                   <Link href={`/${locale}/configuracion/notificaciones`}>
                     <Bell className="size-4" />
                     Notificaciones
