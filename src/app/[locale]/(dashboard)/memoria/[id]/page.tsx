@@ -61,6 +61,9 @@ export default async function MemoriaDetailPage({
   const label = getTypeLabel(memoria.item_type, memoria.source)
   const fecha = formatDistanceToNow(new Date(memoria.created_at), { addSuffix: true, locale: es })
 
+  const contentObj = typeof memoria.content === "object" && memoria.content !== null ? (memoria.content as { text?: string; meta?: Record<string, unknown> }) : null
+  const metaUrl = contentObj?.meta?.url as string | undefined
+
   return (
     <div className="px-4 md:px-6 max-w-2xl mx-auto py-2">
       {/* Back link */}
@@ -73,11 +76,22 @@ export default async function MemoriaDetailPage({
       </Link>
 
       {/* Badge + fecha */}
-      <div className="flex items-center gap-3 mb-8">
-        <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-          {label}
-        </span>
-        <span className="text-xs text-muted-foreground">{fecha}</span>
+      <div className="flex items-center justify-between gap-3 mb-8">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+            {label}
+          </span>
+          <span className="text-xs text-muted-foreground">{fecha}</span>
+        </div>
+        {metaUrl && (
+          <Link
+            href={metaUrl}
+            className="text-sm font-medium hover:underline"
+            style={{ color: "#E8401A" }}
+          >
+            Ver fuente completa →
+          </Link>
+        )}
       </div>
 
       {/* Content */}

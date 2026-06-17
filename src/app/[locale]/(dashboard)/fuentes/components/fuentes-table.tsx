@@ -124,9 +124,13 @@ function FuenteDrawer({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contenido: `${detail.name}\n\n${detail.fullText.slice(0, 500)}`,
+          contenido: detail.fullText,
           origenTipo: "fuente",
-          origenMeta: { fuente_id: source.sourceKey },
+          origenMeta: { 
+            sourceKey: source.sourceKey,
+            titulo: detail.name,
+            url: `/fuentes?sourceKey=${source.sourceKey}`
+          },
           source: detail.name,
         }),
       })
