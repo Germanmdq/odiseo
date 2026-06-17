@@ -61,7 +61,6 @@ const NAV_GROUPS = [
     items: [
       { title: "Mensajes", url: "/mensajes", icon: Mail },
       { title: "Diario", url: "/diario", icon: PenLine },
-      { title: "Mi actividad", url: "/actividad", icon: Calendar },
       { title: "Notas", url: "/notas", icon: StickyNote },
       { title: "Foro", url: "/foro", icon: MessageCircle },
       { title: "Planes", url: "/planes", icon: LayoutList },
@@ -80,6 +79,7 @@ const NAV_GROUPS = [
   {
     label: "Yo",
     items: [
+      { title: "Mi actividad", url: "/actividad", icon: Calendar },
       { title: "Memoria", url: "/memoria", icon: Brain },
       { title: "Perfil", url: "/configuracion/perfil", icon: User },
     ],

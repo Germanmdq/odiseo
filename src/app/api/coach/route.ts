@@ -3,6 +3,8 @@ import { NextRequest } from "next/server"
 import { SYSTEM_PROMPTS, type CoachAuthorId } from "@/lib/coach/prompts"
 import { embedQuery } from "@/lib/nvidia"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { createClient } from "@/lib/supabase/server"
+import { registrarActividad } from "@/lib/activity"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -126,7 +128,7 @@ function parseDelta(line: string) {
   }
 }
 
-async function streamPlainTextFromNvidia(response: Response) {
+async function streamPlainTextFromNvidia(response: Response, userId?: string, autorId?: string) {
   const encoder = new TextEncoder()
   const decoder = new TextDecoder()
   const reader = response.body?.getReader()
@@ -142,7 +144,21 @@ async function streamPlainTextFromNvidia(response: Response) {
       try {
         while (true) {
           const { done, value } = await reader.read()
-          if (done) break
+          if (done) {
+            if (userId && autorId) {
+              try {
+                await registrarActividad({
+                  userId,
+                  eventType: "chat",
+                  titleEs: `Conversación con ${autorId}`,
+                  metadata: { autorId },
+                })
+              } catch (e) {
+                console.error("Error registering activity in coach stream:", e)
+              }
+            }
+            break
+          }
 
           buffer += decoder.decode(value, { stream: true })
           const lines = buffer.split("\n")
@@ -240,7 +256,10 @@ export async function POST(request: NextRequest) {
       return new Response(`Error de NVIDIA: ${errorText}`, { status: 502 })
     }
 
-    return streamPlainTextFromNvidia(nvidiaResponse)
+    const supabaseClient = await createClient()
+    const { data: { user } } = await supabaseClient.auth.getUser()
+
+    return streamPlainTextFromNvidia(nvidiaResponse, user?.id, authorId)
   } catch (error) {
     console.error("Error en /api/coach:", error)
     const message =

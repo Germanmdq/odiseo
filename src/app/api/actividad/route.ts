@@ -1,11 +1,12 @@
 import { createClient } from "@/lib/supabase/server"
 
 const EVENT_LABELS: Record<string, string> = {
-  coach: "Usaste el Coach",
-  narrador: "Creaste una escena",
-  pregunta: "Te evaluaste",
-  nota: "Escribiste en el Diario",
-  memoria: "Guardaste una memoria",
+  chat: "Mensaje de Coach / Creador",
+  assessment: "Te evaluaste",
+  book: "Generaste un capítulo",
+  note: "Escribiste una nota",
+  journal: "Escribiste en el Diario",
+  telegram: "Mensaje de Telegram",
 }
 
 export async function GET() {
@@ -18,9 +19,9 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("daily_activity_events")
-    .select("event_date, event_type, created_at")
+    .select("activity_date, event_type, title_es, created_at")
     .eq("user_id", user.id)
-    .gte("event_date", since.toISOString().slice(0, 10))
+    .gte("activity_date", since.toISOString().slice(0, 10))
     .order("created_at", { ascending: false })
 
   if (error) {
@@ -30,7 +31,7 @@ export async function GET() {
   const rows = data ?? []
 
   // Build set of active dates
-  const activeDates = new Set(rows.map((r: { event_date: string }) => r.event_date))
+  const activeDates = new Set(rows.map((r: { activity_date: string }) => r.activity_date))
 
   // Calculate current streak (consecutive days backwards from today)
   let streak = 0
@@ -50,13 +51,13 @@ export async function GET() {
   const recentEvents: Array<{ label: string; date: string; created_at: string }> = []
   const seen = new Set<string>()
   for (const row of rows) {
-    const key = `${row.event_date}-${row.event_type}`
+    const key = `${row.activity_date}-${row.event_type}`
     if (seen.has(key)) continue
     seen.add(key)
     recentEvents.push({
-      label: EVENT_LABELS[row.event_type] ?? row.event_type,
-      date: row.event_date,
-      created_at: row.created_at ?? row.event_date,
+      label: row.title_es || EVENT_LABELS[row.event_type] || row.event_type,
+      date: row.activity_date,
+      created_at: row.created_at ?? row.activity_date,
     })
     if (recentEvents.length >= 10) break
   }

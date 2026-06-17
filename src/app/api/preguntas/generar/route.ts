@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { createClient } from "@/lib/supabase/server"
+import { registrarActividad } from "@/lib/activity"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -177,6 +179,21 @@ export async function POST(request: NextRequest) {
         { error: "Las preguntas generadas no tienen el formato correcto. Intentá de nuevo." },
         { status: 502 }
       )
+    }
+
+    try {
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await registrarActividad({
+          userId: user.id,
+          eventType: "assessment",
+          titleEs: `Evaluación sobre ${tema}`,
+          metadata: { tema },
+        })
+      }
+    } catch (e) {
+      console.error("Error registering activity in preguntas:", e)
     }
 
     return NextResponse.json({ preguntas: parsed })

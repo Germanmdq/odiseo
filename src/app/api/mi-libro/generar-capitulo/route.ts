@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 
 import { createClient } from "@/lib/supabase/server"
+import { registrarActividad } from "@/lib/activity"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -86,7 +87,19 @@ export async function POST(request: NextRequest) {
       try {
         while (true) {
           const { done, value } = await reader.read()
-          if (done) break
+          if (done) {
+            try {
+              await registrarActividad({
+                userId: user.id,
+                eventType: "book",
+                titleEs: `Capítulo generado: ${tema}`,
+                metadata: { tema },
+              })
+            } catch (e) {
+              console.error("Error registering activity in mi-libro stream:", e)
+            }
+            break
+          }
           buffer += decoder.decode(value, { stream: true })
           const lines = buffer.split("\n")
           buffer = lines.pop() ?? ""

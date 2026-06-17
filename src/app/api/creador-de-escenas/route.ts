@@ -2,6 +2,8 @@ import { NextRequest } from "next/server"
 
 import { embedQuery } from "@/lib/nvidia"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { createClient } from "@/lib/supabase/server"
+import { registrarActividad } from "@/lib/activity"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -114,7 +116,7 @@ function parseDelta(line: string) {
   }
 }
 
-async function streamPlainTextFromNvidia(response: Response) {
+async function streamPlainTextFromNvidia(response: Response, userId?: string) {
   const encoder = new TextEncoder()
   const decoder = new TextDecoder()
   const reader = response.body?.getReader()
@@ -130,7 +132,20 @@ async function streamPlainTextFromNvidia(response: Response) {
       try {
         while (true) {
           const { done, value } = await reader.read()
-          if (done) break
+          if (done) {
+            if (userId) {
+              try {
+                await registrarActividad({
+                  userId,
+                  eventType: "chat",
+                  titleEs: "Escena creada",
+                })
+              } catch (e) {
+                console.error("Error registering activity in creador-de-escenas stream:", e)
+              }
+            }
+            break
+          }
 
           buffer += decoder.decode(value, { stream: true })
           const lines = buffer.split("\n")
@@ -216,7 +231,10 @@ export async function POST(request: NextRequest) {
       return new Response(`Error de NVIDIA: ${errorText}`, { status: 502 })
     }
 
-    return streamPlainTextFromNvidia(nvidiaResponse)
+    const supabaseClient = await createClient()
+    const { data: { user } } = await supabaseClient.auth.getUser()
+
+    return streamPlainTextFromNvidia(nvidiaResponse, user?.id)
   } catch (error) {
     console.error("Error en /api/creador-de-escenas:", error)
     const message =
