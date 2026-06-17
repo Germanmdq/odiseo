@@ -21,6 +21,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  X,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -92,6 +93,7 @@ type DataTableProps<TData, TValue> = {
   getDrawerTitle?: (row: TData) => string
   getDrawerDescription?: (row: TData) => string
   renderDrawer?: (row: TData) => React.ReactNode
+  hideCounts?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -109,6 +111,7 @@ export function DataTable<TData, TValue>({
   getDrawerTitle,
   getDrawerDescription,
   renderDrawer,
+  hideCounts,
 }: DataTableProps<TData, TValue>) {
   const firstTab = tabs?.[0]?.value ?? "all"
   const [uncontrolledActiveTab, setUncontrolledActiveTab] =
@@ -237,7 +240,7 @@ export function DataTable<TData, TValue>({
                       className="cursor-pointer"
                     >
                       {tab.label}
-                      <Badge variant="secondary">{count}</Badge>
+                      {!hideCounts && <Badge variant="secondary">{count}</Badge>}
                     </TabsTrigger>
                   )
                 })}
@@ -351,11 +354,6 @@ export function DataTable<TData, TValue>({
           <div className="flex w-fit items-center justify-center text-sm font-medium">
             {labels.page} {table.getState().pagination.pageIndex + 1}{" "}
             {labels.of} {table.getPageCount() || 1}
-            {manualPagination ? (
-              <span className="text-muted-foreground ml-2">
-                ({manualPagination.totalRows})
-              </span>
-            ) : null}
           </div>
           <div className="ml-auto flex items-center gap-2 lg:ml-0">
             <Button
@@ -410,6 +408,13 @@ export function DataTable<TData, TValue>({
           }}
         >
           <DrawerContent className="odiseo-reading-drawer h-full overflow-hidden">
+            <button
+              onClick={() => setSelectedRow(null)}
+              className="absolute top-4 right-4 z-50 flex size-8 items-center justify-center rounded-full text-white hover:opacity-80 transition-opacity"
+              style={{ backgroundColor: "#E8401A" }}
+            >
+              <X className="size-4" />
+            </button>
             <DrawerHeader className="gap-1">
               <DrawerTitle>{drawerTitle}</DrawerTitle>
               {drawerDescription ? (

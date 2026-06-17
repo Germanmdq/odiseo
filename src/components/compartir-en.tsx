@@ -26,20 +26,25 @@ interface Props {
   label?: string
 }
 
+const DESTINOS = [
+  { label: "Coach", path: "/coach" },
+  { label: "Creador de escenas", path: "/creador-de-escenas" },
+  { label: "Ponerme a prueba", path: "/preguntas" },
+  { label: "Mi libro", path: "/mi-libro" },
+]
+
 export function CompartirEn({ contenido, titulo, fuenteId, origen = "compartir", className, size = "sm", variante = "completo", label = "Compartir en…" }: Props) {
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) ?? "es"
   const [saveState, setSaveState] = useState<SaveState>("idle")
 
-  function navegar(path: string, autor?: string) {
+  function navegar(path: string) {
     sessionStorage.setItem(
       "odiseo_reutilizar",
-      JSON.stringify({ content: contenido, origen, autor: autor ?? null })
+      JSON.stringify({ content: contenido, origen })
     )
-    const url = autor
-      ? `/${locale}${path}?autor=${autor}&desde=externo`
-      : `/${locale}${path}?desde=externo`
+    const url = `/${locale}${path}?desde=externo`
     router.push(url)
   }
 
@@ -81,21 +86,11 @@ export function CompartirEn({ contenido, titulo, fuenteId, origen = "compartir",
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
         <p className="px-2 py-1.5 text-xs text-muted-foreground font-medium">Llevar este contenido a…</p>
-        {variante === "completo" && (
-          <>
-            <DropdownMenuItem onClick={() => navegar("/coach", "neville")}>Coach — Neville Goddard</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navegar("/coach", "murphy")}>Coach — Joseph Murphy</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navegar("/coach", "fox")}>Coach — Emmet Fox</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navegar("/coach", "scovel-shinn")}>Coach — Florence Scovel Shinn</DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
-        )}
-        <DropdownMenuItem onClick={() => navegar("/narrador")}>Narrador</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navegar("/creador-de-escenas")}>Creador de escenas</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navegar("/preguntas")}>Ponerme a prueba</DropdownMenuItem>
-        {variante === "completo" && (
-          <DropdownMenuItem onClick={() => navegar("/mi-libro")}>Mi libro</DropdownMenuItem>
-        )}
+        {DESTINOS.map((dest) => (
+          <DropdownMenuItem key={dest.path} onClick={() => navegar(dest.path)}>
+            {dest.label}
+          </DropdownMenuItem>
+        ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={handleGuardar}

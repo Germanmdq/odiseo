@@ -3,7 +3,7 @@
 import * as React from "react"
 import { ArrowLeft, Share2, Bookmark, BookmarkCheck, MessageSquare, Wand2 } from "lucide-react"
 import type { ColumnDef } from "@tanstack/react-table"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 
 import { DataTable, DataTableColumnHeader } from "@/components/data-table"
 import { Button } from "@/components/ui/button"
@@ -246,6 +246,18 @@ export function FuentesTable({
   const [selectedSource, setSelectedSource] = React.useState<FuenteSummary | null>(null)
   const [yearFilter, setYearFilter] = React.useState("all")
   const [categoryFilter, setCategoryFilter] = React.useState("all")
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  React.useEffect(() => {
+    const sourceKey = searchParams.get("sourceKey")
+    if (sourceKey) {
+      const found = sources.find((s) => s.sourceKey === sourceKey)
+      if (found) {
+        setSelectedSource(found)
+      }
+    }
+  }, [searchParams, sources])
 
   const years = React.useMemo(
     () =>
@@ -296,6 +308,7 @@ export function FuentesTable({
         columns={columns}
         data={filteredSources}
         labels={labels.table}
+        hideCounts={true}
         toolbar={
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
@@ -352,7 +365,13 @@ export function FuentesTable({
         direction="right"
         open={Boolean(selectedSource)}
         onOpenChange={(open) => {
-          if (!open) setSelectedSource(null)
+          if (!open) {
+            setSelectedSource(null)
+            const newParams = new URLSearchParams(searchParams.toString())
+            newParams.delete("sourceKey")
+            const search = newParams.toString()
+            router.push(`${window.location.pathname}${search ? "?" + search : ""}`)
+          }
         }}
       >
         <DrawerContent className="odiseo-reading-drawer h-full overflow-hidden">

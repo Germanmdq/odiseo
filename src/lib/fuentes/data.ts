@@ -18,43 +18,32 @@ type StudyMaterialRow = {
   is_published: boolean | null
 }
 
-const BOOK_SOURCE_FILENAMES = new Set([
-  "599-a-tus-ordenes.md",
-  "600-tu-fe-es-tu-fortuna.md",
-  "601-libertad-para-todos.md",
-  "602-la-sensacion-es-el-secreto.md",
-  "603-la-oracion-el-arte-de-creer.md",
-  "604-la-busqueda.md",
-  "605-cinco-lecciones.md",
-  "606-fuera-de-este-mundo.md",
-  "607-el-poder-de-la-conciencia.md",
-  "608-la-imaginacion-despierta.md",
-  "609-tiempo-de-siembra-y-cosecha.md",
-  "610-yo-conozco-a-mi-padre.md",
-  "611-la-ley-y-la-promesa.md",
-  "612-el-rompe-el-cascaron.md",
-  "613-resurreccion.md",
+const BOOK_FUENTE_IDS = new Set([
+  'neville_goddard_at_your_command_book_',
+  'feeling_is_the_secret1944_1944',
+  'prayer_the_art_of_believing1945_1945',
+  'five_lessons_a_master_class_',
+  'out_of_this_world1949_1949',
+  'seedtime_and_harvest1956_1956',
+  'seedtime_and_harvest_a_mystical_view_of_the_scriptures1956_1956',
+  'i_know_my_father1960_1960',
+  'he_breaks_the_shell1964_rare_full_book_1964',
+  'freedom_for_all1942_1942',
+  'awakened_imagination1954_1954',
+  'resurrection1966_1966',
 ])
-
-function getFuenteType(
-  materialType: string | null,
-  title: string,
-  sourceFilename?: string | null
-): FuenteType {
-  if (sourceFilename && BOOK_SOURCE_FILENAMES.has(sourceFilename)) return "libro"
-  if (materialType === "book" || materialType === "libro") return "libro"
-  if (/radio/i.test(title) || materialType === "radio") return "radio"
-  return "conferencia"
-}
 
 function toSummary(row: StudyMaterialRow): FuenteSummary {
   const name = row.title_es || "Sin título"
+  const fid = row.fuente_id ?? row.id
 
   return {
     id: row.id,
-    sourceKey: row.fuente_id ?? row.id,
+    sourceKey: fid,
     name,
-    type: getFuenteType(row.material_type, name, row.source_filename),
+    type: row.material_type === 'libro' || BOOK_FUENTE_IDS.has(fid)
+      ? "libro"
+      : /radio/i.test(name) ? "radio" : "conferencia",
     year: row.year,
     wordCount: 0,
     summary: null,
@@ -107,7 +96,7 @@ async function getFuenteSummariesUncached(): Promise<FuenteSummary[]> {
 
 export const getFuenteSummaries = unstable_cache(
   getFuenteSummariesUncached,
-  ["fuente-summaries-v6"],
+  ["fuente-summaries-v9"],
   { revalidate: 3600 }
 )
 
@@ -135,6 +124,6 @@ async function getFuenteDetailUncached(sourceKey: string): Promise<FuenteDetail 
 
 export const getFuenteDetail = unstable_cache(
   getFuenteDetailUncached,
-  ["fuente-detail-v5"],
+  ["fuente-detail-v6"],
   { revalidate: 3600 }
 )

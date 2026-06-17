@@ -46,7 +46,7 @@ export function MessageInput({
   }
 
   return (
-    <div className="flex shrink-0 items-end gap-2 border-t border-[#EEEEEE] bg-white px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:rounded-b-[1.6rem]">
+    <div className="flex shrink-0 items-end gap-2 border-t border-[#EEEEEE] bg-white px-3 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 sm:pb-4 sm:rounded-b-[1.6rem]">
       <Textarea
         ref={textareaRef}
         suppressHydrationWarning

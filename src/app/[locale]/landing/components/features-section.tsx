@@ -1,6 +1,5 @@
 "use client"
 
-import Image from 'next/image'
 import {
   MessageSquareText,
   Mic,
@@ -93,13 +92,11 @@ export function FeaturesSection() {
               </div>
             </div>
             <div className="w-full md:w-[40%] shrink-0">
-              <Image
-                src="/landing/screenshot-1.jpg"
-                alt="Coach y Narrador"
-                width={600}
-                height={400}
-                className="w-full h-auto rounded-2xl"
-                style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+              <img
+                src="/ilustracion-conversacion.jpg"
+                alt=""
+                className="w-full h-full object-contain"
+                style={{ mixBlendMode: "multiply" }}
               />
             </div>
           </div>
@@ -109,13 +106,11 @@ export function FeaturesSection() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="w-full md:w-[40%] shrink-0 order-last md:order-first">
-              <Image
-                src="/landing/screenshot-2.jpg"
-                alt="Memoria y registro"
-                width={600}
-                height={400}
-                className="w-full h-auto rounded-2xl"
-                style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+              <img
+                src="/ilustracion-mente.jpg"
+                alt=""
+                className="w-full h-full object-contain"
+                style={{ mixBlendMode: "multiply" }}
               />
             </div>
             <div className="flex-1 min-w-0 space-y-6">

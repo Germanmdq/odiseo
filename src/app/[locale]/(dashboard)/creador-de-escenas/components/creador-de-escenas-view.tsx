@@ -204,7 +204,7 @@ export function CreadorDeEscenasView() {
       </div>
 
       {/* Input fijo abajo */}
-      <div className="relative shrink-0 border-t border-[#EEEEEE] bg-white px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4">
+      <div className="relative shrink-0 border-t border-[#EEEEEE] bg-white px-3 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-4 sm:pb-4">
         <div className="mx-auto flex max-w-3xl items-end gap-2">
           <Textarea
             ref={textareaRef}

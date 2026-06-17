@@ -2,8 +2,6 @@ import { getTranslations } from "next-intl/server"
 
 import {
   getContentArtifactsPage,
-  getContentArtifactCountsByLevel,
-  TESTIMONIO_LEVELS,
 } from "@/lib/content-artifacts/data"
 import { TestimoniosTable } from "./components/testimonios-table"
 
@@ -14,24 +12,18 @@ export default async function TestimoniosPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>
-  searchParams: Promise<{ q?: string; nivel?: string; page?: string; pageSize?: string }>
+  searchParams: Promise<{ q?: string; page?: string; pageSize?: string }>
 }) {
   const { locale } = await params
-  const { q = "", nivel = "all", page = "1", pageSize = "10" } = await searchParams
+  const { q = "", page = "1", pageSize = "10" } = await searchParams
   const t = await getTranslations({ locale, namespace: "testimonios" })
 
-  const nivelFilter = nivel === "all" ? undefined : nivel
-
-  const [result, levelCounts] = await Promise.all([
-    getContentArtifactsPage({
-      subtype: "testimonial",
-      page: Number(page),
-      pageSize: Number(pageSize),
-      query: q,
-      nivel: nivelFilter,
-    }),
-    getContentArtifactCountsByLevel(q),
-  ])
+  const result = await getContentArtifactsPage({
+    subtype: "testimonial",
+    page: Number(page),
+    pageSize: Number(pageSize),
+    query: q,
+  })
 
   return (
     <div className="flex-1 space-y-6 px-6 pt-0">
@@ -49,9 +41,6 @@ export default async function TestimoniosPage({
         pageSize={result.pageSize}
         pageCount={result.pageCount}
         query={q}
-        nivel={nivel}
-        levelValues={TESTIMONIO_LEVELS}
-        levelCounts={levelCounts}
         labels={{
           table: {
             columns: t("table.columns"),
@@ -72,12 +61,6 @@ export default async function TestimoniosPage({
             technique: t("columns.technique"),
             level: t("columns.level"),
             source: t("columns.source"),
-          },
-          tabs: {
-            all: t("tabs.all"),
-            ley: t("tabs.ley"),
-            autoconcepto: t("tabs.autoconcepto"),
-            promesa: t("tabs.promesa"),
           },
           drawer: {
             fullText: t("drawer.fullText"),

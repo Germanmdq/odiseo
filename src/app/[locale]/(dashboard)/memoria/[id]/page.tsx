@@ -16,13 +16,15 @@ type Memoria = {
 
 const TYPE_LABELS: Record<string, string> = {
   coach: "Coach",
-  narrador: "Creador de escenas",
+  narrador: "Narrador",
+  creador: "Creador de escenas",
   pregunta: "Preguntas",
-  plan: "Tu plan",
-  manual: "Manual",
-  questions: "Preguntas",
-  book: "Mi libro",
   evaluacion: "Evaluación",
+  plan: "Plan",
+  fuente: "Fuentes",
+  biblia: "Biblia metafísica",
+  "mi-libro": "Mi libro",
+  manual: "Manual",
 }
 
 function getContentText(content: Memoria["content"]): string {

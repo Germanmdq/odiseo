@@ -20,21 +20,27 @@ type Memoria = {
 
 const TYPE_LABELS: Record<string, string> = {
   coach: "Coach",
-  narrador: "Creador de escenas",
+  narrador: "Narrador",
+  creador: "Creador de escenas",
   pregunta: "Preguntas",
-  plan: "Tu plan",
-  manual: "Manual",
-  questions: "Preguntas",
-  book: "Mi libro",
   evaluacion: "Evaluación",
+  plan: "Plan",
+  fuente: "Fuentes",
+  biblia: "Biblia metafísica",
+  "mi-libro": "Mi libro",
+  manual: "Manual",
 }
 
 const TYPE_COLORS: Record<string, string> = {
   coach: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
-  narrador: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",
+  narrador: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+  creador: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",
   pregunta: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",
   evaluacion: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",
   plan: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
+  fuente: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+  biblia: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+  "mi-libro": "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",
   manual: "bg-muted text-muted-foreground",
 }
 

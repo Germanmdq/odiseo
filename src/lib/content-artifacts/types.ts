@@ -24,6 +24,8 @@ export type ContentArtifact = {
   preguntasRelacionadas: string[]
   resumen: string | null
   slug: string | null
+  fuenteId: string | null
+  fuente_id?: string | null
   similarity?: number | null
 }
 

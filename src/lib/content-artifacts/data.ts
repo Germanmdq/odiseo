@@ -37,7 +37,8 @@ const CONTENT_ARTIFACT_SELECT = `
   estado_emocional,
   preguntas_relacionadas,
   resumen,
-  slug
+  slug,
+  fuente_id
 `
 
 type ContentArtifactRow = {
@@ -60,6 +61,7 @@ type ContentArtifactRow = {
   preguntas_relacionadas: unknown
   resumen: string | null
   slug: string | null
+  fuente_id: string | null
   similarity?: number | string | null
 }
 
@@ -108,6 +110,8 @@ export function toContentArtifact(row: ContentArtifactRow): ContentArtifact {
     preguntasRelacionadas: asStringArray(row.preguntas_relacionadas),
     resumen: row.resumen,
     slug: row.slug,
+    fuenteId: row.fuente_id,
+    fuente_id: row.fuente_id,
     similarity:
       typeof row.similarity === "number"
         ? row.similarity
@@ -175,7 +179,7 @@ async function getContentArtifactsPageUncached({
 
 export const getContentArtifactsPage = unstable_cache(
   getContentArtifactsPageUncached,
-  ["content-artifacts-page"],
+  ["content-artifacts-page-v2"],
   { revalidate: 3600 }
 )
 
@@ -251,7 +255,7 @@ async function getContentArtifactsAllUncached(
 
 export const getContentArtifactsAll = unstable_cache(
   getContentArtifactsAllUncached,
-  ["content-artifacts-all"],
+  ["content-artifacts-all-v2"],
   { revalidate: 3600 }
 )
 
@@ -276,6 +280,6 @@ async function getContentArtifactsByIdsUncached(ids: string[]) {
 
 export const getContentArtifactsByIds = unstable_cache(
   getContentArtifactsByIdsUncached,
-  ["content-artifacts-by-ids"],
+  ["content-artifacts-by-ids-v2"],
   { revalidate: 3600 }
 )

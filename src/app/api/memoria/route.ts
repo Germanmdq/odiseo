@@ -2,7 +2,18 @@ import { NextRequest } from "next/server"
 
 import { createClient } from "@/lib/supabase/server"
 
-const VALID_TYPES = ["coach", "narrador", "pregunta", "plan", "manual", "evaluacion"] as const
+const VALID_TYPES = [
+  "coach",
+  "narrador",
+  "creador",
+  "pregunta",
+  "evaluacion",
+  "plan",
+  "fuente",
+  "biblia",
+  "mi-libro",
+  "manual",
+] as const
 type MemoriaType = (typeof VALID_TYPES)[number]
 
 function isMemoriaType(value: string): value is MemoriaType {
@@ -66,6 +77,11 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: `origenTipo inválido: ${origenTipo}` }, { status: 400 })
   }
 
+  const meta = (origenMeta ?? {}) as { preguntaUsuario?: string }
+  const contenidoFinal = meta.preguntaUsuario
+    ? `**Pregunta:** ${meta.preguntaUsuario}\n\n**Respuesta:** ${contenido}`
+    : contenido
+
   const sourceLabel = source ?? origenTipo
   const { data, error } = await supabase
     .from("memoria")
@@ -73,7 +89,7 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
       item_type: origenTipo,
       title: sourceLabel,
-      content: { text: contenido, meta: origenMeta ?? {} },
+      content: { text: contenidoFinal, meta: origenMeta ?? {} },
       source: sourceLabel,
       status: "active",
       updated_at: new Date().toISOString(),

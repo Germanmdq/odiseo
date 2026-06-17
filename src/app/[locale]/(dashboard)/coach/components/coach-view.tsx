@@ -9,6 +9,7 @@ import ReactMarkdown, { type Components } from "react-markdown"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
 import { CompartirEn } from "@/components/compartir-en"
+import { GuardarEnMemoriaButton } from "@/components/guardar-en-memoria-button"
 import { SugerenciasCoach, getSugerencias, extraerTema } from "@/components/sugerencias-coach"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { MessageInput } from "./message-input"
@@ -292,13 +293,23 @@ export function CoachView() {
                               </div>
                               {/* CompartirEn */}
                               {msg.senderId !== "current-user" && msg.content && !msg.isInitial ? (
-                                <div className="hidden sm:flex opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mb-1">
+                                <div className="hidden sm:flex opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mb-1 items-center gap-1">
                                   <CompartirEn
                                     contenido={msg.content}
                                     origen="coach"
                                     size="xs"
                                     variante="coach"
                                     label="Usar esta conversación"
+                                  />
+                                  <GuardarEnMemoriaButton
+                                    contenido={msg.content}
+                                    origenTipo="coach"
+                                    origenMeta={{ 
+                                      autorId: selectedAuthor ?? "",
+                                      preguntaUsuario: currentMessages[currentMessages.indexOf(msg) - 1]?.content ?? ""
+                                    }}
+                                    source={`Coach — ${currentAuthor?.name ?? ""}`}
+                                    className="!opacity-100"
                                   />
                                 </div>
                               ) : null}

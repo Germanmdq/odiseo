@@ -2,14 +2,16 @@
 
 import * as React from "react"
 import type { ColumnDef, PaginationState } from "@tanstack/react-table"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useRouter, useSearchParams, useParams } from "next/navigation"
 
 import { DataTable, DataTableColumnHeader } from "@/components/data-table"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { CompartirEn } from "@/components/compartir-en"
 import { formatBodyParagraphs } from "@/lib/format-body"
 import type { ContentArtifact } from "@/lib/content-artifacts/types"
+import Link from "next/link"
+import { ReutilizarEnButton } from "@/components/reutilizar-en-button"
+import { GuardarEnMemoriaButton } from "@/components/guardar-en-memoria-button"
 
 type Labels = {
   table: {
@@ -32,12 +34,6 @@ type Labels = {
     level: string
     source: string
   }
-  tabs: {
-    all: string
-    ley: string
-    autoconcepto: string
-    promesa: string
-  }
   drawer: {
     fullText: string
     tags: string
@@ -58,13 +54,6 @@ type Props = {
   pageSize: number
   pageCount: number
   query: string
-  nivel: string
-  levelValues: {
-    ley: string
-    autoconcepto: string
-    promesa: string
-  }
-  levelCounts: Record<string, number>
   labels: Labels
 }
 
@@ -92,39 +81,51 @@ function TagList({ label, values }: { label: string; values: string[] }) {
 function TestimonioDrawer({
   item,
   labels,
+  locale,
 }: {
   item: ContentArtifact
   labels: Labels
+  locale: string
 }) {
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <section className="space-y-3">
-        <h3 className="font-medium">{labels.drawer.fullText}</h3>
-        <article className="rounded-md border p-5 text-base leading-relaxed space-y-4">
-          {formatBodyParagraphs(item.body).map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-        </article>
-      </section>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <TagList label={labels.drawer.topic} values={item.temaPrincipal} />
-        <TagList label={labels.drawer.technique} values={item.tecnica} />
-        <TagList label={labels.drawer.symbols} values={item.tags} />
-        <div>
-          <p className="text-muted-foreground text-xs">{labels.drawer.level}</p>
-          <p className="font-medium">{item.nivelDificultad || labels.drawer.empty}</p>
-        </div>
-        <div className="md:col-span-2">
-          <p className="text-muted-foreground text-xs">{labels.drawer.source}</p>
-          <p className="font-medium">
-            {join([...item.conferenciasCitadas, ...item.librosCitados], item.sourceTable || "—")}
-          </p>
-        </div>
+    <div className="mx-auto max-w-2xl px-6 py-8 space-y-6">
+      <h2 className="text-xl font-semibold">{item.title}</h2>
+      
+      <div className="rounded-lg bg-muted p-5 text-sm leading-relaxed space-y-4">
+        {formatBodyParagraphs(item.body).map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
       </div>
 
-      <div className="pt-2 border-t">
-        <CompartirEn contenido={item.body} titulo={item.title} origen="testimonio" label="Usar este contenido" />
+      <div className="flex flex-wrap gap-2">
+        {item.temaPrincipal?.map((t) => (
+          <span key={t} className="rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-medium">{t}</span>
+        ))}
+        {item.tecnica?.map((t) => (
+          <span key={t} className="rounded-full border px-3 py-1 text-xs">{t}</span>
+        ))}
+      </div>
+
+      {item.fuente_id ? (
+        <div className="pt-4 border-t">
+          <p className="text-xs text-muted-foreground mb-1">Fuente</p>
+          <Link
+            href={`/es/fuentes?sourceKey=${item.fuente_id}`}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Ver conferencia completa →
+          </Link>
+        </div>
+      ) : item.sourceTable ? (
+        <div className="pt-4 border-t">
+          <p className="text-xs text-muted-foreground mb-1">Fuente</p>
+          <p className="text-sm">{item.sourceTable}</p>
+        </div>
+      ) : null}
+
+      <div className="flex gap-2 pt-2">
+        <ReutilizarEnButton content={item.body} origen="testimonios" />
+        <GuardarEnMemoriaButton contenido={item.body} origenTipo="coach" origenMeta={{}} source="Testimonios" />
       </div>
     </div>
   )
@@ -137,9 +138,6 @@ export function TestimoniosTable({
   pageSize,
   pageCount,
   query,
-  nivel,
-  levelValues,
-  levelCounts,
   labels,
 }: Props) {
   const router = useRouter()
@@ -170,13 +168,9 @@ export function TestimoniosTable({
           <DataTableColumnHeader column={column} title={labels.columns.excerpt} />
         ),
         cell: ({ row }) => (
-          <div className="min-w-0">
-            <p className="line-clamp-2 font-medium leading-snug">
-              {row.original.excerpt}
-            </p>
-            <p className="text-muted-foreground mt-1 line-clamp-1 text-sm">
-              {row.original.title}
-            </p>
+          <div className="flex flex-col gap-0.5">
+            <span className="font-medium text-sm">{row.original.title}</span>
+            <span className="text-xs text-muted-foreground">{row.original.temaPrincipal?.[0] ?? "—"}</span>
           </div>
         ),
         enableHiding: false,
@@ -194,79 +188,18 @@ export function TestimoniosTable({
           </span>
         ),
       },
-      {
-        id: "tecnica",
-        size: 150,
-        accessorFn: (row) => join(row.tecnica),
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={labels.columns.technique} />
-        ),
-        cell: ({ row }) => (
-          <span className="line-clamp-2 leading-snug">
-            {join(row.original.tecnica)}
-          </span>
-        ),
-      },
-      {
-        accessorKey: "nivelDificultad",
-        size: 210,
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={labels.columns.level} />
-        ),
-        cell: ({ row }) => (
-          <span className="line-clamp-2 leading-snug">
-            {row.original.nivelDificultad || "—"}
-          </span>
-        ),
-      },
-      {
-        id: "source",
-        size: 220,
-        accessorFn: (row) =>
-          join([...row.conferenciasCitadas, ...row.librosCitados], row.sourceTable || "—"),
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={labels.columns.source} />
-        ),
-        cell: ({ row }) => (
-          <span className="line-clamp-2">
-            {join(
-              [...row.original.conferenciasCitadas, ...row.original.librosCitados],
-              row.original.sourceTable || "—"
-            )}
-          </span>
-        ),
-      },
     ],
     [labels]
   )
+
+  const params = useParams()
+  const locale = (params.locale as string) ?? "es"
 
   return (
     <DataTable
       columns={columns}
       data={rows}
       labels={labels.table}
-      activeTab={nivel}
-      onTabChange={(value) =>
-        updateParams({ nivel: value === "all" ? null : value, page: 1 })
-      }
-      tabs={[
-        { value: "all", label: labels.tabs.all, count: total },
-        {
-          value: levelValues.ley,
-          label: labels.tabs.ley,
-          count: levelCounts[levelValues.ley] ?? 0,
-        },
-        {
-          value: levelValues.autoconcepto,
-          label: labels.tabs.autoconcepto,
-          count: levelCounts[levelValues.autoconcepto] ?? 0,
-        },
-        {
-          value: levelValues.promesa,
-          label: labels.tabs.promesa,
-          count: levelCounts[levelValues.promesa] ?? 0,
-        },
-      ]}
       toolbar={
         <form
           onSubmit={(event) => {
@@ -296,7 +229,7 @@ export function TestimoniosTable({
       getRowId={(row) => row.id}
       getDrawerTitle={(row) => row.title}
       getDrawerDescription={(row) => row.nivelDificultad ?? ""}
-      renderDrawer={(row) => <TestimonioDrawer item={row} labels={labels} />}
+      renderDrawer={(row) => <TestimonioDrawer item={row} labels={labels} locale={locale} />}
     />
   )
 }

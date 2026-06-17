@@ -42,41 +42,26 @@ function join(values: string[], empty = "—") {
   return values.length ? values.join(", ") : empty
 }
 
-function BibliaDrawer({
-  item,
-  labels,
-}: {
-  item: ContentArtifact
-  labels: Labels
-}) {
+function BibliaDrawer({ item }: { item: ContentArtifact }) {
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      {item.resumen || item.subtitle ? (
-        <section className="space-y-2 rounded-md border p-4">
-          <h3 className="font-medium">{labels.drawer.context}</h3>
-          <p className="text-muted-foreground leading-relaxed">
-            {item.resumen || item.subtitle}
-          </p>
-        </section>
-      ) : null}
+    <div className="mx-auto max-w-2xl px-6 py-10 space-y-8">
+      <p className="text-xs text-muted-foreground uppercase tracking-widest">
+        {item.title}
+      </p>
 
-      <section className="space-y-3">
-        <h3 className="font-medium">{labels.drawer.explanation}</h3>
-        <article className="rounded-md border p-5 text-base leading-relaxed space-y-4">
-          {formatBodyParagraphs(item.body).map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-        </article>
-      </section>
+      {(item.subtitle || item.resumen) && (
+        <blockquote className="text-2xl md:text-3xl font-semibold leading-snug border-l-4 border-primary pl-4">
+          {item.subtitle || item.resumen}
+        </blockquote>
+      )}
 
-      <section className="space-y-2">
-        <h3 className="font-medium">{labels.drawer.source}</h3>
-        <p className="text-muted-foreground">
-          {join([...item.conferenciasCitadas, ...item.librosCitados], item.sourceTable || labels.drawer.empty)}
-        </p>
-      </section>
+      <div className="text-base leading-relaxed space-y-4 text-muted-foreground">
+        {formatBodyParagraphs(item.body).map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
+      </div>
 
-      <div className="pt-2 border-t">
+      <div className="pt-4 border-t">
         <CompartirEn contenido={item.body} titulo={item.title} origen="biblia" label="Usar este contenido" />
       </div>
     </div>
@@ -126,49 +111,6 @@ export function BibliaTable({
         cell: ({ row }) => <span className="font-medium">{row.original.title}</span>,
         enableHiding: false,
       },
-      {
-        id: "temaPrincipal",
-        accessorFn: (row) => join(row.temaPrincipal),
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={labels.columns.topic} />
-        ),
-      },
-      {
-        id: "symbol",
-        accessorFn: (row) => join(row.tags),
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={labels.columns.symbol} />
-        ),
-        cell: ({ row }) => (
-          <div className="flex flex-wrap gap-1">
-            {row.original.tags.length ? (
-              row.original.tags.map((tag) => (
-                <Badge key={tag} variant="outline">
-                  {tag}
-                </Badge>
-              ))
-            ) : (
-              <span>—</span>
-            )}
-          </div>
-        ),
-      },
-      {
-        id: "source",
-        accessorFn: (row) =>
-          join([...row.conferenciasCitadas, ...row.librosCitados], row.sourceTable || "—"),
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={labels.columns.source} />
-        ),
-        cell: ({ row }) => (
-          <span className="line-clamp-2">
-            {join(
-              [...row.original.conferenciasCitadas, ...row.original.librosCitados],
-              row.original.sourceTable || "—"
-            )}
-          </span>
-        ),
-      },
     ],
     [labels]
   )
@@ -190,9 +132,7 @@ export function BibliaTable({
           }),
       }}
       getRowId={(row) => row.id}
-      getDrawerTitle={(row) => row.title}
-      getDrawerDescription={(row) => join(row.temaPrincipal, undefined)}
-      renderDrawer={(row) => <BibliaDrawer item={row} labels={labels} />}
+      renderDrawer={(row) => <BibliaDrawer item={row} />}
     />
   )
 }
