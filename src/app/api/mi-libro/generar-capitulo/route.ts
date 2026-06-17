@@ -45,8 +45,9 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.NVIDIA_API_KEY
   if (!apiKey) return Response.json({ error: "Falta NVIDIA_API_KEY" }, { status: 500 })
 
-  const body = (await request.json()) as { tema?: string }
+  const body = (await request.json()) as { tema?: string; libroId?: string }
   const rawTema = body.tema?.trim() ?? ""
+  const libroId = body.libroId
   // Truncate to avoid excessive token usage / timeouts
   const tema = rawTema.slice(0, 2000)
 
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
                 userId: user.id,
                 eventType: "book",
                 titleEs: `Capítulo generado: ${tema}`,
-                metadata: { tema },
+                metadata: { tema, libroId },
               })
             } catch (e) {
               console.error("Error registering activity in mi-libro stream:", e)

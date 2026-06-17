@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server"
-
 import { createClient } from "@/lib/supabase/server"
 
 function jsonDbError(message: string, error: unknown) {
@@ -28,13 +27,30 @@ export async function GET() {
   if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
   const { data, error } = await supabase
-    .from("mi_libro_capitulos")
-    .select("*")
+    .from("mi_libro_libros")
+    .select(`
+      *,
+      mi_libro_capitulos (
+        id
+      )
+    `)
     .eq("user_id", user.id)
-    .order("orden", { ascending: true })
+    .order("created_at", { ascending: false })
 
-  if (error) return jsonDbError("Error loading mi_libro_capitulos", error)
-  return Response.json({ capitulos: data ?? [] })
+  if (error) return jsonDbError("Error loading mi_libro_libros", error)
+
+  const libros = (data ?? []).map((libro) => {
+    const caps = libro.mi_libro_capitulos
+    const count = Array.isArray(caps) ? caps.length : 0
+    // Remove the relation field from the final response
+    const { mi_libro_capitulos, ...rest } = libro
+    return {
+      ...rest,
+      cantidadCapitulos: count,
+    }
+  })
+
+  return Response.json({ libros })
 }
 
 export async function POST(request: NextRequest) {
@@ -44,35 +60,19 @@ export async function POST(request: NextRequest) {
 
   const body = (await request.json()) as {
     titulo?: string
-    contenido?: string
-    orden?: number
-    memorias_origen?: string[]
+    descripcion?: string
   }
 
-  // Determine next orden value
-  const { data: existing, error: existingError } = await supabase
-    .from("mi_libro_capitulos")
-    .select("orden")
-    .eq("user_id", user.id)
-    .order("orden", { ascending: false })
-    .limit(1)
-
-  if (existingError) return jsonDbError("Error calculating next chapter order", existingError)
-
-  const nextOrden = (existing?.[0]?.orden ?? -1) + 1
-
   const { data, error } = await supabase
-    .from("mi_libro_capitulos")
+    .from("mi_libro_libros")
     .insert({
       user_id: user.id,
-      titulo: body.titulo?.trim() || "Nuevo capítulo",
-      contenido: body.contenido ?? "",
-      orden: body.orden ?? nextOrden,
-      memorias_origen: body.memorias_origen ?? [],
+      titulo: body.titulo?.trim() || "Sin título",
+      descripcion: body.descripcion || "",
     })
     .select("*")
     .single()
 
-  if (error) return jsonDbError("Error inserting mi_libro_capitulos", error)
-  return Response.json({ capitulo: data })
+  if (error) return jsonDbError("Error inserting mi_libro_libros", error)
+  return Response.json({ libro: data })
 }

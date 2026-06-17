@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server"
-
 import { createClient } from "@/lib/supabase/server"
 
 function jsonDbError(message: string, error: unknown) {
@@ -22,12 +21,10 @@ function jsonDbError(message: string, error: unknown) {
   )
 }
 
-export async function PUT(
+async function updateChapter(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  id: string
 ) {
-  const { id } = await params
-
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 })
@@ -51,8 +48,24 @@ export async function PUT(
     .select("*")
     .single()
 
-  if (error) return jsonDbError("Error updating mi_libro_capitulos", error)
+  if (error) return jsonDbError("Error updating chapter", error)
   return Response.json({ capitulo: data })
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  return updateChapter(request, id)
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  return updateChapter(request, id)
 }
 
 export async function DELETE(
@@ -71,6 +84,6 @@ export async function DELETE(
     .eq("id", id)
     .eq("user_id", user.id)
 
-  if (error) return jsonDbError("Error deleting mi_libro_capitulos", error)
+  if (error) return jsonDbError("Error deleting chapter", error)
   return Response.json({ ok: true })
 }
