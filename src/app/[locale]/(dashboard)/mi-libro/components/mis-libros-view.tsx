@@ -306,7 +306,8 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
           <button
             type="button"
             onClick={() => setCreandoLibro(true)}
-            className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground hover:text-foreground hover:border-foreground transition-colors cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 rounded-lg p-3 text-sm text-white font-medium transition-colors hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: "#E8401A" }}
           >
             <Plus className="size-4" />
             Nuevo libro
