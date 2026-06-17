@@ -96,7 +96,7 @@ async function getFuenteSummariesUncached(): Promise<FuenteSummary[]> {
 
 export const getFuenteSummaries = unstable_cache(
   getFuenteSummariesUncached,
-  ["fuente-summaries-v10"],
+  ["fuente-summaries-v11"],
   { revalidate: 3600 }
 )
 

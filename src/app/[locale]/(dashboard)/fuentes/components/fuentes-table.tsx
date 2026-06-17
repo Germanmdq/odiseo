@@ -253,6 +253,8 @@ export function FuentesTable({
   sources: FuenteSummary[]
   labels: FuentesLabels
 }) {
+  console.log(`[FuentesTable] Items con type === 'libro' recibidos:`, sources.filter((s) => s.type === "libro").length)
+
   const [selectedSource, setSelectedSource] = React.useState<FuenteSummary | null>(null)
   const [yearFilter, setYearFilter] = React.useState("all")
   const [categoryFilter, setCategoryFilter] = React.useState("all")
@@ -367,6 +369,11 @@ export function FuentesTable({
             value: "conferencias",
             label: labels.tabs.conferences,
             filter: (row) => row.type === "conferencia" || row.type === "radio",
+          },
+          {
+            value: "libros",
+            label: labels.tabs.books,
+            filter: (row) => row.type === "libro",
           },
         ]}
       />
