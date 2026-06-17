@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "src/app/api/coach/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/creador-de-escenas/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/preguntas/generar/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/mi-libro/generar-capitulo/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}
