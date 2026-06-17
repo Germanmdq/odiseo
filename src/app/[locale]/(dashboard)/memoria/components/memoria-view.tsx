@@ -159,7 +159,8 @@ export function MemoriaView() {
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <span
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${getTypeBadgeClass(m.item_type)}`}
+                    className="rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
+                    style={{ backgroundColor: "#E8401A" }}
                   >
                     {getTypeLabel(m.item_type, m.source)}
                   </span>
