@@ -15,8 +15,7 @@ export async function GET() {
     .from("plan_solicitudes")
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id)
-    .not("respuesta", "is", null)
-    .eq("status", "pendiente")
+    .eq("status", "respondido")
 
   if (error) return NextResponse.json({ count: 0 })
   return NextResponse.json({ count: count ?? 0 })
