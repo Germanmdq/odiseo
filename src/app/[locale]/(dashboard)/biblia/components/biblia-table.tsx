@@ -44,34 +44,26 @@ function join(values: string[], empty = "—") {
 
 function BibliaDrawer({ item }: { item: ContentArtifact }) {
   const parrafos = formatBodyParagraphs(item.body)
-  const cita = parrafos[0] ?? ""
-  const explicacion = parrafos.slice(1)
+  const cleanTitle = item.title.split(" — ")[0] ?? item.title
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-10 space-y-8">
       {/* Referencia */}
-      <p className="text-xs text-muted-foreground uppercase tracking-widest">
-        {item.title}
+      <p className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">
+        {cleanTitle}
       </p>
 
-      {/* Primer párrafo = la cita bíblica */}
-      {cita && (
-        <blockquote className="text-xl md:text-2xl font-semibold leading-snug border-l-4 pl-4" style={{ borderColor: "#E8401A" }}>
-          {cita}
-        </blockquote>
-      )}
-
-      {/* Resto = explicación de Neville */}
-      {explicacion.length > 0 && (
+      {/* Explicación de Neville */}
+      {parrafos.length > 0 && (
         <div className="text-base leading-relaxed space-y-4 text-muted-foreground">
-          {explicacion.map((para, i) => (
+          {parrafos.map((para, i) => (
             <p key={i}>{para}</p>
           ))}
         </div>
       )}
 
       <div className="pt-4 border-t">
-        <CompartirEn contenido={item.body} titulo={item.title} origen="biblia" label="Usar este contenido" />
+        <CompartirEn contenido={item.body} titulo={cleanTitle} origen="biblia" label="Usar este contenido" />
       </div>
     </div>
   )
@@ -117,7 +109,10 @@ export function BibliaTable({
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={labels.columns.quote} />
         ),
-        cell: ({ row }) => <span className="font-medium">{row.original.title}</span>,
+        cell: ({ row }) => {
+          const cleanTitle = row.original.title.split(" — ")[0] ?? row.original.title
+          return <span className="font-medium">{cleanTitle}</span>
+        },
         enableHiding: false,
       },
     ],
