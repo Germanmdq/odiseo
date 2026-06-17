@@ -372,7 +372,7 @@ export function FuentesTable({
           },
           {
             value: "libros",
-            label: labels.tabs.books,
+            label: "Libros",
             filter: (row) => row.type === "libro",
           },
         ]}
