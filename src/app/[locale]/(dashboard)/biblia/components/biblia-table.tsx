@@ -44,26 +44,33 @@ function join(values: string[], empty = "—") {
 
 function BibliaDrawer({ item }: { item: ContentArtifact }) {
   const parrafos = formatBodyParagraphs(item.body)
-  const cleanTitle = item.title.split(" — ")[0] ?? item.title
+  // El título tiene formato "Libro Cap:Ver — Descripción"
+  const [referencia, ...temaParts] = item.title.split(" — ")
+  const tema = temaParts.join(" — ")
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-10 space-y-8">
-      {/* Referencia */}
-      <p className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">
-        {cleanTitle}
+      {/* Referencia bíblica */}
+      <p className="text-xs text-muted-foreground uppercase tracking-widest">
+        {referencia}
       </p>
 
-      {/* Explicación de Neville */}
-      {parrafos.length > 0 && (
-        <div className="text-base leading-relaxed space-y-4 text-muted-foreground">
-          {parrafos.map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-        </div>
+      {/* Tema — grande y legible */}
+      {tema && (
+        <h2 className="text-2xl md:text-3xl font-semibold leading-snug">
+          {tema}
+        </h2>
       )}
 
+      {/* Explicación de Neville */}
+      <div className="text-base leading-relaxed space-y-4 text-muted-foreground">
+        {parrafos.map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
+      </div>
+
       <div className="pt-4 border-t">
-        <CompartirEn contenido={item.body} titulo={cleanTitle} origen="biblia" label="Usar este contenido" />
+        <CompartirEn contenido={item.body} titulo={item.title} origen="biblia" label="Usar este contenido" />
       </div>
     </div>
   )
@@ -110,8 +117,9 @@ export function BibliaTable({
           <DataTableColumnHeader column={column} title={labels.columns.quote} />
         ),
         cell: ({ row }) => {
-          const cleanTitle = row.original.title.split(" — ")[0] ?? row.original.title
-          return <span className="font-medium">{cleanTitle}</span>
+          const parts = row.original.title.split(" — ")
+          const tema = parts.slice(1).join(" — ") || row.original.title
+          return <span className="font-medium">{tema}</span>
         },
         enableHiding: false,
       },
