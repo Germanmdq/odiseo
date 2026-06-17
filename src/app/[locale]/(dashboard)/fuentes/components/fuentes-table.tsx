@@ -119,12 +119,18 @@ function FuenteDrawer({
   async function handleGuardar() {
     if (saveState !== "idle" || !detail) return
     setSaveState("saving")
+
+    const rawContenido = detail.fullText
+    const extracto = rawContenido.length > 300
+      ? rawContenido.slice(0, 300).trimEnd() + "..."
+      : rawContenido
+
     try {
       const res = await fetch("/api/memoria", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contenido: detail.fullText,
+          contenido: extracto,
           origenTipo: "fuente",
           origenMeta: { 
             sourceKey: source.sourceKey,

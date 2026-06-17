@@ -30,11 +30,16 @@ export function GuardarEnMemoriaButton({
     setState("saving")
     setErrorMessage("")
 
+    const isShortType = origenTipo === "fuente" || origenTipo === "biblia" || origenTipo === "testimonios"
+    const extracto = isShortType && contenido.length > 300
+      ? contenido.slice(0, 300).trimEnd() + "..."
+      : contenido
+
     try {
       const res = await fetch("/api/memoria", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contenido, origenTipo, origenMeta, source }),
+        body: JSON.stringify({ contenido: extracto, origenTipo, origenMeta, source }),
       })
       const payload = (await res.json().catch(() => null)) as { error?: string } | null
       if (!res.ok) {

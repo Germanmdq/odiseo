@@ -51,12 +51,18 @@ export function CompartirEn({ contenido, titulo, fuenteId, origen = "compartir",
   async function handleGuardar() {
     if (saveState !== "idle") return
     setSaveState("saving")
+
+    const isShortType = origen === "fuente" || origen === "biblia" || origen === "testimonios"
+    const extracto = isShortType && contenido.length > 300
+      ? contenido.slice(0, 300).trimEnd() + "..."
+      : contenido
+
     try {
       const res = await fetch("/api/memoria", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contenido,
+          contenido: extracto,
           origenTipo: origen,
           origenMeta: fuenteId ? { fuente_id: fuenteId } : undefined,
           source: titulo ?? origen,
