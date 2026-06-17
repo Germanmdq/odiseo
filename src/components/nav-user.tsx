@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import {
   Bell,
   CreditCard,
@@ -39,6 +40,21 @@ export function NavUser({
 }) {
   const locale = useLocale()
   const router = useRouter()
+  const [perfil, setPerfil] = useState({
+    nombre: user.name || "Usuario",
+    email: user.email || "",
+  })
+
+  useEffect(() => {
+    fetch("/api/perfil")
+      .then((r) => r.json())
+      .then((d: { nombrePreferido?: string; fullName?: string; email?: string }) =>
+        setPerfil({
+          nombre: d.nombrePreferido || d.fullName || d.email?.split("@")[0] || "Usuario",
+          email: d.email || "",
+        })
+      )
+  }, [])
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -60,8 +76,8 @@ export function NavUser({
               <Logo size={28} />
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight min-w-0">
-              <span className="truncate font-medium">{user.name}</span>
-              <span className="text-muted-foreground truncate text-xs">{user.email}</span>
+              <span className="truncate font-medium">{perfil.nombre}</span>
+              <span className="text-muted-foreground truncate text-xs">{perfil.email}</span>
             </div>
           </Link>
 
@@ -87,8 +103,8 @@ export function NavUser({
                     <Logo size={28} />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight min-w-0">
-                    <span className="truncate font-medium">{user.name}</span>
-                    <span className="text-muted-foreground truncate text-xs">{user.email}</span>
+                    <span className="truncate font-medium">{perfil.nombre}</span>
+                    <span className="text-muted-foreground truncate text-xs">{perfil.email}</span>
                   </div>
                 </div>
               </DropdownMenuLabel>
