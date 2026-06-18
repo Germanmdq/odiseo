@@ -258,6 +258,7 @@ export function FuentesTable({
   const [selectedSource, setSelectedSource] = React.useState<FuenteSummary | null>(null)
   const [yearFilter, setYearFilter] = React.useState("all")
   const [categoryFilter, setCategoryFilter] = React.useState("all")
+  const [activeTab, setActiveTab] = React.useState("all")
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -291,9 +292,15 @@ export function FuentesTable({
         const matchesYear = yearFilter === "all" || source.year === yearFilter
         const matchesCategory =
           categoryFilter === "all" || source.tags.includes(categoryFilter)
-        return matchesYear && matchesCategory
+        let matchesTab = true
+        if (activeTab === "conferencia") {
+          matchesTab = source.type === "conferencia" || source.type === "radio"
+        } else if (activeTab === "libro") {
+          matchesTab = source.type === "libro"
+        }
+        return matchesYear && matchesCategory && matchesTab
       }),
-    [categoryFilter, sources, yearFilter]
+    [categoryFilter, sources, yearFilter, activeTab]
   )
 
   const columns = React.useMemo<ColumnDef<FuenteSummary>[]>(
@@ -316,17 +323,37 @@ export function FuentesTable({
 
   return (
     <>
+      <div className="flex justify-center gap-2 mb-4">
+        {["all", "conferencia", "libro"].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
+              activeTab === tab
+                ? "text-white shadow-md"
+                : "bg-white border text-muted-foreground hover:bg-muted"
+            }`}
+            style={activeTab === tab ? { backgroundColor: "#E8401A" } : {}}
+          >
+            {tab === "all" ? "Todo" : tab === "conferencia" ? "Conferencias" : "Libros"}
+          </button>
+        ))}
+      </div>
+      <p className="text-xs text-center text-muted-foreground mb-3">
+        Conferencias y libros completos
+      </p>
+
       <DataTable
         columns={columns}
         data={filteredSources}
         labels={labels.table}
         hideCounts={true}
         toolbar={
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap gap-2 items-center mb-4">
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground text-sm">{labels.filters.year}</span>
+              <span className="text-sm text-muted-foreground">{labels.filters.year}</span>
               <Select value={yearFilter} onValueChange={setYearFilter}>
-                <SelectTrigger className="h-9 w-[150px]">
+                <SelectTrigger className="h-9 w-[120px] sm:w-[150px]">
                   <SelectValue placeholder={labels.filters.allYears} />
                 </SelectTrigger>
                 <SelectContent>
@@ -341,11 +368,11 @@ export function FuentesTable({
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground text-sm">
+              <span className="text-sm text-muted-foreground">
                 {labels.filters.category}
               </span>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="h-9 w-[220px]">
+                <SelectTrigger className="h-9 w-[180px] sm:w-[220px]">
                   <SelectValue placeholder={labels.filters.allCategories} />
                 </SelectTrigger>
                 <SelectContent>
@@ -363,19 +390,6 @@ export function FuentesTable({
         getRowId={(row) => row.id}
         selectedRow={selectedSource}
         onSelectedRowChange={setSelectedSource}
-        tabs={[
-          { value: "all", label: labels.tabs.all },
-          {
-            value: "conferencias",
-            label: labels.tabs.conferences,
-            filter: (row) => row.type === "conferencia" || row.type === "radio",
-          },
-          {
-            value: "libros",
-            label: "Libros",
-            filter: (row) => row.type === "libro",
-          },
-        ]}
       />
 
       <Drawer

@@ -87,7 +87,7 @@ export function SugerenciasCoach({ sugerencias, tema }: SugerenciasCoachProps) {
   return (
     <div className="mt-3 border-t pt-3">
       <p className="text-xs text-muted-foreground mb-2">¿Qué hacés con esto?</p>
-      <div className="flex w-full gap-2 overflow-x-auto px-1 py-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
+      <div className="flex flex-wrap gap-2 px-4 pb-3">
         {sugerencias.map((s) => {
           const Icono = ICONOS[s.icono]
           return (
@@ -95,10 +95,10 @@ export function SugerenciasCoach({ sugerencias, tema }: SugerenciasCoachProps) {
               key={s.destino}
               type="button"
               onClick={() => router.push(`/${locale}${s.destino}?desde=coach`)}
-              className="flex shrink-0 items-center gap-1.5 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-medium sm:shrink sm:rounded-2xl sm:px-4 sm:py-3 hover:bg-muted transition-colors cursor-pointer"
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-medium max-w-fit hover:bg-muted transition-colors cursor-pointer"
             >
-              {Icono && <Icono className="size-4 shrink-0" />}
-              <span className="max-w-[220px] whitespace-nowrap overflow-hidden text-ellipsis">
+              {Icono && <Icono className="size-3.5 shrink-0" />}
+              <span className="truncate">
                 {labelConTema(s.label)}
               </span>
             </button>

@@ -38,6 +38,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 
 const NAV_GROUPS = [
@@ -93,6 +94,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [openGroup, setOpenGroup] = React.useState<string | null>(null)
   const locale = useLocale()
   const pathname = usePathname()
+  const { setOpenMobile } = useSidebar()
   const normalizedPathname = pathname.replace(/^\/(es|en)(?=\/|$)/, "") || "/"
 
   React.useEffect(() => {
@@ -151,7 +153,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild className="odiseo-brand-button h-12 rounded-2xl">
-              <Link href="/dashboard">
+              <Link href="/dashboard" onClick={() => {
+                if (window.innerWidth < 1024) {
+                  setOpenMobile(false)
+                }
+              }}>
                 <div className="flex aspect-square size-9 items-center justify-center rounded-2xl border-2 border-black bg-black text-white">
                   <Logo size={24} className="text-current" />
                 </div>
@@ -176,6 +182,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <Link
                   key={item.title}
                   href={item.url}
+                  onClick={() => {
+                    if (window.innerWidth < 1024) {
+                      setOpenMobile(false)
+                    }
+                  }}
                   className={[
                     "flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-150 cursor-pointer w-full",
                     normalizedPathname === item.url
