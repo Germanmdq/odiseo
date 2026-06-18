@@ -13,24 +13,24 @@ export async function GET() {
   const admin = createAdminClient()
   const { data: sub } = await admin
     .from("subscriptions")
-    .select("plan_id, status, current_period_end, incluye_talleres, pasarela")
+    .select("plan, status, expires_at, gateway")
     .eq("user_id", user.id)
+    .eq("status", "active")
+    .gt("expires_at", new Date().toISOString())
+    .order("expires_at", { ascending: false })
+    .limit(1)
     .maybeSingle()
 
-  const suscripto =
-    sub?.status === "active" &&
-    sub?.current_period_end != null &&
-    new Date(sub.current_period_end as string) > new Date()
-
-  if (!suscripto) {
+  if (!sub) {
     return NextResponse.json({ suscripto: false, plan: null })
   }
 
   return NextResponse.json({
     suscripto: true,
-    plan: sub.plan_id,
-    currentPeriodEnd: sub.current_period_end,
-    pasarela: sub.pasarela,
-    incluye_talleres: sub.incluye_talleres,
+    plan: sub.plan,
+    currentPeriodEnd: sub.expires_at,
+    pasarela: sub.gateway,
+    incluye_talleres: sub.plan === "anual",
   })
 }
+

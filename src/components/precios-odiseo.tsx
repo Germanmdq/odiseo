@@ -42,7 +42,7 @@ function PlanCard({
       const res = await fetch("/api/pagos/mp/crear-preferencia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId }),
+        body: JSON.stringify({ plan: planId }),
       })
       const data = (await res.json()) as { init_point?: string; error?: string }
       if (!res.ok || !data.init_point) {
@@ -65,7 +65,7 @@ function PlanCard({
       const res = await fetch("/api/pagos/paypal/crear-orden", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId }),
+        body: JSON.stringify({ plan: planId }),
       })
       const data = (await res.json()) as { approveUrl?: string; error?: string }
       if (!res.ok || !data.approveUrl) {
@@ -81,13 +81,13 @@ function PlanCard({
   return (
     <Card
       className={cn("relative flex flex-col pt-0", {
-        "border-primary shadow-lg": esMasElegido,
-        "border-green-500": esActual,
+        "border-[#E8401A] shadow-lg": esMasElegido,
+        "border-[#E8401A]": esActual,
       })}
     >
       {esMasElegido && !esActual && (
         <div className="absolute start-0 -top-3 w-full">
-          <Badge className="mx-auto flex w-fit gap-1.5 rounded-full font-medium">
+          <Badge className="mx-auto flex w-fit gap-1.5 rounded-full font-medium border-transparent text-white" style={{ backgroundColor: "#E8401A" }}>
             <Sparkles className="!size-4" />
             {badge}
           </Badge>
@@ -97,7 +97,7 @@ function PlanCard({
         <div className="absolute start-0 -top-3 w-full">
           <Badge
             variant="outline"
-            className="mx-auto flex w-fit gap-1.5 rounded-full border-green-500 bg-green-50 text-green-700 font-medium"
+            className="mx-auto flex w-fit gap-1.5 rounded-full border-[#E8401A] bg-[#E8401A]/10 text-[#E8401A] font-medium"
           >
             Plan activo
           </Badge>
@@ -151,9 +151,9 @@ function PlanCard({
         ) : (
           <>
             <Button
-              className="w-full"
+              className="w-full text-white hover:opacity-90 transition-opacity border-transparent"
               size="lg"
-              variant={esMasElegido ? "default" : "outline"}
+              style={{ backgroundColor: "#009EE3" }}
               onClick={pagarConMP}
               disabled={mpEstado === "loading" || ppEstado === "loading"}
             >

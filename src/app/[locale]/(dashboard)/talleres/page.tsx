@@ -138,7 +138,7 @@ export default async function TalleresPage({
   let hasActiveSubscription = false
   if (user) {
     const acceso = await checkAccess(user.id)
-    hasActiveSubscription = acceso.incluye_talleres
+    hasActiveSubscription = acceso.allowed && acceso.plan === "anual"
   }
 
   return (

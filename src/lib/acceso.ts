@@ -1,69 +1,56 @@
 import "server-only"
-
 import { createAdminClient } from "@/lib/supabase/admin"
 
-export type AccesoResult = {
-  allowed: boolean
-  suscripto: boolean
-  plan: string | null
-  incluye_talleres: boolean
-  usosRestantes: number | null
-}
-
-export async function checkAccess(userId: string): Promise<AccesoResult> {
+export async function checkAccess(userId: string): Promise<{ allowed: boolean; plan: string | null }> {
   const admin = createAdminClient()
-
-  // 1. Check active subscription
-  const { data: sub } = await admin
+  
+  const { data } = await admin
     .from("subscriptions")
-    .select("plan_id, status, current_period_end, incluye_talleres")
+    .select("plan, status, expires_at")
     .eq("user_id", userId)
+    .eq("status", "active")
+    .gt("expires_at", new Date().toISOString())
+    .order("expires_at", { ascending: false })
+    .limit(1)
     .maybeSingle()
 
-  const suscripto =
-    sub?.status === "active" &&
-    sub?.current_period_end != null &&
-    new Date(sub.current_period_end as string) > new Date()
+  if (data) return { allowed: true, plan: data.plan }
+  return { allowed: false, plan: null }
+}
 
-  if (suscripto) {
-    return {
-      allowed: true,
-      suscripto: true,
-      plan: sub.plan_id as string,
-      incluye_talleres: sub.incluye_talleres as boolean,
-      usosRestantes: null,
-    }
-  }
+export async function activarSuscripcion({
+  userId,
+  plan,
+  gateway,
+  externalId,
+  amount,
+  currency,
+}: {
+  userId: string
+  plan: string
+  gateway: string
+  externalId: string
+  amount: number
+  currency: string
+}) {
+  const admin = createAdminClient()
+  
+  const now = new Date()
+  const expires = new Date(now)
+  
+  if (plan === "semanal") expires.setDate(expires.getDate() + 7)
+  else if (plan === "mensual") expires.setMonth(expires.getMonth() + 1)
+  else if (plan === "anual") expires.setFullYear(expires.getFullYear() + 1)
 
-  // 2. New strategy: first session of the day is free.
-  // If user has ANY usage from a previous day → paywall.
-  try {
-    const startOfToday = new Date()
-    startOfToday.setHours(0, 0, 0, 0)
-
-    const { count } = await admin
-      .from("user_usage")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .lt("created_at", startOfToday.toISOString())
-
-    const hadPreviousSession = (count ?? 0) > 0
-
-    return {
-      allowed: !hadPreviousSession,
-      suscripto: false,
-      plan: null,
-      incluye_talleres: false,
-      usosRestantes: hadPreviousSession ? 0 : null,
-    }
-  } catch {
-    // Table doesn't exist yet — grant access
-    return {
-      allowed: true,
-      suscripto: false,
-      plan: null,
-      incluye_talleres: false,
-      usosRestantes: null,
-    }
-  }
+  await admin.from("subscriptions").insert({
+    user_id: userId,
+    plan,
+    gateway,
+    status: "active",
+    external_id: externalId,
+    amount,
+    currency,
+    starts_at: now.toISOString(),
+    expires_at: expires.toISOString(),
+  })
 }

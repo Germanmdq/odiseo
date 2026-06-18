@@ -1,69 +1,43 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { PLANES, isPlanId } from "@/lib/planes"
+import MercadoPago, { Preference } from "mercadopago"
 
-export async function POST(request: NextRequest) {
+const PLANES_MP = {
+  semanal:  { title: "Odiseo — Plan Semanal",  price: 7000,  currency: "ARS" },
+  mensual:  { title: "Odiseo — Plan Mensual",  price: 12000, currency: "ARS" },
+  anual:    { title: "Odiseo — Plan Anual",    price: 55000, currency: "ARS" },
+}
+
+export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 })
 
-  const body = (await request.json()) as { planId?: string }
-  const planId = body.planId
+  const { plan } = await req.json() as { plan: keyof typeof PLANES_MP }
+  if (!PLANES_MP[plan]) return NextResponse.json({ error: "Plan inválido" }, { status: 400 })
 
-  if (!planId || !isPlanId(planId)) {
-    return NextResponse.json({ error: "planId inválido" }, { status: 400 })
-  }
+  const client = new MercadoPago({ accessToken: process.env.MP_ACCESS_TOKEN! })
+  const preference = new Preference(client)
 
-  const accessToken = process.env.MP_ACCESS_TOKEN
-  const baseUrl = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000"
-
-  if (!accessToken) {
-    return NextResponse.json({ error: "MP no configurado" }, { status: 500 })
-  }
-
-  const plan = PLANES[planId]
-
-  const preference = {
-    items: [
-      {
-        id: planId,
-        title: `Odiseo — Plan ${plan.nombre}`,
-        description: plan.descripcion,
+  const result = await preference.create({
+    body: {
+      items: [{
+        id: plan,
+        title: PLANES_MP[plan].title,
         quantity: 1,
+        unit_price: PLANES_MP[plan].price,
         currency_id: "ARS",
-        unit_price: plan.precio_ars,
+      }],
+      back_urls: {
+        success: `${process.env.NEXT_PUBLIC_URL}/es/suscripcion/exito?plan=${plan}&gateway=mercadopago`,
+        failure: `${process.env.NEXT_PUBLIC_URL}/es/precios?error=pago_fallido`,
+        pending: `${process.env.NEXT_PUBLIC_URL}/es/suscripcion/pendiente`,
       },
-    ],
-    back_urls: {
-      success: `${baseUrl}/es/suscripcion/exito`,
-      failure: `${baseUrl}/es/suscripcion/pendiente`,
-      pending: `${baseUrl}/es/suscripcion/pendiente`,
-    },
-    auto_return: "approved",
-    notification_url: `${baseUrl}/api/pagos/mp/webhook`,
-    metadata: {
-      userId: user.id,
-      planId,
-    },
-  }
-
-  const res = await fetch("https://api.mercadopago.com/checkout/preferences", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(preference),
+      auto_return: "approved",
+      external_reference: `${user.id}|${plan}|mercadopago`,
+      notification_url: `${process.env.NEXT_PUBLIC_URL}/api/pagos/mp/webhook`,
+    }
   })
 
-  if (!res.ok) {
-    const err = await res.text()
-    console.error("MP preference error:", err)
-    return NextResponse.json({ error: "Error al crear preferencia MP" }, { status: 502 })
-  }
-
-  const data = (await res.json()) as { init_point: string; sandbox_init_point: string }
-  return NextResponse.json({ init_point: data.init_point })
+  return NextResponse.json({ init_point: result.init_point })
 }
