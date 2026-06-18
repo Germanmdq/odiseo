@@ -118,16 +118,12 @@ function PlanCard({
 
       <CardContent className="flex flex-1 flex-col space-y-6">
         <div className="text-center">
-          <span className="text-4xl font-bold">${plan.precio_usd}</span>
+          <span className="text-4xl font-bold">{plan.precioUSD}</span>
           <span className="text-muted-foreground text-sm">
-            {plan.periodo === "weekly"
-              ? " / semana"
-              : plan.periodo === "monthly"
-                ? " / mes"
-                : " / año"}
+            {plan.periodo}
           </span>
           <p className="text-xs text-muted-foreground mt-1">
-            ${plan.precio_ars.toLocaleString("es-AR")} ARS
+            {plan.precioARS} ARS
           </p>
         </div>
 
@@ -166,7 +162,7 @@ function PlanCard({
             </Button>
 
             <Button
-              className="w-full font-medium border-2"
+              className="w-full font-medium border-2 border-foreground/20 hover:border-foreground/40"
               variant="outline"
               size="lg"
               onClick={pagarConPayPal}
@@ -174,8 +170,9 @@ function PlanCard({
             >
               {ppEstado === "loading" ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              {ppEstado === "error" ? "Error — intentá de nuevo" : "Pagar con PayPal"}
+              ) : (
+                "Pagar con PayPal"
+              )}
             </Button>
 
             {!userId && (

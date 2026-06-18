@@ -4,9 +4,10 @@ import { createAdminClient } from "@/lib/supabase/admin"
 export async function checkAccess(userId: string): Promise<{ allowed: boolean; plan: string | null }> {
   const admin = createAdminClient()
   
-  const { data } = await admin
+  // 1. Tiene suscripción activa → acceso ilimitado
+  const { data: sub } = await admin
     .from("subscriptions")
-    .select("plan, status, expires_at")
+    .select("plan, expires_at")
     .eq("user_id", userId)
     .eq("status", "active")
     .gt("expires_at", new Date().toISOString())
@@ -14,7 +15,17 @@ export async function checkAccess(userId: string): Promise<{ allowed: boolean; p
     .limit(1)
     .maybeSingle()
 
-  if (data) return { allowed: true, plan: data.plan }
+  if (sub) return { allowed: true, plan: sub.plan }
+
+  // 2. Sin suscripción → contar usos totales en daily_activity_events
+  const { count } = await admin
+    .from("daily_activity_events")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+
+  // 3 usos gratis totales, después paywall
+  if (!count || count < 3) return { allowed: true, plan: null }
+
   return { allowed: false, plan: null }
 }
 

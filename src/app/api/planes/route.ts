@@ -46,8 +46,8 @@ export async function POST(req: NextRequest) {
   // Enviar email a Germán
   try {
     await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: "germangonzalezmdq@gmail.com",
+      from: "Odiseo <noreply@odiseo.online>",
+      to: "quotesneville@gmail.com",
       subject: `Nueva solicitud de plan — ${body.nombre}`,
       html: `
         <h2>Nueva solicitud de plan personalizado</h2>

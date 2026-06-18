@@ -52,7 +52,12 @@ export default async function PreciosPage({
 
       {/* Footer */}
       <footer className="py-6 border-t text-center text-xs text-muted-foreground w-full">
-        © {new Date().getFullYear()} Odiseo. Todos los derechos reservados.
+        <p className="text-center text-xs text-muted-foreground mt-4 mb-2">
+          Podés cancelar en cualquier momento desde tu perfil.
+        </p>
+        <p>
+          © {new Date().getFullYear()} Odiseo. Todos los derechos reservados.
+        </p>
       </footer>
     </div>
   )
