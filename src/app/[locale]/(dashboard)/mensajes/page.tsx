@@ -1,122 +1,153 @@
-import { createClient } from "@/lib/supabase/server"
-import { createAdminClient } from "@/lib/supabase/admin"
-import { Mail, Clock, CheckCircle } from "lucide-react"
+"use client"
+
+import { useState, useEffect, useRef } from "react"
+import { Send, Loader2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
 
-interface PlanSolicitud {
+type Mensaje = {
   id: string
-  user_id: string
-  deseo: string
-  duracion_dias: number
-  status: string
-  respuesta: string | null
+  remitente: "usuario" | "german"
+  contenido: string
   created_at: string
+  leido: boolean
 }
 
-export default async function MensajesPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
-  const { locale } = await params
+export default function MensajesPage() {
+  const [mensajes, setMensajes] = useState<Mensaje[]>([])
+  const [input, setInput] = useState("")
+  const [enviando, setEnviando] = useState(false)
+  const [cargando, setCargando] = useState(true)
+  const bottomRef = useRef<HTMLDivElement>(null)
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  useEffect(() => {
+    fetch("/api/mensajes")
+      .then(r => r.json())
+      .then((data: unknown) => {
+        setMensajes(Array.isArray(data) ? (data as Mensaje[]) : [])
+        setCargando(false)
+      })
+      .catch(() => {
+        setCargando(false)
+      })
+  }, [])
 
-  const admin = createAdminClient()
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [mensajes])
 
-  // Mark all "respondido" requests as "leido" when the user views this page
-  await admin
-    .from("plan_solicitudes")
-    .update({ status: "leido" })
-    .eq("user_id", user.id)
-    .eq("status", "respondido")
+  const enviar = async () => {
+    const texto = input.trim()
+    if (!texto || enviando) return
+    setEnviando(true)
+    setInput("")
 
-  const { data: solicitudes } = await admin
-    .from("plan_solicitudes")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
+    try {
+      const res = await fetch("/api/mensajes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contenido: texto }),
+      })
 
-  const typedSolicitudes = (solicitudes ?? []) as PlanSolicitud[]
+      if (res.ok) {
+        const data = (await res.json()) as { data: Mensaje }
+        setMensajes(prev => [...prev, data.data])
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setEnviando(false)
+    }
+  }
 
-  if (!typedSolicitudes.length) {
+  if (cargando) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center space-y-4">
-        <div className="size-16 rounded-full bg-muted flex items-center justify-center">
-          <Mail className="size-8 text-muted-foreground" />
-        </div>
-        <h1 className="text-2xl font-semibold">Mensajes</h1>
-        <p className="text-muted-foreground max-w-md">
-          Acá vas a ver las respuestas de Germán a tus solicitudes de plan. 
-          Todavía no hiciste ninguna solicitud.
-        </p>
-        <Button asChild style={{ backgroundColor: "#E8401A" }} className="text-white mt-2 cursor-pointer">
-          <Link href={`/${locale}/planes`}>Pedir mi primer plan</Link>
-        </Button>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Mensajes</h1>
-        <p className="text-muted-foreground mt-1">
-          Tus solicitudes de plan y las respuestas de Germán.
+    <div className="flex flex-col h-[calc(100dvh-var(--header-height)-2rem)] max-w-2xl mx-auto px-4">
+      {/* Header */}
+      <div className="py-6 border-b shrink-0">
+        <h1 className="text-xl font-semibold">Mensajes</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Tu conversación directa con Germán
         </p>
       </div>
 
-      <div className="space-y-4">
-        {typedSolicitudes.map(sol => {
-          const isAnswered = sol.status === "respondido" || sol.status === "leido"
-          return (
-            <div key={sol.id} className="rounded-xl border bg-card p-5 space-y-4">
-              {/* Header */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(sol.created_at), { addSuffix: true, locale: es })}
-                    {" · "}{sol.duracion_dias} días
-                  </p>
-                  <p className="text-sm font-medium line-clamp-2">{sol.deseo}</p>
-                </div>
-                <span className={`shrink-0 flex items-center gap-1.5 text-xs font-medium rounded-full px-2.5 py-1 ${
-                  isAnswered
-                    ? "bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400"
-                    : "bg-muted text-muted-foreground"
+      {/* Mensajes */}
+      <div className="flex-1 overflow-y-auto py-6 space-y-4">
+        {mensajes.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center space-y-3">
+            <p className="text-muted-foreground text-sm max-w-xs">
+              Podés escribirle directamente a Germán. Él responde personalmente.
+            </p>
+          </div>
+        ) : (
+          mensajes.map(msg => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.remitente === "usuario" ? "justify-end" : "justify-start"}`}
+            >
+              <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                msg.remitente === "usuario"
+                  ? "text-white rounded-br-sm"
+                  : "bg-muted rounded-bl-sm"
+              }`}
+              style={msg.remitente === "usuario" ? { backgroundColor: "#E8401A" } : {}}
+              >
+                {msg.remitente === "german" && (
+                  <p className="text-xs font-semibold mb-1 opacity-60">Germán</p>
+                )}
+                <p className="whitespace-pre-wrap">{msg.contenido}</p>
+                <p className={`text-xs mt-1.5 ${
+                  msg.remitente === "usuario" ? "text-white/60" : "text-muted-foreground"
                 }`}>
-                  {isAnswered
-                    ? <><CheckCircle className="size-3" /> Respondido</>
-                    : <><Clock className="size-3" /> Pendiente</>
-                  }
-                </span>
+                  {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: es })}
+                </p>
               </div>
-
-              {/* Respuesta de Germán */}
-              {sol.respuesta ? (
-                <div className="rounded-lg bg-muted/50 p-4 space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Respuesta de Germán
-                  </p>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {sol.respuesta}
-                  </p>
-                </div>
-              ) : (
-                <div className="rounded-lg bg-muted/30 p-4 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Germán todavía no respondió esta solicitud.
-                  </p>
-                </div>
-              )}
             </div>
-          )
-        })}
+          ))
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="shrink-0 border-t py-4">
+        <div className="flex items-end gap-2">
+          <Textarea
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault()
+                void enviar()
+              }
+            }}
+            placeholder="Escribile a Germán..."
+            rows={1}
+            className="resize-none max-h-[120px] min-h-[44px]"
+          />
+          <Button
+            onClick={enviar}
+            disabled={enviando || !input.trim()}
+            className="shrink-0 text-white size-11 cursor-pointer"
+            style={{ backgroundColor: "#E8401A" }}
+          >
+            {enviando
+              ? <Loader2 className="size-4 animate-spin" />
+              : <Send className="size-4" />
+            }
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground mt-2 text-center">
+          Enter para enviar · Shift+Enter para nueva línea
+        </p>
       </div>
     </div>
   )
