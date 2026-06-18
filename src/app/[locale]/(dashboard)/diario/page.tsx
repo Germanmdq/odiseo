@@ -80,7 +80,7 @@ export default function DiarioPage() {
   }, [])
 
   useEffect(() => {
-    fetch("/api/notas")
+    fetch("/api/diario")
       .then(r => r.json())
       .then(d => setNotas(Array.isArray(d) ? d : []))
       .catch(() => toast.error("Error al cargar el diario"))
@@ -98,7 +98,7 @@ export default function DiarioPage() {
     if (!nueva.trim() || guardando) return
     setGuardando(true)
     try {
-      const r = await fetch("/api/notas", {
+      const r = await fetch("/api/diario", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: nueva }),
@@ -118,7 +118,7 @@ export default function DiarioPage() {
   async function handleEditar(id: string) {
     if (!editContent.trim()) return
     try {
-      const r = await fetch(`/api/notas/${id}`, {
+      const r = await fetch(`/api/diario/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: editContent }),
@@ -134,7 +134,7 @@ export default function DiarioPage() {
 
   async function handleEliminar(id: string) {
     try {
-      await fetch(`/api/notas/${id}`, { method: "DELETE" })
+      await fetch(`/api/diario/${id}`, { method: "DELETE" })
       setNotas(prev => prev.filter(n => n.id !== id))
       setConfirmDeleteId(null)
       if (expandedId === id) setExpandedId(null)

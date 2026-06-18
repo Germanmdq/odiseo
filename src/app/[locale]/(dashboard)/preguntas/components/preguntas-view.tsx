@@ -323,6 +323,23 @@ function ResultadoScreen({
         ...(respuesta_neville.conferenciasCitadas ?? []),
       ]
     : []
+  const hasSaved = React.useRef(false)
+  React.useEffect(() => {
+    if (hasSaved.current) return
+    hasSaved.current = true
+
+    const respuestaNeville = respuesta_neville ? respuesta_neville.body : ""
+    fetch("/api/memoria", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contenido: `Evaluación sobre "${tema}" — Puntaje: ${correctas}/${total}${respuestaNeville ? `\n\n${respuestaNeville}` : ""}`,
+        origenTipo: "evaluacion",
+        origenMeta: { tema, correctas, total, puntaje },
+        source: `Ponerme a prueba — ${tema}`,
+      }),
+    }).catch(() => {})
+  }, [tema, correctas, total, puntaje, respuesta_neville])
 
   return (
     <div className="mx-auto max-w-2xl space-y-8 py-4">

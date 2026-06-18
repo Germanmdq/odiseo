@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { registrarActividad } from "@/lib/activity"
 
 export async function GET() {
   const supabase = await createClient()
@@ -31,5 +32,18 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return Response.json({ error: error.message }, { status: 500 })
+
+  if (user) {
+    try {
+      await registrarActividad({
+        userId: user.id,
+        eventType: "nota",
+        titleEs: "Nota guardada",
+      })
+    } catch (e) {
+      console.error("Error registering activity for note:", e)
+    }
+  }
+
   return Response.json(data, { status: 201 })
 }
