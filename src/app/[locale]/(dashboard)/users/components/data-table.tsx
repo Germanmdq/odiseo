@@ -111,13 +111,13 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
       case "Admin":
         return "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20"
       case "Editor":
-        return "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20"
+        return "text-neutral-700 bg-neutral-100 dark:text-neutral-300 dark:bg-neutral-800"
       case "Author":
-        return "text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20"
+        return "text-neutral-600 bg-neutral-50 dark:text-neutral-400 dark:bg-neutral-900/10"
       case "Maintainer":
         return "text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/20"
       case "Subscriber":
-        return "text-purple-600 bg-purple-50 dark:text-purple-400 dark:bg-purple-900/20"
+        return "text-[#E8401A] bg-orange-50 dark:text-[#E8401A] dark:bg-[#E8401A]/10"
       default:
         return "text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/20"
     }

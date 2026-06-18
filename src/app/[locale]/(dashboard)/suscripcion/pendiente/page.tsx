@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button"
 export default function SuscripcionPendientePage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center space-y-6">
-      <div className="rounded-full bg-yellow-100 p-4">
-        <Clock className="h-12 w-12 text-yellow-600" />
+      <div className="rounded-full bg-orange-100 dark:bg-orange-950/20 p-4">
+        <Clock className="h-12 w-12 text-[#E8401A]" />
       </div>
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Tu pago está siendo procesado</h1>

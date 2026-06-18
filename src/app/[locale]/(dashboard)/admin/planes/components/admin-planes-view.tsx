@@ -74,11 +74,14 @@ export function AdminPlanesView({ solicitudes }: { solicitudes: Solicitud[] }) {
                   {" · "}{sol.duracion_dias} días{sol.conoce_neville ? ` · ${sol.conoce_neville}` : ""}
                 </p>
               </div>
-              <span className={`text-xs font-semibold rounded-full px-2.5 py-1 ${
-                sol.status === "respondido" || sol.status === "leido"
-                  ? "bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400"
-                  : "bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400"
-              }`}>
+              <span 
+                className={`text-xs font-semibold rounded-full px-2.5 py-1 ${
+                  sol.status === "respondido" || sol.status === "leido"
+                    ? "bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400"
+                    : "text-white"
+                }`}
+                style={!(sol.status === "respondido" || sol.status === "leido") ? { backgroundColor: "#E8401A" } : {}}
+              >
                 {sol.status}
               </span>
             </div>

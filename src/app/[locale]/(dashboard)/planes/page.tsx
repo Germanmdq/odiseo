@@ -278,6 +278,7 @@ export default function PlanesPage() {
                   type="time"
                   value={form.horaDespertar}
                   onChange={e => set("horaDespertar", e.target.value)}
+                  className="[color-scheme:light] text-foreground"
                 />
               </div>
               <div className="space-y-1.5">
@@ -286,6 +287,7 @@ export default function PlanesPage() {
                   type="time"
                   value={form.horaDormir}
                   onChange={e => set("horaDormir", e.target.value)}
+                  className="[color-scheme:light] text-foreground"
                 />
               </div>
             </div>

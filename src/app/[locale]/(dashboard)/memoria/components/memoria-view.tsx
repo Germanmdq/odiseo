@@ -32,16 +32,16 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  coach: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
-  narrador: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  creador: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",
-  pregunta: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",
-  evaluacion: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",
-  plan: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
-  fuente: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  biblia: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-  "mi-libro": "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",
-  manual: "bg-muted text-muted-foreground",
+  coach: "bg-orange-50 text-[#E8401A] border border-orange-100 dark:bg-[#E8401A]/10 dark:text-orange-400 dark:border-transparent",
+  narrador: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
+  creador: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
+  pregunta: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
+  evaluacion: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
+  plan: "bg-orange-50 text-[#E8401A] border border-orange-100 dark:bg-[#E8401A]/10 dark:text-orange-400 dark:border-transparent",
+  fuente: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
+  biblia: "bg-orange-50 text-[#E8401A] border border-orange-100 dark:bg-[#E8401A]/10 dark:text-orange-400 dark:border-transparent",
+  "mi-libro": "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
+  manual: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
 }
 
 function getContentText(content: Memoria["content"]): string {

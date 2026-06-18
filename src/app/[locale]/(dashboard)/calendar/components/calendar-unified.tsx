@@ -132,15 +132,15 @@ export function CalendarMain({ eventDates = [] }: CalendarMainProps) {
                 className={cn(
                   "relative border-r border-b last:border-r-0 p-2 min-h-[120px] hover:bg-muted/50 cursor-pointer transition-colors",
                   !isCurrentMonth && "text-muted-foreground bg-muted/20",
-                  isDayToday && "bg-blue-50 dark:bg-blue-900/20",
-                  isSelected && "bg-blue-100 dark:bg-blue-800/30"
+                  isDayToday && "bg-orange-50/50 dark:bg-[#E8401A]/10",
+                  isSelected && "bg-orange-100/60 dark:bg-[#E8401A]/20"
                 )}
                 onClick={() => handleDateSelect(day)}
               >
                 {/* Date Number */}
                 <div className={cn(
                   "text-sm font-medium mb-1",
-                  isDayToday && "text-blue-600 dark:text-blue-400"
+                  isDayToday && "text-[#E8401A] dark:text-[#E8401A]"
                 )}>
                   {format(day, 'd')}
                 </div>

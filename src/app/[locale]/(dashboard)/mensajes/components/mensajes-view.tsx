@@ -68,9 +68,7 @@ export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) 
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 h-[calc(100dvh-var(--header-height)-4rem)] flex flex-col">
-      {/* Contenedor principal con sombra */}
-      <div className="flex flex-1 rounded-2xl border bg-card shadow-md overflow-hidden min-h-[500px]">
+    <div className="flex h-[calc(100dvh-var(--header-height)-2rem)] overflow-hidden rounded-xl border bg-card shadow-md mx-4">
         {/* Columna Izquierda: Lista de solicitudes (280px fijo) */}
         <div className="w-[280px] shrink-0 border-r flex flex-col bg-muted/10">
           <div className="p-4 border-b bg-muted/20">
@@ -98,13 +96,15 @@ export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) 
                     <span className="font-medium text-sm text-foreground truncate max-w-[150px]">
                       Plan de {item.nombre}
                     </span>
-                    <span className={`text-[10px] font-semibold rounded-full px-2 py-0.5 shrink-0 ${
-                      item.status === "respondido"
-                        ? "bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400"
-                        : "bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400"
-                    }`}>
-                      {item.status === "respondido" ? "Listo" : "Pendiente"}
-                    </span>
+                    {item.status === "respondido" ? (
+                      <span className="text-[10px] font-semibold rounded-full px-2 py-0.5 shrink-0 bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400">
+                        Listo
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-semibold rounded-full px-2 py-0.5 shrink-0 text-white" style={{ backgroundColor: "#E8401A" }}>
+                        Pendiente
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground line-clamp-1">
                     {item.deseo}
@@ -139,7 +139,7 @@ export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) 
                       Plan Preparado
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full dark:bg-amber-950/20 dark:text-amber-400">
+                    <span className="flex items-center gap-1 text-xs font-medium text-white px-2.5 py-1 rounded-full" style={{ backgroundColor: "#E8401A" }}>
                       <Clock className="size-3.5" />
                       En Preparación
                     </span>
@@ -205,8 +205,8 @@ export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) 
                   </div>
                 ) : (
                   <div className="rounded-xl border border-dashed p-8 text-center space-y-4 max-w-md mx-auto my-8">
-                    <div className="size-12 rounded-full bg-amber-50 dark:bg-amber-950/20 flex items-center justify-center mx-auto">
-                      <Clock className="size-6 text-amber-500" />
+                    <div className="size-12 rounded-full bg-orange-50 dark:bg-orange-950/10 flex items-center justify-center mx-auto">
+                      <Clock className="size-6 text-[#E8401A]" />
                     </div>
                     <div className="space-y-2">
                       <h4 className="font-medium text-foreground">Germán está preparando tu plan</h4>
@@ -226,7 +226,6 @@ export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) 
             </div>
           )}
         </div>
-      </div>
     </div>
   )
 }
