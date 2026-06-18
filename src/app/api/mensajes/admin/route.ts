@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     const { data: userData } = await admin.auth.admin.getUserById(body.userId)
     if (userData?.user?.email) {
       await resend.emails.send({
-        from: "Odiseo <onboarding@resend.dev>",
+        from: "Odiseo <noreply@odiseo.online>",
         to: userData.user.email,
         subject: "Germán te respondió en Odiseo",
         html: `

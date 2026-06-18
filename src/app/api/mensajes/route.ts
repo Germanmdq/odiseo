@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   // Notificar a Germán por email
   try {
     await resend.emails.send({
-      from: "Odiseo <onboarding@resend.dev>",
+      from: "Odiseo <noreply@odiseo.online>",
       to: "quotesneville@gmail.com",
       subject: `Nuevo mensaje de usuario — Odiseo`,
       html: `

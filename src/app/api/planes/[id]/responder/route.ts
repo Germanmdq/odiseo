@@ -53,7 +53,7 @@ export async function POST(
       const { data: userData } = await admin.auth.admin.getUserById(solicitud.user_id)
       if (userData?.user?.email) {
         await resend.emails.send({
-          from: "Odiseo <onboarding@resend.dev>",
+          from: "Odiseo <noreply@odiseo.online>",
           to: userData.user.email,
           subject: "Tu plan personalizado está listo",
           html: `
