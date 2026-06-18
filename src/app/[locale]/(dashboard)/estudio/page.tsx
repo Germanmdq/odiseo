@@ -9,7 +9,6 @@ const CARDS = [
     href: "/fuentes",
     icon: Library,
     image: "/dashboard/secciones/fuentes.jpg",
-    kicker: "Biblioteca",
   },
   {
     title: "Testimonios y casos",
@@ -17,7 +16,6 @@ const CARDS = [
     href: "/testimonios",
     icon: ScrollText,
     image: "/dashboard/secciones/testimonios.jpg",
-    kicker: "Casos",
   },
   {
     title: "Biblia metafísica",
@@ -25,7 +23,6 @@ const CARDS = [
     href: "/biblia",
     icon: Cross,
     image: "/dashboard/secciones/biblia.jpg",
-    kicker: "Símbolos",
   },
   {
     title: "Talleres",
@@ -33,7 +30,6 @@ const CARDS = [
     href: "/talleres",
     icon: GraduationCap,
     image: "/dashboard/secciones/talleres.jpg",
-    kicker: "Talleres",
   },
 ]
 
@@ -66,7 +62,6 @@ export default async function EstudioPage({
             desc={card.desc}
             icon={card.icon}
             image={card.image}
-            kicker={card.kicker}
           />
         ))}
       </div>
