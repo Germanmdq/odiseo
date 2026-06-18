@@ -72,7 +72,7 @@ export function OdiseoOrbital() {
     {
       id: 6,
       title: "Mi libro",
-      date: "Tu proceso",
+      date: "Tu conocimiento",
       content: "Escribís un tema y el asistente genera un capítulo reflexivo desde las enseñanzas de Neville en primera persona. Editás, guardás y acumulás capítulos de tu propio libro.",
       category: "Mi espacio",
       icon: BookMarked,

@@ -58,7 +58,7 @@ const tools = [
     href: "libro",
     icon: BookOpen,
     title: "Mi libro",
-    desc: "Convertí tu proceso en capítulos propios.",
+    desc: "Convertí tu conocimiento en capítulos propios.",
   },
   {
     href: "planes",

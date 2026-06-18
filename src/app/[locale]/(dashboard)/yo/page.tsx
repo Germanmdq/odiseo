@@ -5,7 +5,7 @@ import { OdiseoHubCard } from "@/components/odiseo-hub-card"
 const CARDS = [
   {
     title: "Memoria",
-    desc: "Todo lo que fuiste guardando de tus conversaciones, evaluaciones y planes aprobados. El archivo de tu proceso.",
+    desc: "Todo lo que fuiste guardando de tus conversaciones, evaluaciones y planes aprobados. El archivo de tu conocimiento.",
     href: "/memoria",
     icon: BrainCircuit,
     image: "/dashboard/secciones/memoria.jpg",

@@ -62,7 +62,7 @@ const CARDS = [
   },
   {
     title: "Mi libro",
-    desc: "Escribí sobre un tema y se genera un capítulo reflexivo sobre tu proceso. Guardá y editá todos tus capítulos acá.",
+    desc: "Escribí sobre un tema y se genera un capítulo reflexivo sobre tu conocimiento. Guardá y editá todos tus capítulos acá.",
     href: "/mi-libro",
     icon: BookMarked,
     image: "/dashboard/secciones/diario.jpg",

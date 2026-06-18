@@ -98,7 +98,7 @@ export default async function DashboardPage({
           </h1>
 
           <p className="mt-3 max-w-xl text-sm leading-6 text-white/70 sm:text-base">
-            Entrá a conversar, estudiar, registrar tu proceso o seguir creando desde las herramientas que ya tenés en Odiseo.
+            Entrá a conversar, estudiar, registrar tu conocimiento o seguir creando desde las herramientas que ya tenés en Odiseo.
           </p>
 
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">

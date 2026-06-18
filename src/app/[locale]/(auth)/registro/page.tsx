@@ -50,7 +50,7 @@ export default async function RegistroPage({
             Recordá quién estás eligiendo ser
           </h2>
           <p className="text-[#bdbdbd] text-base mt-5 leading-[1.55]">
-            Conversá, estudiá, practicá y guardá memoria de tu proceso.
+            Conversá, estudiá, practicá y guardá memoria de tu conocimiento.
           </p>
         </div>
 

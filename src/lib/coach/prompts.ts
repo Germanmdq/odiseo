@@ -11,7 +11,7 @@ Acá podés:
 — Leer cientos de conferencias y libros en [Fuentes](/fuentes)
 — Ver testimonios reales de personas que aplicaron la Ley en [Testimonios](/testimonios)
 — Evaluarte con [Ponerme a prueba](/preguntas)
-— Escribir tu proceso en el Diario o en Notas
+— Escribir tu conocimiento en el Diario o en Notas
 — Generar tu propio libro de capítulos en [Mi libro](/mi-libro)
 — Pedir un plan de práctica personalizado a Germán en [Planes](/planes)
 
