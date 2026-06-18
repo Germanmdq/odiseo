@@ -71,83 +71,83 @@ export default function MensajesPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-var(--header-height)-2rem)] max-w-2xl mx-auto px-4">
-      {/* Header */}
-      <div className="py-6 border-b shrink-0">
-        <h1 className="text-xl font-semibold">Mensajes</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Tu conversación directa con Germán
-        </p>
-      </div>
-
-      {/* Mensajes */}
-      <div className="flex-1 overflow-y-auto py-6 space-y-4">
-        {mensajes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center space-y-3">
-            <p className="text-muted-foreground text-sm max-w-xs">
-              Podés escribirle directamente a Germán. Él responde personalmente.
-            </p>
-          </div>
-        ) : (
-          mensajes.map(msg => (
-            <div
-              key={msg.id}
-              className={`flex ${msg.remitente === "usuario" ? "justify-end" : "justify-start"}`}
-            >
-              <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                msg.remitente === "usuario"
-                  ? "text-white rounded-br-sm"
-                  : "bg-muted rounded-bl-sm"
-              }`}
-              style={msg.remitente === "usuario" ? { backgroundColor: "#E8401A" } : {}}
-              >
-                {msg.remitente === "german" && (
-                  <p className="text-xs font-semibold mb-1 opacity-60">Germán</p>
-                )}
-                <p className="whitespace-pre-wrap">{msg.contenido}</p>
-                <p className={`text-xs mt-1.5 ${
-                  msg.remitente === "usuario" ? "text-white/60" : "text-muted-foreground"
-                }`}>
-                  {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: es })}
-                </p>
-              </div>
-            </div>
-          ))
-        )}
-        <div ref={bottomRef} />
-      </div>
-
-      {/* Input */}
-      <div className="shrink-0 border-t py-4">
-        <div className="flex items-end gap-2">
-          <Textarea
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault()
-                void enviar()
-              }
-            }}
-            placeholder="Escribile a Germán..."
-            rows={1}
-            className="resize-none max-h-[120px] min-h-[44px]"
-          />
-          <Button
-            onClick={enviar}
-            disabled={enviando || !input.trim()}
-            className="shrink-0 text-white size-11 cursor-pointer"
-            style={{ backgroundColor: "#E8401A" }}
-          >
-            {enviando
-              ? <Loader2 className="size-4 animate-spin" />
-              : <Send className="size-4" />
-            }
-          </Button>
+    <div className="mx-auto max-w-2xl px-4 py-8 h-[calc(100dvh-var(--header-height)-4rem)] flex flex-col">
+      {/* Card contenedor */}
+      <div className="flex flex-col flex-1 rounded-2xl border bg-card shadow-md overflow-hidden">
+        
+        {/* Header naranja */}
+        <div className="shrink-0 px-6 py-4" style={{ backgroundColor: "#E8401A" }}>
+          <h1 className="text-lg font-semibold text-white">Mensajes</h1>
+          <p className="text-white/70 text-xs mt-0.5">Tu conversación directa con Germán</p>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
-          Enter para enviar · Shift+Enter para nueva línea
-        </p>
+
+        {/* Área de mensajes */}
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-muted/20">
+          {mensajes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center space-y-2 py-16">
+              <p className="text-muted-foreground text-sm max-w-xs">
+                Podés escribirle directamente a Germán. Él responde personalmente.
+              </p>
+            </div>
+          ) : (
+            mensajes.map(msg => (
+              <div
+                key={msg.id}
+                className={`flex ${msg.remitente === "usuario" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                    msg.remitente === "usuario"
+                      ? "text-white rounded-br-sm"
+                      : "bg-white rounded-bl-sm border"
+                  }`}
+                  style={msg.remitente === "usuario" ? { backgroundColor: "#E8401A" } : {}}
+                >
+                  {msg.remitente === "german" && (
+                    <p className="text-xs font-semibold mb-1 text-muted-foreground">Germán</p>
+                  )}
+                  <p className="whitespace-pre-wrap">{msg.contenido}</p>
+                  <p className={`text-xs mt-1.5 ${
+                    msg.remitente === "usuario" ? "text-white/60" : "text-muted-foreground"
+                  }`}>
+                    {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: es })}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Input fijo abajo */}
+        <div className="shrink-0 border-t bg-card px-4 py-3">
+          <div className="flex items-end gap-2">
+            <Textarea
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault()
+                  void enviar()
+                }
+              }}
+              placeholder="Escribile a Germán..."
+              rows={1}
+              className="resize-none max-h-[120px] min-h-[44px] bg-muted/50"
+            />
+            <Button
+              onClick={enviar}
+              disabled={enviando || !input.trim()}
+              className="shrink-0 text-white size-11 rounded-xl cursor-pointer"
+              style={{ backgroundColor: "#E8401A" }}
+            >
+              {enviando
+                ? <Loader2 className="size-4 animate-spin" />
+                : <Send className="size-4" />
+              }
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   )
