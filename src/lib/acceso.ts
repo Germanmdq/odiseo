@@ -3,7 +3,13 @@ import { createAdminClient } from "@/lib/supabase/admin"
 
 export async function checkAccess(userId: string): Promise<{ allowed: boolean; plan: string | null }> {
   const admin = createAdminClient()
-  
+
+  // Germán siempre tiene acceso ilimitado
+  const { data: userData } = await admin.auth.admin.getUserById(userId)
+  if (userData?.user?.email === "germangonzalezmdq@gmail.com") {
+    return { allowed: true, plan: "anual" }
+  }
+
   // 1. Tiene suscripción activa → acceso ilimitado
   const { data: sub } = await admin
     .from("subscriptions")
