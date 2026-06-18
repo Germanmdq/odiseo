@@ -54,7 +54,7 @@ const CARDS = [
   },
   {
     title: "Planes",
-    desc: "Completá un formulario con tu deseo y tus horarios. Germán te prepara un plan personalizado a medida.",
+    desc: "Lecturas, ejercicios, imaginación nocturna y afirmaciones. Germán te guía.",
     href: "/planes",
     icon: ClipboardList,
     image: "/dashboard/secciones/planes.jpg",

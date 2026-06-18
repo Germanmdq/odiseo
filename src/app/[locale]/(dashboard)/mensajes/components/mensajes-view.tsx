@@ -53,7 +53,7 @@ export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) 
           <div className="space-y-2">
             <h2 className="text-xl font-semibold text-foreground">Tu bandeja de planes está vacía</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Pedí tu plan de práctica personalizado y Germán preparará una guía de ejercicios exclusiva para vos.
+              Lecturas, ejercicios, imaginación nocturna y afirmaciones. Germán te guía.
             </p>
           </div>
           <Button asChild className="w-full text-white font-medium cursor-pointer" style={{ backgroundColor: "#E8401A" }}>

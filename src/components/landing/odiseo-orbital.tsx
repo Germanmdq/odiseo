@@ -85,7 +85,7 @@ export function OdiseoOrbital() {
       id: 7,
       title: "Planes",
       date: "Personalizado",
-      content: "Completás un formulario con tu deseo y tus horarios. Germán te prepara un plan de práctica diaria personalizado a medida.",
+      content: "Germán te guía con lecturas, ejercicios, imaginación nocturna y afirmaciones programadas que llegan a tu teléfono.",
       category: "Mi espacio",
       icon: ClipboardList,
       relatedIds: [6, 8],

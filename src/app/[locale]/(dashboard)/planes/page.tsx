@@ -100,7 +100,7 @@ export default function PlanesPage() {
         <div className="px-8 py-6 border-b" style={{ backgroundColor: "#E8401A" }}>
           <h1 className="text-2xl font-semibold text-white">Pedir un plan personalizado</h1>
           <p className="text-white/80 mt-1 text-sm">
-            Germán prepara un plan de práctica diaria hecho para vos.
+            Germán te va a guiar con un plan personalizado que incluye: lecturas seleccionadas, ejercicios prácticos, imaginación nocturna y afirmaciones programadas que llegan a tu teléfono.
           </p>
         </div>
 
@@ -110,7 +110,7 @@ export default function PlanesPage() {
           <section className="rounded-xl border bg-card shadow-md p-6 space-y-4">
             <h2 className="font-semibold text-base border-b pb-2">Tu deseo</h2>
             <div className="space-y-1.5">
-              <Label>¿Qué querés manifestar? <span className="text-destructive">*</span></Label>
+              <Label>¿Qué te gustaría experimentar? ¿Cuál es tu deseo? <span className="text-destructive">*</span></Label>
               <Textarea
                 value={form.deseo}
                 onChange={e => set("deseo", e.target.value)}
