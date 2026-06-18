@@ -39,7 +39,7 @@ export default async function LoginPage({
             Recordá quién estás eligiendo ser
           </h2>
           <p className="text-[#bdbdbd] text-base mt-5 leading-[1.55]">
-            Conversá, estudiá, practicá y guardá memoria de tu proceso. Tu primera consulta al Coach es gratis.
+            Conversá, estudiá, practicá y guardá memoria de tu proceso.
           </p>
         </div>
 
