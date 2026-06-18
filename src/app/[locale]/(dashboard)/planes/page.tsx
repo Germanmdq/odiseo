@@ -95,7 +95,7 @@ export default function PlanesPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-2xl border bg-card shadow-lg overflow-hidden">
         {/* Header del formulario */}
         <div className="px-8 py-6 border-b" style={{ backgroundColor: "#E8401A" }}>
           <h1 className="text-2xl font-semibold text-white">Pedir un plan personalizado</h1>
@@ -107,7 +107,7 @@ export default function PlanesPage() {
         {/* Contenido del formulario */}
         <div className="px-8 py-8 space-y-8">
           {/* SECCIÓN 1 — Tu deseo */}
-          <section className="rounded-xl border bg-muted/30 p-6 space-y-4">
+          <section className="rounded-xl border bg-card shadow-md p-6 space-y-4">
             <h2 className="font-semibold text-base border-b pb-2">Tu deseo</h2>
             <div className="space-y-1.5">
               <Label>¿Qué querés manifestar? <span className="text-destructive">*</span></Label>
@@ -121,7 +121,7 @@ export default function PlanesPage() {
           </section>
 
           {/* SECCIÓN 2 — Tu vida actual */}
-          <section className="rounded-xl border bg-muted/30 p-6 space-y-4">
+          <section className="rounded-xl border bg-card shadow-md p-6 space-y-4">
             <h2 className="font-semibold text-base border-b pb-2">Tu vida actual</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -268,7 +268,7 @@ export default function PlanesPage() {
           </section>
 
           {/* SECCIÓN 3 — Tu práctica */}
-          <section className="rounded-xl border bg-muted/30 p-6 space-y-4">
+          <section className="rounded-xl border bg-card shadow-md p-6 space-y-4">
             <h2 className="font-semibold text-base border-b pb-2">Tu práctica</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -311,7 +311,7 @@ export default function PlanesPage() {
           </section>
 
           {/* SECCIÓN 4 — Extra */}
-          <section className="rounded-xl border bg-muted/30 p-6 space-y-4">
+          <section className="rounded-xl border bg-card shadow-md p-6 space-y-4">
             <h2 className="font-semibold text-base border-b pb-2">¿Algo más?</h2>
             <Textarea
               value={form.mensajeExtra}

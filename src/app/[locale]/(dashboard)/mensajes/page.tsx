@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { Mail, Clock, CheckCircle } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 interface PlanSolicitud {
   id: string
@@ -19,7 +21,7 @@ export default async function MensajesPage({
 }: {
   params: Promise<{ locale: string }>
 }) {
-  await params
+  const { locale } = await params
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -53,6 +55,9 @@ export default async function MensajesPage({
           Acá vas a ver las respuestas de Germán a tus solicitudes de plan. 
           Todavía no hiciste ninguna solicitud.
         </p>
+        <Button asChild style={{ backgroundColor: "#E8401A" }} className="text-white mt-2 cursor-pointer">
+          <Link href={`/${locale}/planes`}>Pedir mi primer plan</Link>
+        </Button>
       </div>
     )
   }
