@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from '@/components/ui/button'
-import { ArrowRight, Sparkles, Shield, Truck, Clock } from 'lucide-react'
+import { Sparkles, Shield, Truck, Clock } from 'lucide-react'
 
 interface FeatureItem {
   id: number
@@ -36,14 +35,7 @@ export function FeaturesGrid({ features }: FeaturesGridProps) {
                 <h3 className='mb-2 text-lg font-semibold'>{feature.title}</h3>
                 <p className='text-muted-foreground mb-4 text-sm'>{feature.description}</p>
 
-                <Button
-                  variant='link'
-                  size='sm'
-                  className='text-muted-foreground hover:text-foreground h-auto cursor-pointer !p-0 text-sm'
-                >
-                  Conocé más
-                  <ArrowRight className='ms-1.5 size-4' />
-                </Button>
+
               </CardContent>
             </Card>
           </article>
