@@ -375,7 +375,7 @@
       "getStarted": "Get Started Free"
     },
     "hero": {
-      "badge": "University of Imagination",
+      "badge": "The companion that keeps you in practice",
       "title1": "Odiseo",
       "title2": "",
       "subtitle": "Your space to study, practice and transform your life from within. Conversations with masters, guided scenes, complete library, unique workshops and a book you write yourself.",
@@ -460,9 +460,9 @@
       "title": "Frequently asked questions",
       "subtitle": "What people ask us most about Odiseo.",
       "q1": "What is Odiseo?",
-      "a1": "Odiseo is a platform to study and practice the law of imagination according to Neville Goddard. It has an AI coach, narrator, metaphysical bible, testimonials and guided plans.",
+      "a1": "Odiseo is a platform to study and practice imagination. It has an assistant, scene creator, source library, testimonials and more.",
       "q2": "Is it free?",
-      "a2": "Yes, you can start for free with no credit card.",
+      "a2": "It's free.",
       "q3": "Do I need to know who Neville Goddard is?",
       "a3": "No. Odiseo guides you from scratch, explaining each concept with examples and scenes.",
       "q4": "Does the Coach remember my conversations?",
@@ -483,7 +483,7 @@
     "talleres": {
       "eyebrow": "Included in your annual plan",
       "title": "What changes is not what you do. It's how you see yourself.",
-      "subtitle": "32 recordings. 4 workshops. A real conversation between Germán González and Taty Baldi about what no book will tell you.",
+      "subtitle": "4 workshops. A real conversation between Germán González and Taty Baldi about what no book will tell you.",
       "lessons": "8 lessons",
       "taller1Title": "The Law of Assumption",
       "taller1Desc": "The starting point that changes everything. Learn what it truly means to assume a desire as fulfilled, why feeling is everything, and how to start a daily practice that works. No detours, no empty theory.",
@@ -499,7 +499,7 @@
       "person1Role": "Founder of Odiseo",
       "person2Name": "Taty Baldi",
       "person2Role": "Co-facilitator",
-      "cta": "Access the workshops",
+      "cta": "Ingresar",
       "ctaNote": "Included in the annual plan · $47 USD"
     },
     "footer": {

@@ -154,7 +154,7 @@ export function HeroOdiseo() {
             {/* Badge */}
             <div className="hero-badge mb-6">
               <span className="inline-block bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-medium px-4 py-1.5 rounded-full tracking-wider">
-                Universidad de la Imaginación
+                El compañero que te mantiene en práctica
               </span>
             </div>
 

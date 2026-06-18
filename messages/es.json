@@ -375,7 +375,7 @@
       "getStarted": "Entrá gratis"
     },
     "hero": {
-      "badge": "Universidad de la Imaginación",
+      "badge": "El compañero que te mantiene en práctica",
       "title1": "Odiseo",
       "title2": "",
       "subtitle": "Tu espacio para estudiar, practicar y transformar tu vida desde adentro. Conversaciones con maestros, escenas guiadas, biblioteca completa, talleres únicos y un libro que escribís vos.",
@@ -460,9 +460,9 @@
       "title": "Preguntas frecuentes",
       "subtitle": "Lo que más nos preguntan sobre Odiseo.",
       "q1": "¿Qué es Odiseo?",
-      "a1": "Odiseo es una plataforma para estudiar y practicar la ley de imaginación según Neville Goddard. Tiene coach con IA, narrador, biblia metafísica, testimonios y planes guiados.",
+      "a1": "Odiseo es una plataforma para estudiar y practicar la imaginación. Tiene asistente, creador de escenas, biblioteca de fuentes, testimonios y más.",
       "q2": "¿Es gratis?",
-      "a2": "Sí, podés empezar gratis sin tarjeta de crédito.",
+      "a2": "Es gratis.",
       "q3": "¿Necesito saber quién es Neville Goddard?",
       "a3": "No. Odiseo te guía desde cero, explicando cada concepto con ejemplos y escenas.",
       "q4": "¿El Coach recuerda mis conversaciones?",
@@ -483,7 +483,7 @@
     "talleres": {
       "eyebrow": "Incluido en tu suscripción anual",
       "title": "Lo que cambia no es lo que hacés. Es cómo te ves.",
-      "subtitle": "32 grabaciones. 4 talleres. Una conversación real entre Germán González y Taty Baldi sobre lo que nadie te dice en los libros.",
+      "subtitle": "4 talleres. Una conversación real entre Germán González y Taty Baldi sobre lo que nadie te dice en los libros.",
       "lessons": "8 lecciones",
       "taller1Title": "La Ley de la Asunción",
       "taller1Desc": "El punto de partida que cambia todo. Aprendés qué significa realmente asumir un deseo como cumplido, por qué el sentimiento lo es todo, y cómo empezar una práctica diaria que funcione. Sin rodeos, sin teoría vacía.",
@@ -499,7 +499,7 @@
       "person1Role": "Fundador de Odiseo",
       "person2Name": "Taty Baldi",
       "person2Role": "Co-facilitadora",
-      "cta": "Acceder a los talleres",
+      "cta": "Ingresar",
       "ctaNote": "Incluidos en el plan anual · $47 USD / $55.000 ARS"
     },
     "footer": {

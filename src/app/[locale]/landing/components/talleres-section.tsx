@@ -2,16 +2,35 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { useTranslations } from 'next-intl'
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export function TalleresSection() {
   const t = useTranslations("landing.talleres")
   const params = useParams()
   const locale = (params.locale as string) ?? "es"
+  const router = useRouter()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user)
+    })
+  }, [])
+
+  const handleCTAClick = () => {
+    if (isLoggedIn) {
+      router.push(`/${locale}/talleres`)
+    } else {
+      router.push(`/${locale}/auth/login`)
+    }
+  }
 
   const talleres = [
     { num: 1, title: t("taller1Title"), desc: t("taller1Desc") },
@@ -114,10 +133,9 @@ export function TalleresSection() {
 
           {/* CTA */}
           <div className="text-center space-y-2">
-            <Button size="lg" className="cursor-pointer" asChild>
-              <Link href={`/${locale}/registro`}>{t("cta")}</Link>
+            <Button size="lg" className="cursor-pointer" onClick={handleCTAClick}>
+              {t("cta")}
             </Button>
-            <p className="text-xs text-muted-foreground">{t("ctaNote")}</p>
           </div>
         </div>
       </div>
