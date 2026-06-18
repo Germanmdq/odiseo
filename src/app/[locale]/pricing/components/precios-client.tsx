@@ -4,7 +4,7 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Check, Sparkles, Loader2, ArrowLeft } from "lucide-react"
+import { Check, Sparkles, ArrowLeft } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -147,30 +147,32 @@ function PlanCard({
           </Button>
         ) : (
           <>
-            <Button
-              className="w-full text-white hover:opacity-90 transition-opacity border-transparent cursor-pointer"
-              size="lg"
-              style={{ backgroundColor: "#009EE3" }}
+            <button
               onClick={pagarConMP}
               disabled={mpEstado === "loading" || ppEstado === "loading"}
+              className="w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
+              style={{ backgroundColor: "#E8401A" }}
             >
-              {mpEstado === "loading" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {mpEstado === "error" ? "Error — intentá de nuevo" : "Pagar con MercadoPago"}
-            </Button>
+              {mpEstado === "loading" ? "Procesando..." : "Pagar con MercadoPago"}
+            </button>
 
-            <Button
-              className="w-full font-medium border-2 border-foreground/20 hover:border-foreground/40 cursor-pointer"
-              variant="outline"
-              size="lg"
+            <button
               onClick={pagarConPayPal}
               disabled={mpEstado === "loading" || ppEstado === "loading"}
+              className="w-full py-2.5 rounded-lg text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              style={{ backgroundColor: "#FFC439", color: "#003087" }}
             >
               {ppEstado === "loading" ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                "Procesando..."
               ) : (
-                "Pagar con PayPal"
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#003087">
+                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.59 3.025-2.566 6.082-8.558 6.082H9.824l-1.42 9.02h3.77c.524 0 .968-.382 1.05-.9l.058-.303 1.013-6.428.065-.353c.082-.518.527-.9 1.05-.9h.663c4.296 0 7.662-1.747 8.647-6.797.41-2.104.203-3.86-.499-5.134z"/>
+                  </svg>
+                  PayPal
+                </>
               )}
-            </Button>
+            </button>
           </>
         )}
       </CardFooter>
@@ -227,7 +229,7 @@ export function PreciosClient({ locale, userId }: PreciosClientProps) {
           </p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
           {PLAN_ORDER.map((planId) => (
             <PlanCard
               key={planId}

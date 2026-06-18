@@ -3,7 +3,6 @@
 import { Share2 } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
 
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,10 +43,13 @@ export function ReutilizarEnButton({ content, origen }: ReutilizarEnButtonProps)
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="shrink-0 gap-1.5 h-7 px-2 text-xs">
+        <button
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: "#E8401A" }}
+        >
           <Share2 className="size-3.5" />
-          Reutilizar en…
-        </Button>
+          Reutilizar en...
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
         <p className="px-2 py-1.5 text-xs text-muted-foreground font-medium">

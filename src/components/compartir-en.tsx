@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Share2, Bookmark, BookmarkCheck } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
 
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +32,7 @@ const DESTINOS = [
   { label: "Mi libro", path: "/mi-libro" },
 ]
 
-export function CompartirEn({ contenido, titulo, fuenteId, origen = "compartir", className, size = "sm", variante = "completo", label = "Compartir en…" }: Props) {
+export function CompartirEn({ contenido, titulo, fuenteId, origen = "compartir", className, size = "sm", variante = "completo", label = "Reutilizar en..." }: Props) {
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) ?? "es"
@@ -78,17 +77,17 @@ export function CompartirEn({ contenido, titulo, fuenteId, origen = "compartir",
   }
 
   const SaveIcon = saveState === "saved" ? BookmarkCheck : Bookmark
-  const btnClass = size === "xs"
-    ? "shrink-0 gap-1 h-6 px-2 text-xs"
-    : "shrink-0 gap-1.5 h-7 px-2 text-xs"
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className={`${btnClass} ${className ?? ""}`}>
+        <button
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 ${className ?? ""}`}
+          style={{ backgroundColor: "#E8401A" }}
+        >
           <Share2 className="size-3.5" />
           {label}
-        </Button>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
         <p className="px-2 py-1.5 text-xs text-muted-foreground font-medium">Llevar este contenido a…</p>
