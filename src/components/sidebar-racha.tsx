@@ -14,7 +14,7 @@ export function SidebarRacha() {
 
   if (racha === 0) return null
 
-  const tooltip = `Tu racha actual es de ${racha} día${racha !== 1 ? "s" : ""}. ¡Evaluarte hoy la mantiene viva!`
+  const tooltip = `Tu racha actual es de ${racha} día${racha !== 1 ? "s" : ""}. ¡Ponerte a prueba hoy la mantiene viva!`
 
   return (
     <div

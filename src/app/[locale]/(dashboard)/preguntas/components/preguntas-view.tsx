@@ -134,7 +134,7 @@ function SetupScreen({
 
         <div className="space-y-2">
           <label className="text-xl font-semibold block">
-            ¿Sobre qué tema querés evaluarte?
+            ¿Sobre qué tema querés ponerte a prueba?
           </label>
           <input
             type="text"
@@ -176,7 +176,7 @@ function SetupScreen({
         </div>
 
         <Button size="lg" className="w-full" onClick={handleStart} disabled={!tema.trim()}>
-          Empezar evaluación
+          Empezar
         </Button>
       </div>
     </div>
@@ -405,7 +405,7 @@ function ResultadoScreen({
       )}
 
       <Button onClick={onReintentar} size="lg">
-        Evaluar otro tema
+        Elegir otro tema
       </Button>
     </div>
   )

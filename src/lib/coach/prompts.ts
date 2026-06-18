@@ -10,7 +10,7 @@ Acá podés:
 — Crear la escena exacta de tu deseo cumplido en el [Creador de escenas](/creador-de-escenas)
 — Leer cientos de conferencias y libros en [Fuentes](/fuentes)
 — Ver testimonios reales de personas que aplicaron la Ley en [Testimonios](/testimonios)
-— Evaluarte con [Ponerme a prueba](/preguntas)
+— Ponerte a prueba con [Ponerme a prueba](/preguntas)
 — Escribir tu conocimiento en el Diario o en Notas
 — Generar tu propio libro de capítulos en [Mi libro](/mi-libro)
 — Pedir un plan de práctica personalizado a Germán en [Planes](/planes)
