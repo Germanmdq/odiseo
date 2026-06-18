@@ -45,9 +45,9 @@ export function LoginForm1({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome back</CardTitle>
+          <CardTitle className="text-xl">Bienvenido de vuelta</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Ingresá tu email para acceder
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,7 +64,7 @@ export function LoginForm1({
                         <FormControl>
                           <Input
                             type="email"
-                            placeholder="test@example.com"
+                            placeholder="hola@ejemplo.com"
                             {...field}
                           />
                         </FormControl>
@@ -78,12 +78,12 @@ export function LoginForm1({
                     render={({ field }) => (
                       <FormItem>
                         <div className="flex items-center">
-                          <FormLabel>Password</FormLabel>
+                          <FormLabel>Contraseña</FormLabel>
                           <a
                             href="/auth/forgot-password"
                             className="ml-auto text-sm underline-offset-4 hover:underline"
                           >
-                            Forgot your password?
+                            ¿Olvidaste tu contraseña?
                           </a>
                         </div>
                         <FormControl>
@@ -94,7 +94,7 @@ export function LoginForm1({
                     )}
                   />
                   <Button type="submit" className="w-full cursor-pointer">
-                    Login
+                    Ingresar
                   </Button>
 
                   <Button variant="outline" className="w-full cursor-pointer" type="button">
@@ -104,13 +104,13 @@ export function LoginForm1({
                         fill="currentColor"
                       />
                     </svg>
-                    Login with Google
+                    Ingresar con Google
                   </Button>
                 </div>
                 <div className="text-center text-sm">
-                  Don&apos;t have an account?{" "}
+                  ¿No tenés cuenta?{" "}
                   <a href="/auth/sign-up" className="underline underline-offset-4">
-                    Sign up
+                    Registrate
                   </a>
                 </div>
               </div>
@@ -118,10 +118,6 @@ export function LoginForm1({
           </Form>
         </CardContent>
       </Card>
-      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
-      </div>
     </div>
   )
 }

@@ -1,6 +1,8 @@
 import { LoginForm } from "./components/login-form"
 import Link from "next/link"
 import Image from "next/image"
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
 
 export default async function LoginPage({
   params,
@@ -8,6 +10,9 @@ export default async function LoginPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) redirect(`/${locale}/inicio`)
 
   return (
     <div className="min-h-svh grid md:grid-cols-[1.05fr_0.95fr]">

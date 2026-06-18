@@ -55,6 +55,11 @@ const nextConfig: NextConfig = {
         destination: '/dashboard',
         permanent: true,
       },
+      {
+        source: '/:locale/inicio',
+        destination: '/:locale/dashboard',
+        permanent: false,
+      },
     ];
   },
 };

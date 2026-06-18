@@ -20,7 +20,7 @@ export function ForgotPasswordForm1({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Forgot your password?</CardTitle>
+          <CardTitle className="text-xl">¿Olvidaste tu contraseña?</CardTitle>
           <CardDescription>
             Enter your email address and we&apos;ll send you a link to reset your password
           </CardDescription>
