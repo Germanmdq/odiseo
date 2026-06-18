@@ -40,7 +40,7 @@ export function LoginForm() {
     void supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/${locale}/auth/callback?next=/${locale}/dashboard`,
+        redirectTo: `${window.location.origin}/${locale}/auth/callback?next=/${locale}/registro`,
       },
     })
   }

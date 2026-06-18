@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       }],
       back_urls: {
         success: `${process.env.NEXT_PUBLIC_URL}/es/suscripcion/exito?plan=${plan}&gateway=mercadopago`,
-        failure: `${process.env.NEXT_PUBLIC_URL}/es/precios?error=pago_fallido`,
+        failure: `${process.env.NEXT_PUBLIC_URL}/es/pricing?error=pago_fallido`,
         pending: `${process.env.NEXT_PUBLIC_URL}/es/suscripcion/pendiente`,
       },
       auto_return: "approved",

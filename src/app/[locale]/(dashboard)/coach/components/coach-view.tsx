@@ -187,16 +187,31 @@ export function CoachView() {
 
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
+      let accumulatedContent = ""
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
 
         const chunk = decoder.decode(value, { stream: true })
+        accumulatedContent += chunk
         updateMessage(authorId, assistantMessage.id, (message) => ({
           ...message,
           content: `${message.content}${chunk}`,
         }))
+      }
+
+      if (accumulatedContent && accumulatedContent.length > 50) {
+        fetch("/api/memoria", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contenido: accumulatedContent,
+            origenTipo: "coach",
+            origenMeta: { autorId: authorId, preguntaUsuario: content },
+            source: `Coach — ${currentAuthor?.name ?? authorId}`,
+          }),
+        }).catch(() => {})
       }
 
       sessionStorage.setItem(

@@ -149,7 +149,7 @@ async function streamPlainTextFromNvidia(response: Response, userId?: string, au
               try {
                 await registrarActividad({
                   userId,
-                  eventType: "chat",
+                  eventType: "coach_message",
                   titleEs: `Conversación con ${autorId}`,
                   metadata: { autorId },
                 })

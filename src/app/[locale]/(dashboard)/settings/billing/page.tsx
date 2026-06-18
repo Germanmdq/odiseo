@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Check, Loader2 } from "lucide-react"
 import { PLANES, type PlanId } from "@/lib/planes"
+import { useLocale } from "next-intl"
 
 type EstadoSuscripcion = {
   suscripto: boolean
@@ -33,6 +34,7 @@ function PasarelaLabel({ pasarela }: { pasarela: string | null }) {
 }
 
 export default function SuscripcionPage() {
+  const locale = useLocale()
   const [estado, setEstado] = React.useState<EstadoSuscripcion | null>(null)
   const [cargando, setCargando] = React.useState(true)
 
@@ -105,7 +107,7 @@ export default function SuscripcionPage() {
             </CardHeader>
             <CardContent>
               <Button asChild variant="outline">
-                <Link href="/es/pricing">Ver todos los planes</Link>
+                <Link href={`/${locale}/pricing`}>Ver todos los planes</Link>
               </Button>
             </CardContent>
           </Card>
@@ -138,7 +140,7 @@ export default function SuscripcionPage() {
               ))}
             </ul>
             <Button asChild>
-              <Link href="/es/pricing">Ver planes</Link>
+              <Link href={`/${locale}/pricing`}>Ver planes</Link>
             </Button>
           </CardContent>
         </Card>

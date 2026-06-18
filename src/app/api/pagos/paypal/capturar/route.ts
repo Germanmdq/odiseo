@@ -18,7 +18,7 @@ async function getPaypalToken() {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const orderId = searchParams.get("token")
-  if (!orderId) redirect("/es/precios?error=pago_fallido")
+  if (!orderId) redirect("/es/pricing?error=pago_fallido")
 
   const token = await getPaypalToken()
   
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
   })
 
   const data = await res.json()
-  if (data.status !== "COMPLETED") redirect("/es/precios?error=pago_fallido")
+  if (data.status !== "COMPLETED") redirect("/es/pricing?error=pago_fallido")
 
   const customId = data.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id ?? ""
   const [userId, plan] = customId.split("|")

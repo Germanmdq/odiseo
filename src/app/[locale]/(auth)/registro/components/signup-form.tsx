@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-export function SignupForm() {
+export function SignupForm({ userId }: { userId?: string }) {
   const t = useTranslations("auth.registro")
   const locale = useLocale()
   const router = useRouter()
@@ -50,12 +50,41 @@ export function SignupForm() {
     })
   }
 
+  function handleUpdateName(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError("")
+
+    const formData = new FormData(event.currentTarget)
+    const nombre = String(formData.get("nombre_preferido") || "")
+
+    if (!nombre.trim()) {
+      setError("Por favor, ingresá tu nombre")
+      return
+    }
+
+    startTransition(async () => {
+      const supabase = createClient()
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ nombre_preferido: nombre })
+        .eq("id", userId)
+
+      if (updateError) {
+        setError(updateError.message)
+        return
+      }
+
+      router.replace(`/${locale}/dashboard`)
+      router.refresh()
+    })
+  }
+
   function handleGoogle() {
     const supabase = createClient()
     void supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/${locale}/auth/callback?next=/${locale}/dashboard`,
+        redirectTo: `${window.location.origin}/${locale}/auth/callback?next=/${locale}/registro`,
       },
     })
   }
@@ -73,6 +102,48 @@ export function SignupForm() {
         >
           Volver al login
         </Link>
+      </div>
+    )
+  }
+
+  if (userId) {
+    return (
+      <div>
+        <h1 className="text-[30px] font-bold tracking-[-0.02em] text-black leading-tight">
+          ¡Casi listo!
+        </h1>
+        <p className="text-[#777] text-[15px] mt-2.5">
+          Ingresá tu nombre para comenzar a usar Odiseo.
+        </p>
+
+        <form onSubmit={handleUpdateName} className="flex flex-col gap-4 mt-7">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="nombre_preferido" className="text-sm font-semibold text-black">Nombre</label>
+            <input
+              id="nombre_preferido"
+              name="nombre_preferido"
+              type="text"
+              placeholder="German Gonzalez"
+              autoComplete="name"
+              required
+              className="border-2 border-black rounded-xl px-4 py-2.5 text-sm text-black placeholder:text-[#ABABAB] outline-none focus:border-[#FF2B0A] transition-colors"
+            />
+          </div>
+
+          {error && (
+            <p className="rounded-xl border border-[#FF2B0A]/30 bg-[#FF2B0A]/08 px-3 py-2 text-sm text-[#FF2B0A]">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={isPending}
+            className="w-full bg-[#FF2B0A] text-white rounded-full py-3 text-sm font-semibold shadow-[0_4px_14px_rgba(255,43,10,0.4)] hover:bg-[#d42209] hover:shadow-[0_6px_20px_rgba(255,43,10,0.5)] transition-all disabled:opacity-60 cursor-pointer mt-1"
+          >
+            {isPending ? "Guardando..." : "Comenzar"}
+          </button>
+        </form>
       </div>
     )
   }

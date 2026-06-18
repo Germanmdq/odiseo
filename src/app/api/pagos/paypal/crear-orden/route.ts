@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       }],
       application_context: {
         return_url: `${process.env.NEXT_PUBLIC_URL}/api/pagos/paypal/capturar`,
-        cancel_url: `${process.env.NEXT_PUBLIC_URL}/es/precios?error=pago_cancelado`,
+        cancel_url: `${process.env.NEXT_PUBLIC_URL}/es/pricing?error=pago_cancelado`,
       },
     }),
   })

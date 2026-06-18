@@ -1,6 +1,8 @@
 import { SignupForm } from "./components/signup-form"
 import Link from "next/link"
 import Image from "next/image"
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
 
 export default async function RegistroPage({
   params,
@@ -8,6 +10,20 @@ export default async function RegistroPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("nombre_preferido")
+      .eq("id", user.id)
+      .maybeSingle()
+
+    if (profile?.nombre_preferido) {
+      redirect(`/${locale}/dashboard`)
+    }
+  }
 
   return (
     <div className="min-h-svh grid md:grid-cols-[1.05fr_0.95fr]">
@@ -52,7 +68,7 @@ export default async function RegistroPage({
               <Image src="/logo-odiseo.png" alt="Odiseo" width={52} height={52} className="rounded-full" />
             </Link>
           </div>
-          <SignupForm />
+          <SignupForm userId={user?.id} />
         </div>
       </main>
     </div>

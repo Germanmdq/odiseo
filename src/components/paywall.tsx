@@ -11,7 +11,7 @@ export function Paywall({ locale }: { locale: string }) {
       </div>
 
       <Link
-        href={`/${locale}/precios`}
+        href={`/${locale}/pricing`}
         className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-semibold text-white transition-opacity hover:opacity-90 cursor-pointer"
         style={{ backgroundColor: "#E8401A" }}
       >

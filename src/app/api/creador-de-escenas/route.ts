@@ -137,7 +137,7 @@ async function streamPlainTextFromNvidia(response: Response, userId?: string) {
               try {
                 await registrarActividad({
                   userId,
-                  eventType: "chat",
+                  eventType: "escena_creada",
                   titleEs: "Escena creada",
                 })
               } catch (e) {

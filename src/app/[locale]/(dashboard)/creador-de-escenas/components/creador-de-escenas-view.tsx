@@ -99,11 +99,26 @@ export function CreadorDeEscenasView() {
 
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
+      let accumulatedContent = ""
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
         const chunk = decoder.decode(value, { stream: true })
+        accumulatedContent += chunk
         updateMessage(assistantMessage.id, (m) => ({ ...m, content: `${m.content}${chunk}` }))
+      }
+
+      if (accumulatedContent && accumulatedContent.length > 50) {
+        fetch("/api/memoria", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contenido: accumulatedContent,
+            origenTipo: "creador",
+            origenMeta: { preguntaUsuario: content },
+            source: "Creador de escenas",
+          }),
+        }).catch(() => {})
       }
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : t("errors.connection")
