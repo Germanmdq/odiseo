@@ -166,7 +166,8 @@ function PlanCard({
             </Button>
 
             <Button
-              className="w-full bg-[#003087] hover:bg-[#003087]/90 text-white"
+              className="w-full font-medium border-2"
+              variant="outline"
               size="lg"
               onClick={pagarConPayPal}
               disabled={mpEstado === "loading" || ppEstado === "loading"}

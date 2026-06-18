@@ -64,11 +64,11 @@ export default function SuscripcionPage() {
 
       {estado?.suscripto && planData ? (
         <>
-          <Card className="border-green-500/50 bg-green-50/30">
+          <Card className="border-[#E8401A]/50 bg-[#E8401A]/5">
             <CardHeader>
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <CardTitle>Plan activo</CardTitle>
-                <Badge className="bg-green-600 hover:bg-green-600">{planData.nombre}</Badge>
+                <Badge className="bg-[#E8401A] hover:bg-[#E8401A]/90 text-white border-transparent">{planData.nombre}</Badge>
               </div>
               <CardDescription>{planData.descripcion}</CardDescription>
             </CardHeader>
@@ -88,7 +88,7 @@ export default function SuscripcionPage() {
               <div className="pt-2 space-y-1">
                 {planData.features.map((f) => (
                   <div key={f} className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 shrink-0 text-green-600" />
+                    <Check className="h-4 w-4 shrink-0 text-[#E8401A]" />
                     {f}
                   </div>
                 ))}
@@ -124,11 +124,12 @@ export default function SuscripcionPage() {
           <CardContent className="space-y-4">
             <ul className="space-y-2">
               {[
-                "Coach IA con todos los maestros",
+                "Coach con todos los maestros",
                 "Creador de escenas ilimitado",
                 "Biblioteca de fuentes completa",
                 "Memoria personal",
-                "Evaluaciones de conocimientos",
+                "Evaluaciones de conocimiento",
+                "Mi libro personal",
               ].map((f) => (
                 <li key={f} className="flex items-center gap-2 text-sm">
                   <Check className="h-4 w-4 shrink-0 text-primary" />

@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
     try {
       raw = await callChat(prompt)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Error al llamar a la IA"
+      const msg = err instanceof Error ? err.message : "Error al llamar al asistente"
       return NextResponse.json({ error: msg }, { status: 502 })
     }
 
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     } catch {
       if (attempt === 0) continue
       return NextResponse.json(
-        { error: "La IA no devolvió un JSON válido. Intentá de nuevo." },
+        { error: "El asistente no devolvió un JSON válido. Intentá de nuevo." },
         { status: 502 }
       )
     }

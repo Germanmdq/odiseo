@@ -49,7 +49,7 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
   const [loadingCapitulos, setLoadingCapitulos] = React.useState(false)
   const [creandoLibro, setCreandoLibro] = React.useState(false)
 
-  // IA Generation State
+  // Asistente Generation State
   const [tema, setTema] = React.useState("")
   const [generando, setGenerando] = React.useState(false)
   const [draftTitulo, setDraftTitulo] = React.useState("")
@@ -424,10 +424,10 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
                 </div>
               </div>
             ) : (
-              /* Agregar capítulo con IA */
+              /* Agregar capítulo con Asistente */
               <div className="p-4 md:p-6 border-b bg-muted/20 shrink-0">
                 <p className="text-xs md:text-sm font-medium mb-3">
-                  Agregar capítulo con Asistente IA
+                  Agregar capítulo con Asistente
                 </p>
                 <div className="flex gap-2">
                   <input
