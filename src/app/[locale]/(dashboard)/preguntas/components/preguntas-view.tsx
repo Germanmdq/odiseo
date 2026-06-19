@@ -384,7 +384,7 @@ function ResultadoScreen({
           <div className="rounded-lg border p-5 space-y-4">
             {respuesta_neville.pregunta_original && (
               <p className="italic text-sm text-muted-foreground">
-                "{respuesta_neville.pregunta_original}"
+                “{respuesta_neville.pregunta_original}”
               </p>
             )}
             <article className="space-y-3 text-sm leading-relaxed">

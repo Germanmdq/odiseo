@@ -64,9 +64,13 @@ export function NavMain({
           type="button"
           className={[
             "flex w-full items-center justify-between rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-150 cursor-pointer",
-            isGroupOpen
-              ? "bg-black text-white"
-              : "bg-[#FF2B0A] text-white hover:bg-[#e02500]",
+            isMobile
+              ? isGroupOpen
+                ? "bg-white text-black"
+                : "bg-white/[0.055] text-white hover:bg-white/[0.09]"
+              : isGroupOpen
+                ? "bg-black text-white"
+                : "bg-[#FF2B0A] text-white hover:bg-[#e02500]",
           ].join(" ")}
         >
           <span>{label}</span>
@@ -81,7 +85,7 @@ export function NavMain({
 
       {/* Items desplegados */}
       <CollapsibleContent>
-        <div className="mt-1 flex flex-col gap-0.5 pl-2">
+        <div className={["mt-1 flex flex-col gap-0.5", isMobile ? "pl-0" : "pl-2"].join(" ")}>
           {items.map((item) => {
             const active = normalizedPathname === item.url || item.isActive
             return (
@@ -91,9 +95,13 @@ export function NavMain({
                 onClick={closeMobileSidebar}
                 className={[
                   "flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-150 cursor-pointer",
-                  active
-                    ? "bg-[#FF2B0A] text-white"
-                    : "text-black hover:bg-[#FF2B0A]/10 hover:text-[#FF2B0A]",
+                  isMobile
+                    ? active
+                      ? "bg-[#FF2B0A] text-white"
+                      : "text-white/70 hover:bg-white/[0.08] hover:text-white"
+                    : active
+                      ? "bg-[#FF2B0A] text-white"
+                      : "text-black hover:bg-[#FF2B0A]/10 hover:text-[#FF2B0A]",
                 ].join(" ")}
               >
                 {item.icon && <item.icon className="size-4 shrink-0" />}

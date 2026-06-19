@@ -1,24 +1,29 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useSyncExternalStore } from "react"
+
+function subscribeToFullscreen(callback: () => void) {
+  document.addEventListener("fullscreenchange", callback)
+
+  return () => {
+    document.removeEventListener("fullscreenchange", callback)
+  }
+}
+
+function getFullscreenSnapshot() {
+  return !!document.fullscreenElement
+}
+
+function getServerFullscreenSnapshot() {
+  return false
+}
 
 export function useFullscreen() {
-  const [isFullscreen, setIsFullscreen] = useState(false)
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
-    }
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange)
-    
-    // Initial check
-    setIsFullscreen(!!document.fullscreenElement)
-
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange)
-    }
-  }, [])
+  const isFullscreen = useSyncExternalStore(
+    subscribeToFullscreen,
+    getFullscreenSnapshot,
+    getServerFullscreenSnapshot
+  )
 
   const enterFullscreen = () => {
     if (!document.fullscreenElement) {

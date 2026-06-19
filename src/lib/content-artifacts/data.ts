@@ -121,13 +121,11 @@ export function toContentArtifact(row: ContentArtifactRow): ContentArtifact {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function applySearch<T>(queryBuilder: T, query?: string): T {
   const search = query?.trim()
   if (!search) return queryBuilder
 
   const safeSearch = search.replace(/%/g, "\\%").replace(/,/g, " ")
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (queryBuilder as any).or(
     `title.ilike.%${safeSearch}%,body.ilike.%${safeSearch}%,pregunta_original.ilike.%${safeSearch}%`
   ) as T

@@ -21,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import Link from "next/link"
 
 const loginFormSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -79,12 +80,12 @@ export function LoginForm1({
                       <FormItem>
                         <div className="flex items-center">
                           <FormLabel>Contraseña</FormLabel>
-                          <a
+                          <Link
                             href="/auth/forgot-password"
                             className="ml-auto text-sm underline-offset-4 hover:underline"
                           >
                             ¿Olvidaste tu contraseña?
-                          </a>
+                          </Link>
                         </div>
                         <FormControl>
                           <Input type="password" {...field} />
@@ -109,9 +110,9 @@ export function LoginForm1({
                 </div>
                 <div className="text-center text-sm">
                   ¿No tenés cuenta?{" "}
-                  <a href="/auth/sign-up" className="underline underline-offset-4">
+                  <Link href="/auth/sign-up" className="underline underline-offset-4">
                     Registrate
-                  </a>
+                  </Link>
                 </div>
               </div>
             </form>

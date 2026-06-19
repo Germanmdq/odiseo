@@ -71,7 +71,7 @@ export function CapituloItem({ capitulo, numero, onDelete, onSave }: CapituloIte
           ) : (
             <div className="p-4">
               <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/80">
-                {capitulo.contenido || <em className="text-muted-foreground">Capítulo vacío. Hacé clic en "Editar" para escribir.</em>}
+                {capitulo.contenido || <em className="text-muted-foreground">Capítulo vacío. Hacé clic en &quot;Editar&quot; para escribir.</em>}
               </p>
               <div className="flex gap-2 mt-4 pt-3 border-t">
                 <Button variant="outline" size="sm" type="button" onClick={() => setEditando(true)}>

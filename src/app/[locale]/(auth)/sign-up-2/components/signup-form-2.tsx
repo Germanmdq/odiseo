@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import Link from "next/link"
 
 export function SignupForm2({
   className,
@@ -74,9 +75,9 @@ export function SignupForm2({
       </div>
       <div className="text-center text-sm">
         Already have an account?{" "}
-        <a href="/auth/sign-in-2" className="underline underline-offset-4">
+        <Link href="/auth/sign-in-2" className="underline underline-offset-4">
           Sign in
-        </a>
+        </Link>
       </div>
     </form>
   )

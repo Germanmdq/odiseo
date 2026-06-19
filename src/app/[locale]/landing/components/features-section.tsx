@@ -12,6 +12,7 @@ import {
   ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -92,9 +93,11 @@ export function FeaturesSection() {
               </div>
             </div>
             <div className="w-full md:w-[40%] shrink-0">
-              <img
+              <Image
                 src="/ilustracion-conversacion.jpg"
                 alt=""
+                width={640}
+                height={640}
                 className="w-full h-full object-contain"
                 style={{ mixBlendMode: "multiply" }}
               />
@@ -106,9 +109,11 @@ export function FeaturesSection() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="w-full md:w-[40%] shrink-0 order-last md:order-first">
-              <img
+              <Image
                 src="/ilustracion-mente.jpg"
                 alt=""
+                width={640}
+                height={640}
                 className="w-full h-full object-contain"
                 style={{ mixBlendMode: "multiply" }}
               />

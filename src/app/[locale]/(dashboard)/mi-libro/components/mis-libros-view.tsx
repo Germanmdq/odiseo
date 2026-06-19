@@ -376,7 +376,7 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
                     {generando ? (
                       <>
                         <Loader2 className="size-4 animate-spin text-[#E8401A]" />
-                        Generando capítulo sobre "{tema}"…
+                        {`Generando capítulo sobre "${tema}"…`}
                       </>
                     ) : (
                       <>

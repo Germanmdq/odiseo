@@ -70,7 +70,7 @@ export function HeroSection() {
             <div className="relative rounded-xl border bg-card shadow-2xl">
               {/* Light mode dashboard image */}
               <Image
-                src="/dashboard-light.png"
+                src="/landing/screenshot-1.jpg"
                 alt={t("dashboardAlt")}
                 width={1200}
                 height={800}
@@ -80,7 +80,7 @@ export function HeroSection() {
 
               {/* Dark mode dashboard image */}
               <Image
-                src="/dashboard-dark.png"
+                src="/landing/screenshot-2.jpg"
                 alt={t("dashboardAlt")}
                 width={1200}
                 height={800}

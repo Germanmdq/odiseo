@@ -81,9 +81,9 @@ export default async function DashboardPage({
   const saludo = getSaludo(hourAR)
 
   return (
-    <div className="relative mx-auto grid min-h-[calc(100vh-6.5rem)] w-full max-w-7xl grid-rows-[auto_1fr] gap-4 overflow-hidden px-4 pb-4 lg:px-6">
+    <div className="relative mx-auto grid w-full max-w-7xl gap-4 px-4 pb-4 lg:min-h-[calc(100vh-6.5rem)] lg:grid-rows-[auto_1fr] lg:overflow-hidden lg:px-6">
       {/* Hero */}
-      <section className="relative min-h-[190px] overflow-hidden rounded-[20px] bg-[#F4F4F4] shadow-[0_4px_6px_rgba(0,0,0,0.07),0_10px_15px_rgba(0,0,0,0.1),0_20px_40px_rgba(0,0,0,0.08)] p-5 sm:min-h-[210px] sm:p-6 lg:min-h-[230px] lg:p-7">
+      <section className="relative min-h-[190px] overflow-hidden rounded-[20px] bg-[#F4F4F4] p-5 shadow-[0_4px_6px_rgba(0,0,0,0.07),0_10px_15px_rgba(0,0,0,0.1),0_20px_40px_rgba(0,0,0,0.08)] sm:min-h-[210px] sm:p-6 lg:min-h-[230px] lg:p-7">
         {/* Background */}
         <div className="absolute inset-0 bg-black" />
 

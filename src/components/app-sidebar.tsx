@@ -94,7 +94,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [openGroup, setOpenGroup] = React.useState<string | null>(null)
   const locale = useLocale()
   const pathname = usePathname()
-  const { setOpenMobile } = useSidebar()
+  const { isMobile, setOpenMobile } = useSidebar()
   const normalizedPathname = pathname.replace(/^\/(es|en)(?=\/|$)/, "") || "/"
 
   React.useEffect(() => {
@@ -189,9 +189,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   }}
                   className={[
                     "flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-150 cursor-pointer w-full",
-                    normalizedPathname === item.url
-                      ? "bg-black text-white"
-                      : "bg-[#FF2B0A] text-white hover:bg-[#e02500]",
+                    isMobile
+                      ? normalizedPathname === item.url
+                        ? "bg-white text-black"
+                        : "bg-white/[0.055] text-white hover:bg-white/[0.09]"
+                      : normalizedPathname === item.url
+                        ? "bg-black text-white"
+                        : "bg-[#FF2B0A] text-white hover:bg-[#e02500]",
                   ].join(" ")}
                 >
                   {Icon && <Icon className="size-4 shrink-0" />}

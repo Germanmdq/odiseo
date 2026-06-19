@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
+import Link from "next/link"
 
 const signupFormSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -177,9 +178,9 @@ export function SignupForm1({
                 </div>
                 <div className="text-center text-sm">
                   Already have an account?{" "}
-                  <a href="/auth/sign-in" className="underline underline-offset-4">
+                  <Link href="/auth/sign-in" className="underline underline-offset-4">
                     Sign in
-                  </a>
+                  </Link>
                 </div>
               </div>
             </form>

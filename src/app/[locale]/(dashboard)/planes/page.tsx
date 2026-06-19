@@ -99,10 +99,10 @@ export default function PlanesPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto w-full min-w-0 max-w-2xl px-4 py-4 sm:py-8">
       <div className="rounded-2xl border bg-card shadow-lg overflow-hidden">
         {/* Header del formulario */}
-        <div className="px-8 py-6 border-b" style={{ backgroundColor: "#E8401A" }}>
+        <div className="border-b px-5 py-5 sm:px-8 sm:py-6" style={{ backgroundColor: "#E8401A" }}>
           <h1 className="text-2xl font-semibold text-white">Pedir un plan personalizado</h1>
           <p className="text-white/80 mt-1 text-sm">
             Germán te va a guiar con un plan personalizado que incluye: lecturas seleccionadas, ejercicios prácticos, imaginación nocturna y afirmaciones programadas que llegan a tu teléfono.
@@ -110,9 +110,9 @@ export default function PlanesPage() {
         </div>
 
         {/* Contenido del formulario */}
-        <div className="px-8 py-8 space-y-8">
+        <div className="space-y-5 px-4 py-5 sm:space-y-8 sm:px-8 sm:py-8">
           {/* SECCIÓN 1 — Tu deseo */}
-          <section className="rounded-xl border bg-card shadow-md p-6 space-y-4">
+          <section className="space-y-4 rounded-xl border bg-card p-4 shadow-md sm:p-6">
             <h2 className="font-semibold text-base border-b pb-2">Tu deseo</h2>
             <div className="space-y-1.5">
               <Label>¿Qué te gustaría experimentar? ¿Cuál es tu deseo? <span className="text-destructive">*</span></Label>
@@ -126,7 +126,7 @@ export default function PlanesPage() {
           </section>
 
           {/* SECCIÓN 2 — Tu vida actual */}
-          <section className="rounded-xl border bg-card shadow-md p-6 space-y-4">
+          <section className="space-y-4 rounded-xl border bg-card p-4 shadow-md sm:p-6">
             <h2 className="font-semibold text-base border-b pb-2">Tu vida actual</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -162,7 +162,7 @@ export default function PlanesPage() {
             {/* ¿Trabajás? */}
             <div className="space-y-2">
               <Label>¿Trabajás actualmente?</Label>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 {[
                   { label: "Sí", value: true },
                   { label: "No", value: false },
@@ -218,7 +218,7 @@ export default function PlanesPage() {
             {/* Hijos */}
             <div className="space-y-2">
               <Label>¿Tenés hijos?</Label>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 {[
                   { label: "No", value: false },
                   { label: "Sí", value: true },
@@ -273,17 +273,17 @@ export default function PlanesPage() {
           </section>
 
           {/* SECCIÓN 3 — Tu práctica */}
-          <section className="rounded-xl border bg-card shadow-md p-6 space-y-4">
+          <section className="space-y-4 rounded-xl border bg-card p-4 shadow-md sm:p-6">
             <h2 className="font-semibold text-base border-b pb-2">Tu práctica</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label>¿A qué hora te despertás?</Label>
-                <div className="flex gap-2">
+                <div className="flex min-w-0 gap-2">
                   <select
                     value={form.horaDespertar.split(":")[0] ?? ""}
                     onChange={e => set("horaDespertar", `${e.target.value}:${form.horaDespertar.split(":")[1] ?? "00"}`)}
-                    className="rounded-lg border px-3 py-2 text-sm bg-background flex-1"
+                    className="min-w-0 flex-1 rounded-lg border bg-background px-3 py-2 text-sm"
                   >
                     <option value="">Hora</option>
                     {Array.from({length: 24}, (_, i) => (
@@ -295,7 +295,7 @@ export default function PlanesPage() {
                   <select
                     value={form.horaDespertar.split(":")[1] ?? ""}
                     onChange={e => set("horaDespertar", `${form.horaDespertar.split(":")[0] ?? "00"}:${e.target.value}`)}
-                    className="rounded-lg border px-3 py-2 text-sm bg-background flex-1"
+                    className="min-w-0 flex-1 rounded-lg border bg-background px-3 py-2 text-sm"
                   >
                     <option value="">Min</option>
                     {["00", "15", "30", "45"].map(m => (
@@ -306,11 +306,11 @@ export default function PlanesPage() {
               </div>
               <div className="space-y-1.5">
                 <Label>¿A qué hora te dormís?</Label>
-                <div className="flex gap-2">
+                <div className="flex min-w-0 gap-2">
                   <select
                     value={form.horaDormir.split(":")[0] ?? ""}
                     onChange={e => set("horaDormir", `${e.target.value}:${form.horaDormir.split(":")[1] ?? "00"}`)}
-                    className="rounded-lg border px-3 py-2 text-sm bg-background flex-1"
+                    className="min-w-0 flex-1 rounded-lg border bg-background px-3 py-2 text-sm"
                   >
                     <option value="">Hora</option>
                     {Array.from({length: 24}, (_, i) => (
@@ -322,7 +322,7 @@ export default function PlanesPage() {
                   <select
                     value={form.horaDormir.split(":")[1] ?? ""}
                     onChange={e => set("horaDormir", `${form.horaDormir.split(":")[0] ?? "00"}:${e.target.value}`)}
-                    className="rounded-lg border px-3 py-2 text-sm bg-background flex-1"
+                    className="min-w-0 flex-1 rounded-lg border bg-background px-3 py-2 text-sm"
                   >
                     <option value="">Min</option>
                     {["00", "15", "30", "45"].map(m => (
@@ -335,7 +335,7 @@ export default function PlanesPage() {
 
             <div className="space-y-2">
               <Label>¿Cuántos días querés que dure el plan?</Label>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 {["7", "15", "30"].map(opt => (
                   <button
                     key={opt}
@@ -354,7 +354,7 @@ export default function PlanesPage() {
           </section>
 
           {/* SECCIÓN 4 — Extra */}
-          <section className="rounded-xl border bg-card shadow-md p-6 space-y-4">
+          <section className="space-y-4 rounded-xl border bg-card p-4 shadow-md sm:p-6">
             <h2 className="font-semibold text-base border-b pb-2">¿Algo más?</h2>
             <Textarea
               value={form.mensajeExtra}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 
 import { useTranslations } from "next-intl"
 import { useParams } from "next/navigation"
@@ -111,28 +111,35 @@ export function CoachView() {
   }, [])
 
   const currentAuthor = AUTHORS.find((a) => a.id === selectedAuthor) ?? null
-  const currentMessages = selectedAuthor ? (messages[selectedAuthor] ?? []) : []
+  const currentMessages = useMemo(
+    () => (selectedAuthor ? (messages[selectedAuthor] ?? []) : []),
+    [messages, selectedAuthor]
+  )
   const isLoading = loadingAuthor === selectedAuthor
   const currentError = errorByAuthor[selectedAuthor]
 
   // Mensaje inicial hardcodeado — solo se muestra una vez cargado el perfil
-  const initialGreeting: DisplayMessage | null =
-    selectedAuthor && nombrePreferido !== null
-      ? {
-          id: `initial-${selectedAuthor}`,
-          content: getInitialGreeting(nombrePreferido),
-          timestamp: "",
-          senderId: selectedAuthor,
-          isInitial: true,
-        }
-      : null
+  const initialGreeting: DisplayMessage | null = useMemo(() => {
+    if (!selectedAuthor || nombrePreferido === null) return null
 
-  const displayMessages: DisplayMessage[] = initialGreeting
-    ? [initialGreeting, ...(currentMessages as DisplayMessage[])]
-    : (currentMessages as DisplayMessage[])
+    return {
+      id: `initial-${selectedAuthor}`,
+      content: getInitialGreeting(nombrePreferido),
+      timestamp: "",
+      senderId: selectedAuthor,
+      isInitial: true,
+    }
+  }, [nombrePreferido, selectedAuthor])
+
+  const displayMessages: DisplayMessage[] = useMemo(
+    () =>
+      initialGreeting
+        ? [initialGreeting, ...(currentMessages as DisplayMessage[])]
+        : (currentMessages as DisplayMessage[]),
+    [currentMessages, initialGreeting]
+  )
 
   // Auto-scroll al fondo con cada nuevo mensaje
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const container = scrollBottomRef.current?.parentElement?.parentElement
     if (container) container.scrollTop = container.scrollHeight

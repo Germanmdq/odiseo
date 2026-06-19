@@ -6,6 +6,7 @@ import { Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Logo } from "@/components/logo"
 
 export function SiteHeader() {
   const router = useRouter()
@@ -19,12 +20,18 @@ export function SiteHeader() {
   }, [])
 
   const pathname = usePathname()
-  const isCoachRoute = pathname?.includes("/coach") || pathname?.includes("/conversar")
+  const isImmersiveRoute = pathname ? /\/(coach|creador-de-escenas|narrador)\/?$/.test(pathname) : false
 
   return (
-    <header className={`flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) ${isCoachRoute ? "hidden md:flex" : ""}`}>
-      <div className="flex w-full items-center gap-1 px-4 py-3 lg:gap-2 lg:px-6">
-        <SidebarTrigger className="-ml-1 hidden md:inline-flex" />
+    <header className={`flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) ${isImmersiveRoute ? "hidden md:flex" : ""}`}>
+      <div className="flex w-full items-center gap-2 px-4 py-3 lg:gap-2 lg:px-6">
+        <SidebarTrigger className="-ml-1 inline-flex size-9 rounded-xl md:size-7" />
+        <div className="flex min-w-0 items-center gap-2 md:hidden">
+          <div className="flex size-8 items-center justify-center rounded-xl border-2 border-black bg-black text-white">
+            <Logo size={21} className="text-current" />
+          </div>
+          <span className="text-sm font-bold tracking-tight text-black">ODISEO</span>
+        </div>
         <Separator
           orientation="vertical"
           className="mx-2 hidden data-[orientation=vertical]:h-4 md:block"
