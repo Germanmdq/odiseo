@@ -110,7 +110,7 @@
   {
     "id": 19,
     "question": "¿Cómo pago? ¿Qué métodos aceptan?",
-    "answer": "Aceptamos tarjetas de crédito y débito internacionales. El procesamiento de pagos está a cargo de Stripe, plataforma segura usada por millones de empresas a nivel mundial.",
+    "answer": "Aceptamos MercadoPago y PayPal. MercadoPago permite pagar con medios locales disponibles en Argentina, y PayPal permite pagos internacionales con tarjeta o saldo de cuenta.",
     "category": "Planes y pagos"
   },
   {

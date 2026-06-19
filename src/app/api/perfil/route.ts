@@ -68,10 +68,24 @@ export async function PUT(req: NextRequest) {
   }
 
   if (Object.keys(fullUpdate).length > 0) {
-    const { error } = await admin.from("profiles").update(fullUpdate).eq("id", user.id)
+    const withIdentity = {
+      id: user.id,
+      email: user.email,
+      ...fullUpdate,
+    }
+
+    const { error } = await admin
+      .from("profiles")
+      .upsert(withIdentity, { onConflict: "id" })
+
     if (error && body.fullName !== undefined) {
-      // Columns may not exist — retry with only full_name which is guaranteed to be there
-      await admin.from("profiles").update({ full_name: body.fullName }).eq("id", user.id)
+      // Columns may not exist in older schemas — retry with the smallest safe shape.
+      await admin
+        .from("profiles")
+        .upsert(
+          { id: user.id, email: user.email, full_name: body.fullName },
+          { onConflict: "id" }
+        )
     }
   }
 

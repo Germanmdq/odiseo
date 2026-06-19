@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowLeft, Share2, Bookmark, BookmarkCheck, MessageSquare, Wand2 } from "lucide-react"
+import { ArrowLeft, Share2, Bookmark, BookmarkCheck, MessageSquare, Wand2, X } from "lucide-react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 
@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ReutilizarEnButton } from "@/components/reutilizar-en-button"
 import { formatBodyParagraphs } from "@/lib/format-body"
 import type { FuenteDetail, FuenteSummary, FuenteType } from "@/lib/fuentes/types"
 
@@ -153,6 +154,9 @@ function FuenteDrawer({
   const yearLine = detail ? detail.year : source.year
 
   const SaveIcon = saveState === "saved" ? BookmarkCheck : Bookmark
+  const shareContent = detail
+    ? `${detail.name}\n\n${detail.fullText}`
+    : ""
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -166,44 +170,47 @@ function FuenteDrawer({
         </DrawerClose>
 
         {detail && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-1.5 text-sm">
-                <Share2 className="h-4 w-4" />
-                Usar en...
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuItem
-                onClick={handleGuardar}
-                disabled={saveState === "saving" || saveState === "saved"}
-                className="gap-2"
-              >
-                <SaveIcon className="h-4 w-4" />
-                {saveState === "saved"
-                  ? "Guardado"
-                  : saveState === "saving"
-                    ? "Guardando..."
-                    : saveState === "error"
-                      ? "Error al guardar"
-                      : "Guardar en Memoria"}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="gap-2"
-                onClick={() => router.push(`/${locale}/coach?contexto=${source.sourceKey}`)}
-              >
-                <MessageSquare className="h-4 w-4" />
-                Conversar sobre esto
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="gap-2"
-                onClick={() => router.push(`/${locale}/creador-de-escenas?contexto=${source.sourceKey}`)}
-              >
-                <Wand2 className="h-4 w-4" />
-                Crear escena desde aquí
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <ReutilizarEnButton content={shareContent} origen="fuente" />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-1.5 text-sm">
+                  <Share2 className="h-4 w-4" />
+                  Guardar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem
+                  onClick={handleGuardar}
+                  disabled={saveState === "saving" || saveState === "saved"}
+                  className="gap-2"
+                >
+                  <SaveIcon className="h-4 w-4" />
+                  {saveState === "saved"
+                    ? "Guardado"
+                    : saveState === "saving"
+                      ? "Guardando..."
+                      : saveState === "error"
+                        ? "Error al guardar"
+                        : "Guardar en Memoria"}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="gap-2"
+                  onClick={() => router.push(`/${locale}/coach?contexto=${source.sourceKey}`)}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Conversar sobre esto
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="gap-2"
+                  onClick={() => router.push(`/${locale}/creador-de-escenas?contexto=${source.sourceKey}`)}
+                >
+                  <Wand2 className="h-4 w-4" />
+                  Crear escena desde aquí
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )}
       </div>
 
@@ -406,6 +413,15 @@ export function FuentesTable({
         }}
       >
         <DrawerContent className="odiseo-reading-drawer h-full overflow-hidden">
+          <DrawerClose asChild>
+            <button
+              className="absolute top-4 right-4 z-50 flex size-12 items-center justify-center rounded-full text-white shadow-[0_10px_30px_rgba(232,64,26,0.35)] transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "#E8401A" }}
+              aria-label="Cerrar fuente"
+            >
+              <X className="size-6" />
+            </button>
+          </DrawerClose>
           <DrawerTitle className="sr-only">{selectedSource?.name ?? ""}</DrawerTitle>
           {selectedSource ? (
             <FuenteDrawer source={selectedSource} labels={labels} />

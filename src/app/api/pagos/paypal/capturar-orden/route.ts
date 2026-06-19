@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
   // Extract userId:planId from custom_id
   const customId = capture.purchase_units?.[0]?.custom_id ?? ""
-  const [userId, planId] = customId.split(":")
+  const [userId, planId] = customId.split(/[|:]/)
 
   if (!userId || !planId || !isPlanId(planId)) {
     console.error("PayPal capture: invalid custom_id", customId)

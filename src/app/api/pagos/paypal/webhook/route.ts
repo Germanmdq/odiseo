@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
 
   const orderId = event.resource?.id ?? ""
   const customId = event.resource?.purchase_units?.[0]?.custom_id ?? ""
-  const [userId, planId] = customId.split(":")
+  const [userId, planId] = customId.split(/[|:]/)
 
   if (!userId || !planId || !isPlanId(planId)) {
     console.error("PayPal webhook: invalid custom_id", customId)
