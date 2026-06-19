@@ -77,6 +77,7 @@ export function CoachView() {
   const [retryByAuthor, setRetryByAuthor] = useState<Record<string, string | null>>({})
   const [mostrarSugerencias, setMostrarSugerencias] = useState<Record<string, boolean>>({})
   const [ultimoMensaje, setUltimoMensaje] = useState<Record<string, string>>({})
+  const [ultimoTema, setUltimoTema] = useState<string>("")
   const [nombrePreferido, setNombrePreferido] = useState<string | null>(null)
   const scrollBottomRef = useRef<HTMLDivElement>(null)
 
@@ -218,7 +219,6 @@ export function CoachView() {
         "odiseo_reutilizar",
         JSON.stringify({ content, origen: "coach", autor: authorId })
       )
-      setMostrarSugerencias((current) => ({ ...current, [authorId]: true }))
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No pude responder ahora."
@@ -234,6 +234,25 @@ export function CoachView() {
       }))
     } finally {
       setLoadingAuthor((current) => (current === authorId ? null : current))
+
+      // Después del stream, en el finally:
+      const mensajesUsuario = (messages[authorId] ?? [])
+        .filter(m => m.senderId === "current-user")
+
+      const ultimoMensajeUsuario = mensajesUsuario[mensajesUsuario.length - 1]?.content ?? ""
+
+      // Extraer máximo 3 palabras clave, sin signos de puntuación
+      const tema = ultimoMensajeUsuario
+        .replace(/[¿?¡!.,]/g, "")
+        .split(" ")
+        .filter(w => w.length > 3) // ignorar palabras cortas
+        .slice(0, 3)
+        .join(" ")
+        .toLowerCase()
+        .trim()
+
+      setUltimoTema(tema)
+      setMostrarSugerencias(prev => ({ ...prev, [authorId]: true }))
     }
   }
 
@@ -241,14 +260,6 @@ export function CoachView() {
   const ultimoMensajeUsuario = currentMessages
     .filter(m => m.senderId === "current-user")
     .slice(-1)[0]?.content ?? ""
-
-  // Limpiar el tema — máximo 4 palabras significativas
-  const tema = ultimoMensajeUsuario
-    .split(" ")
-    .slice(0, 4)
-    .join(" ")
-    .replace(/[¿?¡!]/g, "")
-    .trim()
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -358,7 +369,7 @@ export function CoachView() {
                           <div className="w-full min-w-0 overflow-hidden">
                             <SugerenciasCoach
                               sugerencias={getSugerencias(ultimoMensajeUsuario)}
-                              tema={tema}
+                              tema={ultimoTema}
                             />
                           </div>
                         ) : null}

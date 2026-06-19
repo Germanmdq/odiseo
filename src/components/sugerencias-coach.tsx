@@ -82,6 +82,14 @@ export function SugerenciasCoach({ sugerencias, tema }: SugerenciasCoachProps) {
   const router = useRouter()
 
   const labelConTema = (label: string) => {
+    if (label.includes("Generá un capítulo")) {
+      if (!tema || tema.trim().length < 3) {
+        return "Generá un capítulo"
+      }
+      const temaLimpio = tema.length > 20 ? tema.slice(0, 20) + "..." : tema
+      return `Generá un capítulo sobre ${temaLimpio}`
+    }
+
     if (!tema) return label
     const temaLimpio = tema.length > 20 ? tema.slice(0, 20) + "..." : tema
     return label.replace("esto", temaLimpio)
