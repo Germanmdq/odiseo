@@ -16,7 +16,7 @@ function NotaItem({ nota, onDelete }: { nota: Nota, onDelete: () => void }) {
   const [expandida, setExpandida] = useState(false)
   
   return (
-    <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+    <div className="overflow-hidden rounded-2xl border border-black/10 bg-card shadow-[0_8px_28px_rgba(0,0,0,0.08)]">
       <button
         onClick={() => setExpandida(!expandida)}
         className="w-full text-left p-4 cursor-pointer"
@@ -58,6 +58,7 @@ export default function NotasPage() {
   const [loading, setLoading] = useState(true)
   const [nueva, setNueva] = useState("")
   const [guardando, setGuardando] = useState(false)
+  const [composerOpen, setComposerOpen] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -67,6 +68,7 @@ export default function NotasPage() {
         const { content } = JSON.parse(raw) as { content: string }
         sessionStorage.removeItem("odiseo_reutilizar")
         setNueva(content)
+        setComposerOpen(true)
         textareaRef.current?.focus()
       } catch {}
     }
@@ -109,28 +111,38 @@ export default function NotasPage() {
   }
 
   return (
-    <div className="space-y-6 px-4 lg:px-6 max-w-2xl">
+    <div className="mx-auto w-full max-w-2xl space-y-5 px-4 lg:px-6">
       <div>
         <h1 className="text-3xl font-bold">Notas</h1>
         <p className="text-muted-foreground">Tus apuntes personales de práctica.</p>
       </div>
 
       {/* Nueva nota */}
-      <div className="space-y-2">
-        <Textarea
-          ref={textareaRef}
-          placeholder="Escribí una nota..."
-          value={nueva}
-          onChange={e => setNueva(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleAgregar() }}
-          rows={3}
-          className="resize-none"
-        />
-        <div className="flex justify-end">
-          <Button onClick={handleAgregar} disabled={guardando || !nueva.trim()} className="cursor-pointer gap-2">
-            <Plus className="h-4 w-4" />
-            Agregar nota
-          </Button>
+      <div className="overflow-hidden rounded-2xl border border-black/10 bg-card shadow-[0_8px_28px_rgba(0,0,0,0.08)]">
+        <button
+          type="button"
+          onClick={() => setComposerOpen((open) => !open)}
+          className="flex w-full items-center justify-between gap-3 p-4 text-left"
+        >
+          <span className="font-semibold">Agregar nota</span>
+          <ChevronDown className={cn("size-4 text-muted-foreground transition-transform", composerOpen && "rotate-180")} />
+        </button>
+        <div className={cn("border-t px-4 pb-4", !composerOpen && "hidden sm:block")}>
+          <Textarea
+            ref={textareaRef}
+            placeholder="Escribí una nota..."
+            value={nueva}
+            onChange={e => setNueva(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleAgregar() }}
+            rows={3}
+            className="mt-4 resize-none rounded-xl"
+          />
+          <div className="mt-3 flex justify-end">
+            <Button onClick={handleAgregar} disabled={guardando || !nueva.trim()} className="cursor-pointer gap-2 rounded-full">
+              <Plus className="h-4 w-4" />
+              Agregar nota
+            </Button>
+          </div>
         </div>
       </div>
 

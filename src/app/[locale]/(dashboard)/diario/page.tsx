@@ -151,16 +151,16 @@ export default function DiarioPage() {
     : notas
 
   return (
-    <div className="px-4 lg:px-6">
+    <div className="mx-auto w-full max-w-5xl px-4 lg:px-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Diario</h1>
         <p className="text-muted-foreground text-sm">Tu práctica diaria, en palabras.</p>
       </div>
 
-      <div className="flex flex-col md:grid md:grid-cols-[auto_1fr] gap-8 items-start">
+      <div className="flex flex-col gap-5 md:grid md:grid-cols-[auto_1fr] md:gap-8 md:items-start">
         {/* Columna izquierda: Calendar */}
-        <div className="sticky top-6 shrink-0">
-          <div className="rounded-lg border p-2">
+        <div className="w-full shrink-0 md:sticky md:top-6 md:w-auto">
+          <div className="mx-auto w-fit rounded-2xl border border-black/10 bg-card p-2 shadow-[0_8px_28px_rgba(0,0,0,0.08)] md:mx-0">
             <Calendar
               mode="single"
               selected={selectedDay}
@@ -195,7 +195,7 @@ export default function DiarioPage() {
         {/* Columna derecha: textarea + lista */}
         <div className="min-w-0 space-y-4">
           {/* Nueva entrada */}
-          <div className="space-y-1">
+          <div className="space-y-1 rounded-2xl border border-black/10 bg-card p-3 shadow-[0_8px_28px_rgba(0,0,0,0.08)]">
             <div className="relative">
               <textarea
                 ref={textareaRef}
@@ -208,7 +208,7 @@ export default function DiarioPage() {
                     handleGuardar()
                   }
                 }}
-                className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 style={{ minHeight: "120px" }}
               />
               {nueva.trim() && (
@@ -243,7 +243,7 @@ export default function DiarioPage() {
                 const isEditing = editId === nota.id
                 const isConfirmDelete = confirmDeleteId === nota.id
                 return (
-                  <div key={nota.id} className="rounded-lg border bg-card">
+              <div key={nota.id} className="overflow-hidden rounded-2xl border border-black/10 bg-card shadow-[0_8px_28px_rgba(0,0,0,0.08)]">
                     <button
                       type="button"
                       className="w-full flex items-start gap-3 p-4 text-left"

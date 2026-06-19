@@ -198,10 +198,12 @@ export function DataTable<TData, TValue>({
     selectedRow && getDrawerDescription
       ? getDrawerDescription(selectedRow)
       : undefined
+  const rows = table.getRowModel().rows
+  const canOpenRow = renderDrawer != null || onSelectedRowChange != null
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 lg:px-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-0 md:px-4 lg:px-6">
         {tabs?.length ? (
           <>
             <Label htmlFor="view-selector" className="sr-only">
@@ -253,10 +255,72 @@ export function DataTable<TData, TValue>({
 
       </div>
 
-      {toolbar ? <div className="px-4 lg:px-6">{toolbar}</div> : null}
+      {toolbar ? <div className="px-0 md:px-4 lg:px-6">{toolbar}</div> : null}
 
-      <div className="px-4 lg:px-6">
-        <div className="overflow-hidden rounded-lg border">
+      <div className="px-0 md:px-4 lg:px-6">
+        <div className="grid gap-3 md:hidden">
+          {rows.length ? (
+            rows.map((row) => {
+              const cells = row.getVisibleCells()
+              const [primaryCell, ...metaCells] = cells
+
+              return (
+                <div
+                  key={row.id}
+                  role={canOpenRow ? "button" : undefined}
+                  tabIndex={canOpenRow ? 0 : undefined}
+                  onClick={() => {
+                    if (canOpenRow) setSelectedRow(row.original)
+                  }}
+                  onKeyDown={(event) => {
+                    if (!canOpenRow) return
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault()
+                      setSelectedRow(row.original)
+                    }
+                  }}
+                  className="w-full rounded-2xl border border-black/10 bg-white p-4 text-left shadow-[0_8px_28px_rgba(0,0,0,0.09)] transition active:scale-[0.99]"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-semibold leading-snug text-foreground">
+                        {primaryCell
+                          ? flexRender(
+                              primaryCell.column.columnDef.cell,
+                              primaryCell.getContext()
+                            )
+                          : null}
+                      </div>
+                      {metaCells.length ? (
+                        <div className="mt-3 space-y-2 border-t border-black/5 pt-3">
+                          {metaCells.slice(0, 3).map((cell) => (
+                            <div
+                              key={cell.id}
+                              className="text-xs leading-relaxed text-muted-foreground [&_*]:max-w-full"
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                    {canOpenRow ? (
+                      <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                    ) : null}
+                  </div>
+                </div>
+              )
+            })
+          ) : (
+            <div className="rounded-2xl border border-dashed bg-white p-8 text-center text-sm text-muted-foreground shadow-sm">
+              {labels.empty}
+            </div>
+          )}
+        </div>
+        <div className="hidden overflow-hidden rounded-lg border md:block">
           <Table className="table-fixed">
             <TableHeader className="bg-muted sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
@@ -279,17 +343,17 @@ export function DataTable<TData, TValue>({
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
+              {rows?.length ? (
+                rows.map((row) => (
                   <TableRow
                     key={row.id}
                     className={
-                      renderDrawer != null || onSelectedRowChange != null
+                      canOpenRow
                         ? "cursor-pointer hover:bg-muted/50"
                         : undefined
                     }
                     onClick={() => {
-                      if (renderDrawer != null || onSelectedRowChange != null) {
+                      if (canOpenRow) {
                         setSelectedRow(row.original)
                       }
                     }}
@@ -323,8 +387,8 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
 
-      <div className="flex items-center justify-end px-4 lg:px-6">
-        <div className="flex w-full items-center gap-8 lg:w-fit">
+      <div className="flex items-center justify-end px-0 md:px-4 lg:px-6">
+        <div className="flex w-full items-center justify-between gap-4 rounded-2xl border border-black/10 bg-white px-3 py-2 shadow-sm md:border-0 md:bg-transparent md:px-0 md:py-0 md:shadow-none lg:w-fit lg:justify-start lg:gap-8">
           <div className="hidden items-center gap-2 lg:flex">
             <Label htmlFor="rows-per-page" className="text-sm font-medium">
               {labels.rowsPerPage}

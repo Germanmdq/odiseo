@@ -31,12 +31,12 @@ export function CapituloItem({ capitulo, numero, onDelete, onSave }: CapituloIte
   }, [capitulo.contenido])
 
   return (
-    <div className="rounded-lg border bg-card overflow-hidden">
+    <div className="overflow-hidden rounded-2xl border border-black/10 bg-card shadow-[0_8px_28px_rgba(0,0,0,0.08)]">
       {/* Header colapsable */}
       <button
         type="button"
         onClick={() => setAbierto(!abierto)}
-        className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors text-left"
+        className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-muted/50"
       >
         <div className="flex items-center gap-3 min-w-0">
           <span className="text-xs text-muted-foreground font-mono shrink-0">
@@ -59,7 +59,7 @@ export function CapituloItem({ capitulo, numero, onDelete, onSave }: CapituloIte
                 onChange={(e) => setTexto(e.target.value)}
                 className="min-h-[200px] text-sm leading-relaxed resize-none focus-visible:ring-1 focus-visible:ring-ring"
               />
-              <div className="flex gap-2 justify-end">
+              <div className="flex flex-col justify-end gap-2 sm:flex-row">
                 <Button variant="outline" size="sm" type="button" onClick={() => setEditando(false)}>
                   Cancelar
                 </Button>
@@ -73,7 +73,7 @@ export function CapituloItem({ capitulo, numero, onDelete, onSave }: CapituloIte
               <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/80">
                 {capitulo.contenido || <em className="text-muted-foreground">Capítulo vacío. Hacé clic en &quot;Editar&quot; para escribir.</em>}
               </p>
-              <div className="flex gap-2 mt-4 pt-3 border-t">
+              <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
                 <Button variant="outline" size="sm" type="button" onClick={() => setEditando(true)}>
                   <Pencil className="size-3.5 mr-1" /> Editar
                 </Button>

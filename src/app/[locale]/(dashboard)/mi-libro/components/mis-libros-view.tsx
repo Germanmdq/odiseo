@@ -255,11 +255,11 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] h-[calc(100vh-160px)] min-h-[500px] border rounded-xl overflow-hidden bg-card text-card-foreground">
+    <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-black/10 bg-card text-card-foreground shadow-[0_8px_28px_rgba(0,0,0,0.08)] md:h-[calc(100vh-160px)] md:min-h-[500px] md:grid-cols-[280px_1fr]">
       {/* Columna Izquierda: Listado de Libros */}
       <div
         className={cn(
-          "flex flex-col h-full border-r bg-muted/10",
+          "flex flex-col border-r bg-muted/10 md:h-full",
           activeLibroId ? "hidden md:flex" : "flex"
         )}
       >
@@ -323,7 +323,7 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
       {/* Columna Derecha: Contenido del Libro Activo */}
       <div
         className={cn(
-          "flex flex-col h-full overflow-hidden bg-background",
+          "flex flex-col bg-background md:h-full md:overflow-hidden",
           activeLibroId ? "flex" : "hidden md:flex"
         )}
       >
@@ -342,9 +342,9 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col h-full overflow-hidden">
+          <div className="flex flex-col md:h-full md:overflow-hidden">
             {/* Header del libro */}
-            <div className="flex items-center gap-4 p-4 md:p-6 border-b shrink-0 bg-card">
+            <div className="flex items-center gap-4 border-b bg-card p-4 md:shrink-0 md:p-6">
               <button
                 type="button"
                 onClick={() => router.push(`/${locale}/mi-libro`)}
@@ -361,7 +361,7 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled type="button">
+                <Button variant="outline" size="sm" disabled type="button" className="hidden sm:inline-flex">
                   <Download className="size-4 mr-1.5" />
                   PDF (próximo)
                 </Button>
@@ -370,7 +370,7 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
 
             {/* Formulario e Editor de Borrador (Condicional) */}
             {showDraft ? (
-              <div className="p-4 md:p-6 border-b bg-muted/20 space-y-4 shrink-0 overflow-y-auto max-h-[300px]">
+              <div className="max-h-[520px] space-y-4 overflow-y-auto border-b bg-muted/20 p-4 md:max-h-[300px] md:shrink-0 md:p-6">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-xs md:text-sm text-muted-foreground flex items-center gap-2">
                     {generando ? (
@@ -430,11 +430,11 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
               </div>
             ) : (
               /* Agregar capítulo con Asistente */
-              <div className="p-4 md:p-6 border-b bg-muted/20 shrink-0">
+              <div className="border-b bg-muted/20 p-4 md:shrink-0 md:p-6">
                 <p className="text-xs md:text-sm font-medium mb-3">
                   Agregar capítulo con Asistente
                 </p>
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <input
                     value={tema}
                     onChange={(e) => setTema(e.target.value)}
@@ -462,7 +462,7 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
             )}
 
             {/* Lista de capítulos colapsables */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-3 bg-muted/5">
+            <div className="space-y-3 bg-muted/5 p-4 md:flex-1 md:overflow-y-auto md:p-6">
               {capitulos.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                   <ScrollText className="size-10 text-muted-foreground/30 mb-3" />

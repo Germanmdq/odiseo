@@ -25,12 +25,12 @@ export function LeccionesBloqueables({
   const [showPopup, setShowPopup] = React.useState(false)
 
   return (
-    <div className="relative rounded-md border">
+    <div className="relative overflow-hidden rounded-xl border border-black/10">
       {!hasActiveSubscription ? (
         <button
           type="button"
           onClick={() => setShowPopup(true)}
-          className="bg-background/90 absolute inset-x-3 top-3 z-10 flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-medium shadow-sm backdrop-blur"
+          className="bg-background/90 absolute inset-x-3 top-3 z-10 flex items-center justify-center gap-2 rounded-full border px-3 py-2 text-sm font-medium shadow-sm backdrop-blur"
         >
           <Lock className="size-4" />
           {unlockLabel}
@@ -44,7 +44,7 @@ export function LeccionesBloqueables({
             role={!hasActiveSubscription ? "button" : undefined}
             tabIndex={!hasActiveSubscription ? 0 : undefined}
             onClick={!hasActiveSubscription ? () => setShowPopup(true) : undefined}
-            className="flex items-center gap-3 px-4 py-3"
+            className="flex items-center gap-3 px-3 py-3 sm:px-4"
             aria-disabled={!hasActiveSubscription}
           >
             <span className="bg-muted flex size-8 shrink-0 items-center justify-center rounded-md text-sm font-medium tabular-nums">
@@ -54,7 +54,7 @@ export function LeccionesBloqueables({
             {!hasActiveSubscription && (
               <>
                 <Lock className="text-muted-foreground size-4 shrink-0" />
-                <Badge variant="outline" className="shrink-0">
+                <Badge variant="outline" className="hidden shrink-0 sm:inline-flex">
                   {subscribersLabel}
                 </Badge>
               </>

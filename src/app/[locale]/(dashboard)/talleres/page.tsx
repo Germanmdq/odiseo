@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { getTranslations } from "next-intl/server"
+import { ChevronDown } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -142,7 +143,7 @@ export default async function TalleresPage({
   }
 
   return (
-    <div className="flex-1 space-y-6 px-6 pt-0">
+    <div className="flex-1 space-y-6 px-4 pt-0 md:px-6">
       <div className="flex flex-col gap-2">
         <Badge variant="outline" className="w-fit">
           {landing("eyebrow")}
@@ -167,10 +168,10 @@ export default async function TalleresPage({
 
       <div className="grid gap-6 xl:grid-cols-2">
         {talleres.map((taller) => (
-          <Card key={taller.key} className="overflow-hidden py-0">
-            <CardHeader className="gap-4 p-6 pb-0">
+          <Card key={taller.key} className="overflow-hidden rounded-2xl border-black/10 py-0 shadow-[0_8px_28px_rgba(0,0,0,0.08)]">
+            <CardHeader className="gap-4 p-4 pb-0 sm:p-6 sm:pb-0">
               <div className="flex items-start justify-between gap-4">
-                <span className="text-primary/20 text-7xl font-black leading-none tabular-nums">
+                <span className="text-primary/20 text-5xl font-black leading-none tabular-nums sm:text-7xl">
                   {String(taller.number).padStart(2, "0")}
                 </span>
                 <Badge variant="secondary">{landing("lessons")}</Badge>
@@ -183,7 +184,7 @@ export default async function TalleresPage({
               />
             </CardHeader>
 
-            <CardContent className="space-y-5 p-6">
+            <CardContent className="space-y-5 p-4 sm:p-6">
               <div>
                 <h2 className="text-xl font-semibold">{landing(taller.titleKey)}</h2>
                 <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
@@ -191,15 +192,23 @@ export default async function TalleresPage({
                 </p>
               </div>
 
-              <LeccionesBloqueables
-                lessons={taller.lessons.map((lessonKey) => ({
-                  label: t(`leccion.${lessonKey}`),
-                }))}
-                hasActiveSubscription={hasActiveSubscription}
-                locale={locale}
-                unlockLabel={t("unlock")}
-                subscribersLabel={t("subscribers")}
-              />
+              <details className="group rounded-2xl border border-black/10 bg-white shadow-sm">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold">
+                  <span>{landing("lessons")}</span>
+                  <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="border-t p-3">
+                  <LeccionesBloqueables
+                    lessons={taller.lessons.map((lessonKey) => ({
+                      label: t(`leccion.${lessonKey}`),
+                    }))}
+                    hasActiveSubscription={hasActiveSubscription}
+                    locale={locale}
+                    unlockLabel={t("unlock")}
+                    subscribersLabel={t("subscribers")}
+                  />
+                </div>
+              </details>
             </CardContent>
           </Card>
         ))}

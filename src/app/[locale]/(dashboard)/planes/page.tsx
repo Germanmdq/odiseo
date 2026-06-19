@@ -8,6 +8,12 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 
 type FormData = {
   deseo: string
@@ -111,9 +117,17 @@ export default function PlanesPage() {
 
         {/* Contenido del formulario */}
         <div className="space-y-5 px-4 py-5 sm:space-y-8 sm:px-8 sm:py-8">
+          <Accordion
+            type="multiple"
+            defaultValue={["deseo"]}
+            className="space-y-4"
+          >
           {/* SECCIÓN 1 — Tu deseo */}
-          <section className="space-y-4 rounded-xl border bg-card p-4 shadow-md sm:p-6">
-            <h2 className="font-semibold text-base border-b pb-2">Tu deseo</h2>
+          <AccordionItem value="deseo" className="rounded-2xl border border-black/10 bg-card px-4 shadow-[0_8px_28px_rgba(0,0,0,0.08)] sm:px-6">
+            <AccordionTrigger className="hover:no-underline">
+              <span className="font-semibold text-base">Tu deseo</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4 pb-5">
             <div className="space-y-1.5">
               <Label>¿Qué te gustaría experimentar? ¿Cuál es tu deseo? <span className="text-destructive">*</span></Label>
               <Textarea
@@ -123,11 +137,15 @@ export default function PlanesPage() {
                 className="min-h-[180px] resize-none"
               />
             </div>
-          </section>
+            </AccordionContent>
+          </AccordionItem>
 
           {/* SECCIÓN 2 — Tu vida actual */}
-          <section className="space-y-4 rounded-xl border bg-card p-4 shadow-md sm:p-6">
-            <h2 className="font-semibold text-base border-b pb-2">Tu vida actual</h2>
+          <AccordionItem value="vida" className="rounded-2xl border border-black/10 bg-card px-4 shadow-[0_8px_28px_rgba(0,0,0,0.08)] sm:px-6">
+            <AccordionTrigger className="hover:no-underline">
+              <span className="font-semibold text-base">Tu vida actual</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4 pb-5">
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
@@ -270,11 +288,15 @@ export default function PlanesPage() {
                 ))}
               </div>
             </div>
-          </section>
+            </AccordionContent>
+          </AccordionItem>
 
           {/* SECCIÓN 3 — Tu práctica */}
-          <section className="space-y-4 rounded-xl border bg-card p-4 shadow-md sm:p-6">
-            <h2 className="font-semibold text-base border-b pb-2">Tu práctica</h2>
+          <AccordionItem value="practica" className="rounded-2xl border border-black/10 bg-card px-4 shadow-[0_8px_28px_rgba(0,0,0,0.08)] sm:px-6">
+            <AccordionTrigger className="hover:no-underline">
+              <span className="font-semibold text-base">Tu práctica</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4 pb-5">
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
@@ -351,18 +373,24 @@ export default function PlanesPage() {
                 ))}
               </div>
             </div>
-          </section>
+            </AccordionContent>
+          </AccordionItem>
 
           {/* SECCIÓN 4 — Extra */}
-          <section className="space-y-4 rounded-xl border bg-card p-4 shadow-md sm:p-6">
-            <h2 className="font-semibold text-base border-b pb-2">¿Algo más?</h2>
+          <AccordionItem value="extra" className="rounded-2xl border border-black/10 bg-card px-4 shadow-[0_8px_28px_rgba(0,0,0,0.08)] sm:px-6">
+            <AccordionTrigger className="hover:no-underline">
+              <span className="font-semibold text-base">¿Algo más?</span>
+            </AccordionTrigger>
+            <AccordionContent className="pb-5">
             <Textarea
               value={form.mensajeExtra}
               onChange={e => set("mensajeExtra", e.target.value)}
               placeholder="Cualquier cosa que quieras agregarle a Germán..."
               className="min-h-[100px] resize-none"
             />
-          </section>
+            </AccordionContent>
+          </AccordionItem>
+          </Accordion>
 
           {error && (
             <p className="text-sm text-destructive">{error}</p>

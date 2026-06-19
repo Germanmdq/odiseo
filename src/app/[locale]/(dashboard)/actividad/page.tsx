@@ -78,7 +78,7 @@ export default function ActividadPage() {
     : recentEvents
 
   return (
-    <div className="px-4 lg:px-6">
+    <div className="mx-auto w-full max-w-5xl px-4 lg:px-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Mi actividad</h1>
         <p className="text-muted-foreground text-sm">
@@ -86,15 +86,15 @@ export default function ActividadPage() {
         </p>
       </div>
 
-      <div className="flex flex-col md:grid md:grid-cols-[auto_1fr] gap-8 items-start">
+      <div className="flex flex-col gap-5 md:grid md:grid-cols-[auto_1fr] md:gap-8 md:items-start">
         {/* Columna izquierda: Calendar */}
-        <div className="sticky top-6 shrink-0">
+        <div className="w-full shrink-0 md:sticky md:top-6 md:w-auto">
           {loading ? (
-            <div className="w-[268px] h-64 rounded-lg border flex items-center justify-center text-muted-foreground text-sm">
+            <div className="mx-auto flex h-64 w-[268px] items-center justify-center rounded-2xl border border-black/10 bg-card text-sm text-muted-foreground shadow-[0_8px_28px_rgba(0,0,0,0.08)] md:mx-0">
               Cargando...
             </div>
           ) : (
-            <div className="rounded-lg border p-2">
+            <div className="mx-auto w-fit rounded-2xl border border-black/10 bg-card p-2 shadow-[0_8px_28px_rgba(0,0,0,0.08)] md:mx-0">
               <Calendar
                 mode="single"
                 selected={selectedDay}
@@ -132,7 +132,7 @@ export default function ActividadPage() {
           {/* Racha */}
           {streak > 0 && (
             <div
-              className="flex items-center gap-2 text-lg font-semibold"
+              className="flex items-center gap-2 rounded-2xl border border-black/10 bg-card p-4 text-lg font-semibold shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
               style={{ color: ACTIVE_COLOR }}
             >
               <Flame className="h-6 w-6" />
@@ -141,7 +141,7 @@ export default function ActividadPage() {
           )}
 
           {/* Actividad reciente */}
-          <div>
+          <div className="rounded-2xl border border-black/10 bg-card p-4 shadow-[0_8px_28px_rgba(0,0,0,0.08)]">
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
               {selectedDay
                 ? selectedDay.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" })
