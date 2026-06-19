@@ -2,6 +2,8 @@ import { NextRequest } from "next/server"
 
 import { embedQuery } from "@/lib/nvidia"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { createClient } from "@/lib/supabase/server"
+import { checkAccess } from "@/lib/acceso"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -185,6 +187,15 @@ export async function POST(request: NextRequest) {
         { error: "El mensaje del usuario no puede estar vacío." },
         { status: 400 }
       )
+    }
+
+    const supabaseClient = await createClient()
+    const { data: { user } } = await supabaseClient.auth.getUser()
+    if (user) {
+      const { allowed } = await checkAccess(user.id)
+      if (!allowed) {
+        return Response.json({ error: "paywall" }, { status: 403 })
+      }
     }
 
     const queryEmbedding = await embedQuery(lastUserMessage.content)

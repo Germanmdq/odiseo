@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Send, Sparkles } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useParams } from "next/navigation"
 import ReactMarkdown from "react-markdown"
 
 import { Button } from "@/components/ui/button"
@@ -29,6 +30,8 @@ function LoadingDots() {
 
 export function NarradorView() {
   const t = useTranslations("narrador")
+  const params = useParams()
+  const locale = (params?.locale as string) ?? "es"
   const [messages, setMessages] = React.useState<NarradorMessage[]>([])
   const [input, setInput] = React.useState("")
   const [isLoading, setIsLoading] = React.useState(false)
@@ -89,6 +92,11 @@ export function NarradorView() {
           })),
         }),
       })
+
+      if (response.status === 403) {
+        window.location.href = `/${locale}/pricing`
+        return
+      }
 
       if (!response.ok || !response.body) {
         const errorText = await response.text()

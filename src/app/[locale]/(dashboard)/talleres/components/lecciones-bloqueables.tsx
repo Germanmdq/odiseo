@@ -65,17 +65,17 @@ export function LeccionesBloqueables({
 
       <Dialog open={showPopup} onOpenChange={setShowPopup}>
         <DialogContent className="max-w-sm text-center space-y-4 p-8">
-          <DialogTitle className="sr-only">Talleres — Plan Anual</DialogTitle>
+          <DialogTitle className="sr-only">Solo disponible para plan anual</DialogTitle>
           <div
             className="size-12 rounded-full flex items-center justify-center mx-auto text-white"
             style={{ backgroundColor: "#E8401A" }}
           >
             <Lock className="size-6" />
           </div>
-          <h2 className="text-xl font-semibold">Talleres — Plan Anual</h2>
+          <h2 className="text-xl font-semibold">Solo disponible para plan anual</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Los Talleres están incluidos en el plan anual. 8 talleres por año con Germán y Taty,
-            disponibles con tu suscripción anual.
+            Los Talleres son exclusivos del plan anual. Accedés a 8 talleres por año
+            con Germán y Taty.
           </p>
           <Link
             href={`/${locale}/pricing`}

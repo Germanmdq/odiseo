@@ -85,7 +85,7 @@ export default function PlanesPage() {
         </div>
         <h2 className="text-2xl font-semibold">Tu solicitud fue enviada</h2>
         <p className="text-muted-foreground max-w-sm">
-          Para activar tu plan necesitás una suscripción activa.
+          Para recibir tu plan tenés que tener una suscripción activa.
         </p>
         <Link
           href={`/${locale}/pricing`}
