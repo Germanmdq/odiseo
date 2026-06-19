@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { Resend } from "resend"
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { adminEmail, escapeHtml, sendOdiseoEmail, siteUrl } from "@/lib/email"
 
 export async function GET() {
   const supabase = await createClient()
@@ -45,23 +43,18 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Notificar a Germán por email
-  try {
-    await resend.emails.send({
-      from: "Odiseo <noreply@odiseo.online>",
-      to: "quotesneville@gmail.com",
-      subject: `Nuevo mensaje de usuario — Odiseo`,
-      html: `
-        <p><strong>De:</strong> ${user.email}</p>
+  const emailResult = await sendOdiseoEmail({
+    to: adminEmail,
+    subject: "Nuevo mensaje de usuario — Odiseo",
+    replyTo: user.email ?? undefined,
+    html: `
+        <p><strong>De:</strong> ${escapeHtml(user.email)}</p>
         <p><strong>Mensaje:</strong></p>
-        <p>${body.contenido}</p>
+        <p>${escapeHtml(body.contenido)}</p>
         <hr>
-        <p><a href="https://odiseo.online/es/admin/mensajes">Responder desde el admin →</a></p>
+        <p><a href="${siteUrl}/es/admin/mensajes">Responder desde el admin →</a></p>
       `,
-    })
-  } catch (e) {
-    console.error("Error enviando email:", e)
-  }
+  })
 
-  return NextResponse.json({ ok: true, data })
+  return NextResponse.json({ ok: true, data, emailSent: emailResult.sent })
 }

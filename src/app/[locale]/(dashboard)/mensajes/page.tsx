@@ -25,8 +25,8 @@ export default async function MensajesPage({
 
   const allSolicitudes = solicitudes || []
   
-  // Separamos planes respondidos de solicitudes pendientes
-  const planes = allSolicitudes.filter(p => p.status === "respondido")
+  // Separamos planes con respuesta de solicitudes pendientes
+  const planes = allSolicitudes.filter(p => p.status === "respondido" || p.status === "aprobado")
   const pendientes = allSolicitudes.filter(p => p.status === "pendiente")
 
   return (

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { Resend } from "resend"
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { adminEmail, escapeHtml, sendOdiseoEmail, siteUrl } from "@/lib/email"
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -43,48 +41,42 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Enviar email a Germán
-  try {
-    await resend.emails.send({
-      from: "Odiseo <noreply@odiseo.online>",
-      to: "quotesneville@gmail.com",
-      subject: `Nueva solicitud de plan — ${body.nombre}`,
-      html: `
+  const emailResult = await sendOdiseoEmail({
+    to: adminEmail,
+    subject: `Nueva solicitud de plan — ${body.nombre}`,
+    replyTo: user.email ?? undefined,
+    html: `
         <h2>Nueva solicitud de plan personalizado</h2>
         
         <h3>Deseo</h3>
-        <p>${body.deseo}</p>
+        <p>${escapeHtml(body.deseo)}</p>
         
         <h3>Datos personales</h3>
         <ul>
-          <li><strong>Nombre:</strong> ${body.nombre}</li>
-          <li><strong>Edad:</strong> ${body.edad || "—"}</li>
-          <li><strong>País/Ciudad:</strong> ${body.paisCiudad || "—"}</li>
-          <li><strong>Trabaja:</strong> ${body.trabaja === true ? `Sí — ${body.ocupacion || ""}` : body.trabaja === false ? "No" : "—"}</li>
-          <li><strong>Estado civil:</strong> ${body.estadoCivil || "—"}</li>
-          <li><strong>Hijos:</strong> ${body.tieneHijos ? `Sí — ${body.cantidadHijos || ""}` : "No"}</li>
-          <li><strong>Conoce las enseñanzas:</strong> ${body.conoceNeville || "—"}</li>
+          <li><strong>Nombre:</strong> ${escapeHtml(body.nombre)}</li>
+          <li><strong>Edad:</strong> ${escapeHtml(body.edad || "—")}</li>
+          <li><strong>País/Ciudad:</strong> ${escapeHtml(body.paisCiudad || "—")}</li>
+          <li><strong>Trabaja:</strong> ${escapeHtml(body.trabaja === true ? `Sí — ${body.ocupacion || ""}` : body.trabaja === false ? "No" : "—")}</li>
+          <li><strong>Estado civil:</strong> ${escapeHtml(body.estadoCivil || "—")}</li>
+          <li><strong>Hijos:</strong> ${escapeHtml(body.tieneHijos ? `Sí — ${body.cantidadHijos || ""}` : "No")}</li>
+          <li><strong>Conoce las enseñanzas:</strong> ${escapeHtml(body.conoceNeville || "—")}</li>
         </ul>
         
         <h3>Práctica</h3>
         <ul>
-          <li><strong>Se despierta:</strong> ${body.horaDespertar || "—"}</li>
-          <li><strong>Se duerme:</strong> ${body.horaDormir || "—"}</li>
-          <li><strong>Duración del plan:</strong> ${body.duracionDias} días</li>
+          <li><strong>Se despierta:</strong> ${escapeHtml(body.horaDespertar || "—")}</li>
+          <li><strong>Se duerme:</strong> ${escapeHtml(body.horaDormir || "—")}</li>
+          <li><strong>Duración del plan:</strong> ${escapeHtml(body.duracionDias)} días</li>
         </ul>
         
-        ${body.mensajeExtra ? `<h3>Mensaje extra</h3><p>${body.mensajeExtra}</p>` : ""}
+        ${body.mensajeExtra ? `<h3>Mensaje extra</h3><p>${escapeHtml(body.mensajeExtra)}</p>` : ""}
         
         <hr>
-        <p><a href="https://odiseo.online/es/admin/planes">Ir al panel de admin para responder →</a></p>
+        <p><a href="${siteUrl}/es/admin/planes">Ir al panel de admin para responder →</a></p>
       `,
-    })
-  } catch (emailError) {
-    // Graceful degradation — la solicitud se guardó igual
-    console.error("Error enviando email:", emailError)
-  }
+  })
 
-  return NextResponse.json({ ok: true, id: data.id })
+  return NextResponse.json({ ok: true, id: data.id, emailSent: emailResult.sent })
 }
 
 export async function GET() {

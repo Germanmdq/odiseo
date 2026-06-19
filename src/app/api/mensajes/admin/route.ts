@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { Resend } from "resend"
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { escapeHtml, sendOdiseoEmail, siteUrl } from "@/lib/email"
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -14,6 +12,10 @@ export async function POST(req: NextRequest) {
   }
 
   const body = (await req.json()) as { userId: string; contenido: string; planSolicitudId?: string }
+  if (!body.contenido?.trim() || !body.userId) {
+    return NextResponse.json({ error: "Faltan datos para enviar el mensaje" }, { status: 400 })
+  }
+
   const admin = createAdminClient()
 
   const { error } = await admin
@@ -31,16 +33,15 @@ export async function POST(req: NextRequest) {
   try {
     const { data: userData } = await admin.auth.admin.getUserById(body.userId)
     if (userData?.user?.email) {
-      await resend.emails.send({
-        from: "Odiseo <noreply@odiseo.online>",
-        to: userData.user.email,
-        subject: "Germán te respondió en Odiseo",
-        html: `
-          <p>Hola, Germán te envió un mensaje en Odiseo.</p>
-          <p><strong>Mensaje:</strong></p>
-          <p>${body.contenido}</p>
+        await sendOdiseoEmail({
+          to: userData.user.email,
+          subject: "Germán te respondió en Odiseo",
+          html: `
+            <p>Hola, Germán te envió un mensaje en Odiseo.</p>
+            <p><strong>Mensaje:</strong></p>
+          <p>${escapeHtml(body.contenido)}</p>
           <hr>
-          <p><a href="https://odiseo.online/es/mensajes">Ver y responder →</a></p>
+          <p><a href="${siteUrl}/es/mensajes">Ver y responder →</a></p>
         `,
       })
     }

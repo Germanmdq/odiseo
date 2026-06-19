@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { Resend } from "resend"
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { escapeHtml, sendOdiseoEmail, siteUrl } from "@/lib/email"
 
 interface Solicitud {
   id: string
@@ -25,6 +23,10 @@ export async function POST(
   }
 
   const { respuesta } = (await req.json()) as { respuesta: string }
+  if (!respuesta?.trim()) {
+    return NextResponse.json({ error: "La respuesta no puede estar vacía" }, { status: 400 })
+  }
+
   const admin = createAdminClient()
 
   // Obtener la solicitud para saber el email del usuario
@@ -47,26 +49,42 @@ export async function POST(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+  if (solicitud) {
+    const { error: mensajeError } = await admin
+      .from("mensajes")
+      .insert({
+        user_id: solicitud.user_id,
+        remitente: "german",
+        contenido: respuesta.trim(),
+        plan_solicitud_id: id,
+      })
+
+    if (mensajeError) {
+      console.error("Error creando mensaje del plan:", mensajeError)
+    }
+  }
+
   // Obtener email del usuario para notificarle
+  let emailSent = false
   if (solicitud) {
     try {
       const { data: userData } = await admin.auth.admin.getUserById(solicitud.user_id)
       if (userData?.user?.email) {
-        await resend.emails.send({
-          from: "Odiseo <noreply@odiseo.online>",
+        const emailResult = await sendOdiseoEmail({
           to: userData.user.email,
           subject: "Tu plan personalizado está listo",
           html: `
-            <h2>Hola ${solicitud.nombre},</h2>
+            <h2>Hola ${escapeHtml(solicitud.nombre)},</h2>
             <p>Germán preparó tu plan personalizado. Podés verlo en Odiseo en la sección Mensajes.</p>
-            <p><a href="https://odiseo.online/es/mensajes">Ver mi plan →</a></p>
+            <p><a href="${siteUrl}/es/mensajes">Ver mi plan →</a></p>
           `,
         })
+        emailSent = emailResult.sent
       }
     } catch (e) {
       console.error("Error enviando email al usuario:", e)
     }
   }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, emailSent })
 }
