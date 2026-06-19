@@ -80,7 +80,7 @@ export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) 
       
       {/* Columna izquierda — lista */}
       <div className={cn(
-        "flex flex-col border-r",
+        "flex flex-col border-r bg-muted/10",
         vistaDetalle ? "hidden md:flex" : "flex"
       )}>
         {/* Header naranja */}

@@ -2,7 +2,7 @@ import Link from "next/link"
 
 export function Paywall({ locale }: { locale: string }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center space-y-6">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center space-y-6 max-w-sm mx-auto">
       <div className="space-y-3">
         <h2 className="text-3xl font-semibold">Ya sentiste lo que es Odiseo.</h2>
         <p className="text-muted-foreground text-lg max-w-md mx-auto">
