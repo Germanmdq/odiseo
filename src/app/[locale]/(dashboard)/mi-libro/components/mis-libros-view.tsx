@@ -145,6 +145,11 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
         body: JSON.stringify({ tema: temaTrim, libroId: activeLibroId }),
       })
 
+      if (res.status === 403) {
+        window.location.href = `/${locale}/pricing`
+        return
+      }
+
       if (!res.ok || !res.body) throw new Error("Error al generar")
 
       const reader = res.body.getReader()

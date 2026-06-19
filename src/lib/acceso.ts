@@ -23,11 +23,12 @@ export async function checkAccess(userId: string): Promise<{ allowed: boolean; p
 
   if (sub) return { allowed: true, plan: sub.plan }
 
-  // 2. Sin suscripción → contar usos totales en daily_activity_events
+  // 2. Sin suscripción → contar solo usos de IA en daily_activity_events
   const { count } = await admin
     .from("daily_activity_events")
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId)
+    .in("event_type", ["coach_message", "escena_creada", "assessment", "book"])
 
   // 3 usos gratis totales, después paywall
   if (!count || count < 3) return { allowed: true, plan: null }
@@ -59,15 +60,18 @@ export async function activarSuscripcion({
   else if (plan === "mensual") expires.setMonth(expires.getMonth() + 1)
   else if (plan === "anual") expires.setFullYear(expires.getFullYear() + 1)
 
-  await admin.from("subscriptions").insert({
-    user_id: userId,
-    plan,
-    gateway,
-    status: "active",
-    external_id: externalId,
-    amount,
-    currency,
-    starts_at: now.toISOString(),
-    expires_at: expires.toISOString(),
-  })
+  await admin.from("subscriptions").upsert(
+    {
+      user_id: userId,
+      plan,
+      gateway,
+      status: "active",
+      external_id: externalId,
+      amount,
+      currency,
+      starts_at: now.toISOString(),
+      expires_at: expires.toISOString(),
+    },
+    { onConflict: "external_id" }
+  )
 }

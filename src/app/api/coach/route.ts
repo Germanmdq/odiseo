@@ -5,6 +5,7 @@ import { embedQuery } from "@/lib/nvidia"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { createClient } from "@/lib/supabase/server"
 import { registrarActividad } from "@/lib/activity"
+import { checkAccess } from "@/lib/acceso"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -219,6 +220,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const supabaseClient = await createClient()
+    const { data: { user } } = await supabaseClient.auth.getUser()
+    if (user) {
+      const { allowed } = await checkAccess(user.id)
+      if (!allowed) {
+        return Response.json({ error: "paywall" }, { status: 403 })
+      }
+    }
+
     const queryEmbedding = await embedQuery(lastUserMessage.content)
     const supabase = createAdminClient()
     const { data, error } = await supabase.rpc("match_content_artifacts", {
@@ -255,9 +265,6 @@ export async function POST(request: NextRequest) {
       const errorText = await nvidiaResponse.text()
       return new Response(`Error de NVIDIA: ${errorText}`, { status: 502 })
     }
-
-    const supabaseClient = await createClient()
-    const { data: { user } } = await supabaseClient.auth.getUser()
 
     return streamPlainTextFromNvidia(nvidiaResponse, user?.id, authorId)
   } catch (error) {

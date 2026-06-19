@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 
 import { createClient } from "@/lib/supabase/server"
 import { registrarActividad } from "@/lib/activity"
+import { checkAccess } from "@/lib/acceso"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -41,6 +42,9 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { allowed } = await checkAccess(user.id)
+  if (!allowed) return Response.json({ error: "paywall" }, { status: 403 })
 
   const apiKey = process.env.NVIDIA_API_KEY
   if (!apiKey) return Response.json({ error: "Falta NVIDIA_API_KEY" }, { status: 500 })

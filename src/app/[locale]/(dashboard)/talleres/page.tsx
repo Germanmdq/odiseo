@@ -1,12 +1,12 @@
 import Link from "next/link"
 import { getTranslations } from "next-intl/server"
-import { Lock } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { createClient } from "@/lib/supabase/server"
 import { checkAccess } from "@/lib/acceso"
+import { LeccionesBloqueables } from "./components/lecciones-bloqueables"
 
 const TALLERES_VIMEO: Record<string, string> = {
   "ley-de-la-asuncion": "VIMEO_ID_AQUI",
@@ -191,45 +191,15 @@ export default async function TalleresPage({
                 </p>
               </div>
 
-              <div className="relative rounded-md border">
-                {!hasActiveSubscription ? (
-                  <div className="bg-background/90 absolute inset-x-3 top-3 z-10 flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-medium shadow-sm backdrop-blur">
-                    <Lock className="size-4" />
-                    {t("unlock")}
-                  </div>
-                ) : null}
-
-                <div
-                  className={
-                    hasActiveSubscription
-                      ? "divide-y"
-                      : "divide-y pt-14 opacity-60"
-                  }
-                >
-                  {taller.lessons.map((lessonKey, index) => (
-                    <div
-                      key={lessonKey}
-                      className="flex items-center gap-3 px-4 py-3"
-                      aria-disabled={!hasActiveSubscription}
-                    >
-                      <span className="bg-muted flex size-8 shrink-0 items-center justify-center rounded-md text-sm font-medium tabular-nums">
-                        {index + 1}
-                      </span>
-                      <p className="flex-1 text-sm font-medium">
-                        {t(`leccion.${lessonKey}`)}
-                      </p>
-                      {!hasActiveSubscription && (
-                        <>
-                          <Lock className="text-muted-foreground size-4 shrink-0" />
-                          <Badge variant="outline" className="shrink-0">
-                            {t("subscribers")}
-                          </Badge>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <LeccionesBloqueables
+                lessons={taller.lessons.map((lessonKey) => ({
+                  label: t(`leccion.${lessonKey}`),
+                }))}
+                hasActiveSubscription={hasActiveSubscription}
+                locale={locale}
+                unlockLabel={t("unlock")}
+                subscribersLabel={t("subscribers")}
+              />
             </CardContent>
           </Card>
         ))}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { registrarActividad } from "@/lib/activity"
+import { checkAccess } from "@/lib/acceso"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -149,6 +150,17 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.NVIDIA_API_KEY
   if (!apiKey) {
     return NextResponse.json({ error: "NVIDIA_API_KEY no configurada" }, { status: 500 })
+  }
+
+  {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { allowed } = await checkAccess(user.id)
+      if (!allowed) {
+        return NextResponse.json({ error: "paywall" }, { status: 403 })
+      }
+    }
   }
 
   const prompt = buildPrompt(tema, cantidad, tipo)

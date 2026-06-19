@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Loader2, Send } from "lucide-react"
+import { useParams } from "next/navigation"
+import Link from "next/link"
+import { Loader2, Send, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -43,7 +44,8 @@ const INITIAL: FormData = {
 }
 
 export default function PlanesPage() {
-  const router = useRouter()
+  const params = useParams()
+  const locale = (params?.locale as string) ?? "es"
   const [form, setForm] = useState<FormData>(INITIAL)
   const [enviando, setEnviando] = useState(false)
   const [enviado, setEnviado] = useState(false)
@@ -76,19 +78,22 @@ export default function PlanesPage() {
 
   if (enviado) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center space-y-4">
-        <div className="size-16 rounded-full flex items-center justify-center text-white text-2xl"
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center space-y-6">
+        <div className="size-16 rounded-full flex items-center justify-center text-white"
           style={{ backgroundColor: "#E8401A" }}>
-          ✓
+          <CheckCircle className="size-8" />
         </div>
         <h2 className="text-2xl font-semibold">Tu solicitud fue enviada</h2>
-        <p className="text-muted-foreground max-w-md">
-          Germán va a revisar tu caso y prepararte un plan personalizado. 
-          Cuando esté listo, lo vas a ver en Mensajes.
+        <p className="text-muted-foreground max-w-sm">
+          Para activar tu plan necesitás una suscripción activa.
         </p>
-        <Button variant="outline" onClick={() => router.push("mensajes")}>
-          Ir a Mensajes
-        </Button>
+        <Link
+          href={`/${locale}/pricing`}
+          className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold text-white"
+          style={{ backgroundColor: "#E8401A" }}
+        >
+          Ver planes →
+        </Link>
       </div>
     )
   }

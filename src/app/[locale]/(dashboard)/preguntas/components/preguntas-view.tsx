@@ -3,6 +3,7 @@
 import * as React from "react"
 import { toast } from "sonner"
 import { Flame, Loader2 } from "lucide-react"
+import { useParams } from "next/navigation"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -472,6 +473,8 @@ function HistorialTab() {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function PreguntasView() {
+  const params = useParams()
+  const locale = (params?.locale as string) ?? "es"
   const [estado, setEstado] = React.useState<Estado>({
     etapa: "setup",
     racha: 0,
@@ -512,6 +515,12 @@ export function PreguntasView() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tema, cantidad, tipo }),
       })
+
+      if (res.status === 403) {
+        window.location.href = `/${locale}/pricing`
+        return
+      }
+
       const data = (await res.json()) as { preguntas?: Pregunta[]; error?: string }
 
       if (!res.ok || !data.preguntas) {

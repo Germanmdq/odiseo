@@ -181,6 +181,11 @@ export function CoachView() {
         }),
       })
 
+      if (response.status === 403) {
+        window.location.href = `/${locale}/pricing`
+        return
+      }
+
       if (!response.ok || !response.body) {
         const errorText = await response.text()
         throw new Error(errorText || "No pude conectar con el Coach.")

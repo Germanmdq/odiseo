@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Send, Sparkles } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useParams } from "next/navigation"
 import ReactMarkdown from "react-markdown"
 
 import { Button } from "@/components/ui/button"
@@ -29,6 +30,8 @@ function LoadingDots() {
 
 export function CreadorDeEscenasView() {
   const t = useTranslations("creador")
+  const params = useParams()
+  const locale = (params?.locale as string) ?? "es"
 
   const [messages, setMessages] = React.useState<Message[]>([
     { id: "greeting", role: "assistant", content: t("greeting") },
@@ -92,6 +95,11 @@ export function CreadorDeEscenasView() {
           messages: nextMessages.map((m) => ({ role: m.role, content: m.content })),
         }),
       })
+
+      if (response.status === 403) {
+        window.location.href = `/${locale}/pricing`
+        return
+      }
 
       if (!response.ok || !response.body) {
         throw new Error((await response.text()) || t("errors.connection"))
