@@ -82,7 +82,7 @@ export function CoachView() {
   const scrollBottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    fetch("/api/perfil")
+    fetch("/api/perfil", { cache: "no-store" })
       .then((r) => r.json())
       .then((d: { nombrePreferido?: string }) => {
         setNombrePreferido(d.nombrePreferido ?? "")

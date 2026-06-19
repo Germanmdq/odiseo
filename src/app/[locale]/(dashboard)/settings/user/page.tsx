@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -41,6 +42,7 @@ type ProfileData = {
 
 export default function PerfilPage() {
   const t = useTranslations("settings.perfil")
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [email, setEmail] = useState("")
@@ -54,7 +56,7 @@ export default function PerfilPage() {
   })
 
   useEffect(() => {
-    fetch("/api/perfil")
+    fetch("/api/perfil", { cache: "no-store" })
       .then((r) => r.json())
       .then((d: ProfileData) => {
         setEmail(d.email ?? "")
@@ -77,6 +79,8 @@ export default function PerfilPage() {
       })
       if (!r.ok) throw new Error()
       setStatus("saved")
+      // Invalidar caches de Next (sidebar, dashboard, coach) para que tomen el nombre nuevo
+      router.refresh()
       setTimeout(() => setStatus("idle"), 3000)
     } catch {
       setStatus("error")

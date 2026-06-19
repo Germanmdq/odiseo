@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { NextRequest, NextResponse } from "next/server"
 
+export const dynamic = "force-dynamic"
+
 type ProfileRow = {
   full_name?: string | null
   display_name?: string | null
@@ -29,13 +31,16 @@ export async function GET() {
   const profile = (data ?? {}) as ProfileRow
   const metaNombre = (user.user_metadata?.nombre_preferido as string | undefined) ?? ""
 
-  return NextResponse.json({
-    email: user.email ?? "",
-    fullName: profile.full_name ?? "",
-    displayName: profile.display_name ?? "",
-    nombrePreferido: profile.nombre_preferido || metaNombre,
-    avatarUrl: profile.avatar_url ?? "",
-  })
+  return NextResponse.json(
+    {
+      email: user.email ?? "",
+      fullName: profile.full_name ?? "",
+      displayName: profile.display_name ?? "",
+      nombrePreferido: profile.nombre_preferido || metaNombre,
+      avatarUrl: profile.avatar_url ?? "",
+    },
+    { headers: { "Cache-Control": "no-store, max-age=0" } }
+  )
 }
 
 export async function PUT(req: NextRequest) {
