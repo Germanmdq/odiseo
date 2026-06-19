@@ -82,7 +82,7 @@ export function CompartirEn({ contenido, titulo, fuenteId, origen = "compartir",
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 ${className ?? ""}`}
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 active:opacity-75 ${className ?? ""}`}
           style={{ backgroundColor: "#E8401A" }}
         >
           <Share2 className="size-3.5" />

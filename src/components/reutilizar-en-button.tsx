@@ -44,7 +44,7 @@ export function ReutilizarEnButton({ content, origen }: ReutilizarEnButtonProps)
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 active:opacity-75"
           style={{ backgroundColor: "#E8401A" }}
         >
           <Share2 className="size-3.5" />

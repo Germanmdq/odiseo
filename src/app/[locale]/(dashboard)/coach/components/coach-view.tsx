@@ -237,6 +237,19 @@ export function CoachView() {
     }
   }
 
+  // El tema es el último mensaje que escribió el usuario
+  const ultimoMensajeUsuario = currentMessages
+    .filter(m => m.senderId === "current-user")
+    .slice(-1)[0]?.content ?? ""
+
+  // Limpiar el tema — máximo 4 palabras significativas
+  const tema = ultimoMensajeUsuario
+    .split(" ")
+    .slice(0, 4)
+    .join(" ")
+    .replace(/[¿?¡!]/g, "")
+    .trim()
+
   return (
     <TooltipProvider delayDuration={0}>
     <div className="flex h-full min-h-0 overflow-hidden sm:pb-6">
@@ -344,8 +357,8 @@ export function CoachView() {
                         {mostrarSugerencias[selectedAuthor ?? ""] && !isLoading ? (
                           <div className="w-full min-w-0 overflow-hidden">
                             <SugerenciasCoach
-                              sugerencias={getSugerencias(ultimoMensaje[selectedAuthor ?? ""] ?? "")}
-                              tema={extraerTema(ultimoMensaje[selectedAuthor ?? ""] ?? "")}
+                              sugerencias={getSugerencias(ultimoMensajeUsuario)}
+                              tema={tema}
                             />
                           </div>
                         ) : null}

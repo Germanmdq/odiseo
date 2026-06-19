@@ -81,8 +81,11 @@ export function SugerenciasCoach({ sugerencias, tema }: SugerenciasCoachProps) {
   const locale = (params.locale as string) ?? "es"
   const router = useRouter()
 
-  const labelConTema = (label: string) =>
-    tema ? label.replace("esto", tema) : label
+  const labelConTema = (label: string) => {
+    if (!tema) return label
+    const temaLimpio = tema.length > 20 ? tema.slice(0, 20) + "..." : tema
+    return label.replace("esto", temaLimpio)
+  }
 
   return (
     <div className="mt-3 border-t pt-3">

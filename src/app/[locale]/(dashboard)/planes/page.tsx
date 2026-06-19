@@ -274,21 +274,57 @@ export default function PlanesPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label>¿A qué hora te despertás?</Label>
-                <Input
-                  type="time"
-                  value={form.horaDespertar}
-                  onChange={e => set("horaDespertar", e.target.value)}
-                  className="[color-scheme:light] text-foreground"
-                />
+                <div className="flex gap-2">
+                  <select
+                    value={form.horaDespertar.split(":")[0] ?? ""}
+                    onChange={e => set("horaDespertar", `${e.target.value}:${form.horaDespertar.split(":")[1] ?? "00"}`)}
+                    className="rounded-lg border px-3 py-2 text-sm bg-background flex-1"
+                  >
+                    <option value="">Hora</option>
+                    {Array.from({length: 24}, (_, i) => (
+                      <option key={i} value={String(i).padStart(2, "0")}>
+                        {String(i).padStart(2, "0")}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={form.horaDespertar.split(":")[1] ?? ""}
+                    onChange={e => set("horaDespertar", `${form.horaDespertar.split(":")[0] ?? "00"}:${e.target.value}`)}
+                    className="rounded-lg border px-3 py-2 text-sm bg-background flex-1"
+                  >
+                    <option value="">Min</option>
+                    {["00", "15", "30", "45"].map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="space-y-1.5">
                 <Label>¿A qué hora te dormís?</Label>
-                <Input
-                  type="time"
-                  value={form.horaDormir}
-                  onChange={e => set("horaDormir", e.target.value)}
-                  className="[color-scheme:light] text-foreground"
-                />
+                <div className="flex gap-2">
+                  <select
+                    value={form.horaDormir.split(":")[0] ?? ""}
+                    onChange={e => set("horaDormir", `${e.target.value}:${form.horaDormir.split(":")[1] ?? "00"}`)}
+                    className="rounded-lg border px-3 py-2 text-sm bg-background flex-1"
+                  >
+                    <option value="">Hora</option>
+                    {Array.from({length: 24}, (_, i) => (
+                      <option key={i} value={String(i).padStart(2, "0")}>
+                        {String(i).padStart(2, "0")}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={form.horaDormir.split(":")[1] ?? ""}
+                    onChange={e => set("horaDormir", `${form.horaDormir.split(":")[0] ?? "00"}:${e.target.value}`)}
+                    className="rounded-lg border px-3 py-2 text-sm bg-background flex-1"
+                  >
+                    <option value="">Min</option>
+                    {["00", "15", "30", "45"].map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
