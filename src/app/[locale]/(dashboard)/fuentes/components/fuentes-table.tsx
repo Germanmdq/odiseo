@@ -349,11 +349,11 @@ export function FuentesTable({
         labels={labels.table}
         hideCounts={true}
         toolbar={
-          <div className="flex flex-wrap gap-2 items-center mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">{labels.filters.year}</span>
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2 items-start sm:items-center mb-4">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="text-sm text-muted-foreground shrink-0">{labels.filters.year}</span>
               <Select value={yearFilter} onValueChange={setYearFilter}>
-                <SelectTrigger className="h-9 w-[120px] sm:w-[150px]">
+                <SelectTrigger className="h-9 flex-1 sm:w-[150px]">
                   <SelectValue placeholder={labels.filters.allYears} />
                 </SelectTrigger>
                 <SelectContent>
@@ -367,12 +367,12 @@ export function FuentesTable({
               </Select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="text-sm text-muted-foreground shrink-0">
                 {labels.filters.category}
               </span>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="h-9 w-[180px] sm:w-[220px]">
+                <SelectTrigger className="h-9 flex-1 sm:w-[220px]">
                   <SelectValue placeholder={labels.filters.allCategories} />
                 </SelectTrigger>
                 <SelectContent>

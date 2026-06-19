@@ -166,6 +166,7 @@ export function AppMobileNav() {
                 <DrawerClose asChild key={item.url}>
                   <Link
                     href={href}
+                    onClick={() => setOpenSection(null)}
                     className={cn(
                       "flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.055] px-4 py-3 text-sm font-semibold transition",
                       active

@@ -2,10 +2,11 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ClipboardList, CheckCircle, Clock, Calendar, ArrowRight, Sparkles } from "lucide-react"
+import { ClipboardList, CheckCircle, Clock, Calendar, ArrowRight, Sparkles, ChevronLeft, ChevronRight } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 interface PlanSolicitud {
   id: string
@@ -36,12 +37,19 @@ interface MensajesViewProps {
 }
 
 export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) {
-  const allItems = [...planes, ...pendientes].sort(
+  const todos = [...planes, ...pendientes].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )
 
-  const [selectedId, setSelectedId] = useState<string>(allItems[0]?.id ?? "")
-  const selectedItem = allItems.find(item => item.id === selectedId) || allItems[0]
+  const [seleccionado, setSeleccionado] = useState<PlanSolicitud | null>(
+    todos[0] ?? null
+  )
+  const [vistaDetalle, setVistaDetalle] = useState(false)
+
+  const handleSelect = (plan: PlanSolicitud) => {
+    setSeleccionado(plan)
+    setVistaDetalle(true)
+  }
 
   if (planes.length === 0 && pendientes.length === 0) {
     return (
@@ -68,164 +76,135 @@ export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) 
   }
 
   return (
-    <div className="flex h-[calc(100dvh-var(--header-height)-2rem)] overflow-hidden rounded-xl border bg-card shadow-md mx-4">
-        {/* Columna Izquierda: Lista de solicitudes (280px fijo) */}
-        <div className="w-[280px] shrink-0 border-r flex flex-col bg-muted/10">
-          <div className="p-4 border-b bg-muted/20">
-            <h2 className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">Mis Solicitudes</h2>
-          </div>
-          <div className="flex-1 overflow-y-auto divide-y">
-            {allItems.map(item => {
-              const isSelected = item.id === selectedId
-              const dateObj = new Date(item.created_at)
-              const timeAgo = isFinite(dateObj.getTime())
-                ? formatDistanceToNow(dateObj, { addSuffix: true, locale: es })
-                : ""
-              
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setSelectedId(item.id)}
-                  className={`w-full text-left p-4 transition-colors flex flex-col gap-1.5 border-l-4 ${
-                    isSelected
-                      ? "bg-orange-50/50 border-[#E8401A] dark:bg-orange-950/10"
-                      : "border-transparent hover:bg-muted/50"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-medium text-sm text-foreground truncate max-w-[150px]">
-                      Plan de {item.nombre}
-                    </span>
-                    {item.status === "respondido" ? (
-                      <span className="text-[10px] font-semibold rounded-full px-2 py-0.5 shrink-0 bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400">
-                        Listo
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-semibold rounded-full px-2 py-0.5 shrink-0 text-white" style={{ backgroundColor: "#E8401A" }}>
-                        Pendiente
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground line-clamp-1">
-                    {item.deseo}
-                  </p>
-                  <span className="text-[10px] text-muted-foreground">
-                    {timeAgo}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
+    <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] h-[calc(100dvh-var(--header-height)-2rem)] overflow-hidden rounded-xl border bg-card shadow-md mx-4">
+      
+      {/* Columna izquierda — lista */}
+      <div className={cn(
+        "flex flex-col border-r",
+        vistaDetalle ? "hidden md:flex" : "flex"
+      )}>
+        {/* Header naranja */}
+        <div className="shrink-0 px-4 py-4" style={{ backgroundColor: "#E8401A" }}>
+          <h1 className="font-semibold text-white text-lg">Mensajes</h1>
+          <p className="text-white/70 text-xs mt-0.5">{todos.length} solicitudes</p>
         </div>
 
-        {/* Columna Derecha: Detalle de la solicitud seleccionada */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-background">
-          {selectedItem ? (
-            <div className="flex flex-col h-full">
-              {/* Header de la solicitud */}
-              <div className="px-6 py-4 border-b flex items-center justify-between bg-muted/5">
-                <div>
-                  <h3 className="font-semibold text-lg text-foreground">
-                    Solicitud de Plan: {selectedItem.nombre}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Pedida {formatDistanceToNow(new Date(selectedItem.created_at), { addSuffix: true, locale: es })}
+        <div className="flex-1 overflow-y-auto">
+          {todos.map(plan => (
+            <button
+              key={plan.id}
+              onClick={() => handleSelect(plan)}
+              className={cn(
+                "w-full text-left px-4 py-3 border-b hover:bg-muted/50 transition-colors",
+                seleccionado?.id === plan.id ? "bg-muted" : ""
+              )}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    {plan.status === "respondido"
+                      ? <CheckCircle className="size-3 text-green-500 shrink-0" />
+                      : <Clock className="size-3 shrink-0" style={{ color: "#E8401A" }} />
+                    }
+                    <span className="text-xs text-muted-foreground">
+                      {plan.status === "respondido" ? "Respondido" : "Pendiente"}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium line-clamp-2 leading-snug">
+                    {plan.deseo}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatDistanceToNow(new Date(plan.created_at), { addSuffix: true, locale: es })}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  {selectedItem.status === "respondido" ? (
-                    <span className="flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full dark:bg-green-950/20 dark:text-green-400">
-                      <CheckCircle className="size-3.5" />
-                      Plan Preparado
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 text-xs font-medium text-white px-2.5 py-1 rounded-full" style={{ backgroundColor: "#E8401A" }}>
-                      <Clock className="size-3.5" />
-                      En Preparación
-                    </span>
+                <ChevronRight className="size-4 text-muted-foreground shrink-0 mt-1" />
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Columna derecha — detalle */}
+      <div className={cn(
+        "flex flex-col overflow-y-auto",
+        vistaDetalle ? "flex" : "hidden md:flex"
+      )}>
+        {/* Botón volver en mobile */}
+        {vistaDetalle && (
+          <button
+            onClick={() => setVistaDetalle(false)}
+            className="flex items-center gap-1.5 px-4 py-3 text-sm text-primary border-b md:hidden"
+          >
+            <ChevronLeft className="size-4" />
+            Volver
+          </button>
+        )}
+
+        {seleccionado ? (
+          <div className="p-6 space-y-6 max-w-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {seleccionado.status === "respondido"
+                  ? <CheckCircle className="size-4 text-green-500" />
+                  : <Clock className="size-4" style={{ color: "#E8401A" }} />
+                }
+                <span className="text-sm font-medium">
+                  {seleccionado.status === "respondido" ? "Plan respondido" : "Esperando respuesta"}
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {formatDistanceToNow(new Date(seleccionado.created_at), { addSuffix: true, locale: es })}
+              </span>
+            </div>
+
+            <div className="rounded-xl border bg-muted/30 p-5 space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Tu solicitud</p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{seleccionado.deseo}</p>
+              
+              {/* Detalles adicionales del plan si existen */}
+              {(seleccionado.duracion_dias || seleccionado.hora_despertar || seleccionado.hora_dormir) && (
+                <div className="pt-3 border-t grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs text-muted-foreground">
+                  <div>
+                    <span className="font-medium block text-foreground">Duración del plan</span>
+                    {seleccionado.duracion_dias} días
+                  </div>
+                  {seleccionado.hora_despertar && (
+                    <div>
+                      <span className="font-medium block text-foreground">Horario Despertar</span>
+                      {seleccionado.hora_despertar}
+                    </div>
+                  )}
+                  {seleccionado.hora_dormir && (
+                    <div>
+                      <span className="font-medium block text-foreground">Horario Dormir</span>
+                      {seleccionado.hora_dormir}
+                    </div>
                   )}
                 </div>
-              </div>
-
-              {/* Contenido detail scrollable */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                
-                {/* Bloque del Deseo original */}
-                <div className="rounded-xl border bg-muted/20 p-5 space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    <Sparkles className="size-4 text-[#E8401A]" />
-                    Deseo / Objetivo Planteado
-                  </div>
-                  <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-                    {selectedItem.deseo}
-                  </p>
-                  
-                  {/* Detalles adicionales del plan si existen */}
-                  <div className="pt-3 border-t grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs text-muted-foreground">
-                    <div>
-                      <span className="font-medium block text-foreground">Duración del plan</span>
-                      {selectedItem.duracion_dias} días
-                    </div>
-                    {selectedItem.hora_despertar && (
-                      <div>
-                        <span className="font-medium block text-foreground">Horario Despertar</span>
-                        {selectedItem.hora_despertar}
-                      </div>
-                    )}
-                    {selectedItem.hora_dormir && (
-                      <div>
-                        <span className="font-medium block text-foreground">Horario Dormir</span>
-                        {selectedItem.hora_dormir}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Respuesta de Germán */}
-                {selectedItem.status === "respondido" && selectedItem.respuesta ? (
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-md text-foreground flex items-center gap-2">
-                      <span className="size-2 rounded-full bg-[#E8401A]" />
-                      Tu Plan de Práctica Diario
-                    </h4>
-                    <div className="rounded-xl border bg-card p-6 shadow-sm border-l-4 border-l-[#E8401A] space-y-4">
-                      <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-                        {selectedItem.respuesta}
-                      </p>
-                      <div className="pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-muted-foreground bg-muted/5 -mx-6 -mb-6 p-6 rounded-b-xl">
-                        <span className="flex items-center gap-1.5">
-                          <Calendar className="size-3.5" />
-                          Respondido {selectedItem.respondido_at ? formatDistanceToNow(new Date(selectedItem.respondido_at), { addSuffix: true, locale: es }) : ""}
-                        </span>
-                        <span className="font-medium text-[#E8401A]">
-                          Hacé tus ejercicios diariamente al despertar y antes de dormir.
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-dashed p-8 text-center space-y-4 max-w-md mx-auto my-8">
-                    <div className="size-12 rounded-full bg-orange-50 dark:bg-orange-950/10 flex items-center justify-center mx-auto">
-                      <Clock className="size-6 text-[#E8401A]" />
-                    </div>
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-foreground">Germán está preparando tu plan</h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        Evaluamos detalladamente tus horarios, hábitos y deseo para preparar ejercicios a tu medida. Te enviaremos un email cuando tu plan personalizado esté listo.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-              <p className="text-muted-foreground text-sm">
-                Seleccioná una solicitud de la lista para ver los detalles.
-              </p>
-            </div>
-          )}
-        </div>
+
+            {seleccionado.respuesta ? (
+              <div className="rounded-xl border p-5 space-y-2" style={{ borderColor: "#E8401A33" }}>
+                <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#E8401A" }}>
+                  Respuesta de Germán
+                </p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{seleccionado.respuesta}</p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed p-6 text-center">
+                <Clock className="size-8 text-muted-foreground/40 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">Germán todavía no respondió esta solicitud.</p>
+                <p className="text-xs text-muted-foreground mt-1">Generalmente responde en 24-48 horas.</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground text-sm">Seleccioná una solicitud</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
