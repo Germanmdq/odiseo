@@ -186,7 +186,7 @@
       "freePlanDesc": "Tenés acceso a las herramientas básicas de Odiseo.",
       "upgradeTitle": "Desbloqueá todo Odiseo",
       "upgradeDesc": "Con la suscripción completa accedés a:",
-      "f1": "4 talleres completos (32 lecciones)",
+      "f1": "4 talleres actuales + 8 nuevos próximos durante el año",
       "f2": "Coach sin límite de sesiones",
       "f3": "Memoria persistente entre sesiones",
       "f4": "Diario sin límite de entradas",
@@ -483,7 +483,9 @@
     "talleres": {
       "eyebrow": "Incluido en tu suscripción anual",
       "title": "Lo que cambia no es lo que hacés. Es cómo te ves.",
-      "subtitle": "4 talleres. Una conversación real entre Germán González y Taty Baldi sobre lo que nadie te dice en los libros.",
+      "subtitle": "4 talleres actuales y 8 nuevos próximos durante el año. Conversaciones reales entre Germán González y Taty Baldi sobre lo que nadie te dice en los libros.",
+      "currentBadge": "4 talleres actuales",
+      "upcomingBadge": "8 talleres próximos durante el año",
       "lessons": "8 lecciones",
       "taller1Title": "La Ley de la Asunción",
       "taller1Desc": "El punto de partida que cambia todo. Aprendés qué significa realmente asumir un deseo como cumplido, por qué el sentimiento lo es todo, y cómo empezar una práctica diaria que funcione. Sin rodeos, sin teoría vacía.",
@@ -494,13 +496,13 @@
       "taller4Title": "El Despertar de la Imaginación",
       "taller4Desc": "Para los que quieren ir más lejos. Las enseñanzas más profundas sobre la Promesa, los símbolos bíblicos como mapas del alma, y la imaginación como el único poder real que existe.",
       "facilitadoresLabel": "Germán González y Taty Baldi",
-      "facilitadoresDesc": "Estos talleres no se planificaron. Surgieron de conversaciones privadas entre Germán y Taty — charlas profundas, honestas, a veces incómodas, sobre lo que realmente significa aplicar estas enseñanzas en la vida cotidiana. Sin libreto, sin guión, sin filtro. 32 grabaciones que son el resultado de años de práctica real, errores reales y transformaciones que ningún libro podría enseñar.",
+      "facilitadoresDesc": "Estos talleres no se planificaron. Surgieron de conversaciones privadas entre Germán y Taty — charlas profundas, honestas, a veces incómodas, sobre lo que realmente significa aplicar estas enseñanzas en la vida cotidiana. Sin libreto, sin guión, sin filtro. El plan anual incluye los 4 talleres actuales y 8 talleres nuevos próximos durante el año.",
       "person1Name": "Germán González",
       "person1Role": "Fundador de Odiseo",
       "person2Name": "Taty Baldi",
       "person2Role": "Co-facilitadora",
       "cta": "Ingresar",
-      "ctaNote": "Incluidos en el plan anual · $47 USD / $55.000 ARS"
+      "ctaNote": "Incluidos en el plan anual · 4 actuales + 8 próximos · $47 USD / $55.000 ARS"
     },
     "footer": {
       "newsletterTitle": "Recibí actualizaciones",

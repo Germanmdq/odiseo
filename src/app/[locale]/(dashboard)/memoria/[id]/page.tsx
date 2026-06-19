@@ -3,6 +3,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
+import { ReutilizarEnButton } from "@/components/reutilizar-en-button"
 
 type Memoria = {
   id: string
@@ -87,6 +88,10 @@ export default async function MemoriaDetailPage({
       <p className="text-base leading-relaxed text-foreground/80">
         {text || "(sin contenido)"}
       </p>
+
+      {text ? (
+        <ReutilizarEnButton content={text} origen="memoria" />
+      ) : null}
 
       {/* Botón Ver fuente */}
       {metaUrl && (

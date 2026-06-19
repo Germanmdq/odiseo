@@ -76,7 +76,7 @@ export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) 
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] h-[calc(100dvh-var(--header-height)-2rem)] overflow-hidden rounded-xl border bg-card shadow-md mx-4">
+    <div className="mx-auto grid w-[calc(100%-2rem)] max-w-5xl grid-cols-1 overflow-hidden rounded-2xl border border-black/10 bg-card shadow-[0_8px_28px_rgba(0,0,0,0.08)] md:h-[calc(100dvh-var(--header-height)-2rem)] md:grid-cols-[280px_1fr]">
       
       {/* Columna izquierda — lista */}
       <div className={cn(
@@ -89,7 +89,7 @@ export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) 
           <p className="text-white/70 text-xs mt-0.5">{todos.length} solicitudes</p>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="max-h-[70dvh] overflow-y-auto md:max-h-none md:flex-1">
           {todos.map(plan => (
             <button
               key={plan.id}
@@ -141,7 +141,7 @@ export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) 
         )}
 
         {seleccionado ? (
-          <div className="p-6 space-y-6 max-w-2xl">
+          <div className="max-w-2xl space-y-6 p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {seleccionado.status === "respondido"

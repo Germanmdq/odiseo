@@ -7,6 +7,7 @@ import { Trash2, PenLine, Check, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar"
+import { ReutilizarEnButton } from "@/components/reutilizar-en-button"
 
 type Nota = { id: string; content: string; created_at: string; updated_at: string }
 
@@ -298,7 +299,8 @@ export default function DiarioPage() {
                           </p>
                         )}
                         {!isEditing && (
-                          <div className="flex items-center gap-2 pt-1">
+                          <div className="flex flex-wrap items-center gap-2 pt-1">
+                            <ReutilizarEnButton content={nota.content} origen="diario" />
                             <button type="button" onClick={() => { setEditId(nota.id); setEditContent(nota.content) }}
                               className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer">
                               <PenLine className="h-3 w-3" /> Editar

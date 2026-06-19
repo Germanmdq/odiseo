@@ -52,7 +52,7 @@ export const PLANES = {
     precioARS: "$55.000",
     periodo: "/ año",
     incluye_talleres: true,
-    descripcion: "Todo + acceso completo a los Talleres de Germán y Taty",
+    descripcion: "Todo + talleres actuales y nuevos encuentros durante el año",
     features: [
       "Coach con todos los maestros",
       "Creador de escenas ilimitado",
@@ -61,7 +61,8 @@ export const PLANES = {
       "Memoria personal",
       "Evaluaciones de conocimiento",
       "Mi libro personal",
-      "32 grabaciones de Talleres",
+      "4 talleres actuales de Germán y Taty",
+      "8 talleres nuevos próximos durante el año",
       "Equivale a $3,9 USD/mes",
     ],
     badge: "Talleres incluidos",

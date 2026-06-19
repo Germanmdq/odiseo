@@ -81,7 +81,7 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
       try {
         const { content } = JSON.parse(raw) as { content: string }
         sessionStorage.removeItem("odiseo_reutilizar")
-        setTema(content.slice(0, 200))
+        setTema(content.slice(0, 1200))
       } catch {}
     }
   }, [])
@@ -112,6 +112,130 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
   }, [activeLibroId])
 
   const libroActivo = libros.find((l) => l.id === activeLibroId)
+
+  function escapeHtml(value: string) {
+    return value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;")
+  }
+
+  function handleDownloadPdf() {
+    if (!libroActivo) return
+
+    const printWindow = window.open("", "_blank")
+    if (!printWindow) return
+
+    const chapterBlocks = capitulos
+      .map((capitulo, index) => {
+        const paragraphs = capitulo.contenido
+          .split(/\n{2,}/)
+          .map((paragraph) => paragraph.trim())
+          .filter(Boolean)
+          .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, "<br />")}</p>`)
+          .join("")
+
+        return `
+          <article class="chapter">
+            <p class="chapter-number">Capítulo ${index + 1}</p>
+            <h2>${escapeHtml(capitulo.titulo)}</h2>
+            ${paragraphs || "<p><em>Capítulo vacío.</em></p>"}
+          </article>
+        `
+      })
+      .join("")
+
+    const indexItems = capitulos
+      .map((capitulo, index) => `<li>${index + 1}. ${escapeHtml(capitulo.titulo)}</li>`)
+      .join("")
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html lang="es">
+        <head>
+          <meta charset="utf-8" />
+          <title>${escapeHtml(libroActivo.titulo)} - Odiseo</title>
+          <style>
+            @page { margin: 22mm 18mm; }
+            body {
+              color: #111;
+              font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+              line-height: 1.65;
+              margin: 0;
+            }
+            .cover {
+              border-bottom: 2px solid #111;
+              margin-bottom: 28px;
+              padding-bottom: 24px;
+            }
+            .brand {
+              color: #E8401A;
+              font-size: 12px;
+              font-weight: 800;
+              letter-spacing: 0.14em;
+              text-transform: uppercase;
+            }
+            h1 {
+              font-size: 36px;
+              line-height: 1.1;
+              margin: 16px 0 8px;
+            }
+            .meta {
+              color: #666;
+              font-size: 13px;
+            }
+            .index {
+              break-after: page;
+              margin-bottom: 30px;
+            }
+            .index h2,
+            .chapter h2 {
+              font-size: 22px;
+              margin: 0 0 12px;
+            }
+            .index li {
+              margin: 8px 0;
+            }
+            .chapter {
+              break-before: page;
+            }
+            .chapter-number {
+              color: #E8401A;
+              font-size: 12px;
+              font-weight: 800;
+              letter-spacing: 0.1em;
+              margin: 0 0 8px;
+              text-transform: uppercase;
+            }
+            p {
+              font-size: 15px;
+              margin: 0 0 14px;
+            }
+          </style>
+        </head>
+        <body>
+          <section class="cover">
+            <div class="brand">Odiseo</div>
+            <h1>${escapeHtml(libroActivo.titulo)}</h1>
+            <p class="meta">${capitulos.length} capítulos · ${new Date().toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" })}</p>
+          </section>
+          <section class="index">
+            <h2>Índice</h2>
+            <ol>${indexItems}</ol>
+          </section>
+          ${chapterBlocks}
+          <script>
+            window.onload = () => {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
+  }
 
   // Create Book
   const handleCrearLibro = async (titulo: string) => {
@@ -230,6 +354,46 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
     } catch (err) {
       console.error("Error guardando capítulo:", err)
     }
+  }
+
+  const handleImproveChapter = async (capitulo: Capitulo, instruccion: string) => {
+    const res = await fetch("/api/mi-libro/modificar-capitulo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        titulo: capitulo.titulo,
+        contenido: capitulo.contenido,
+        instruccion,
+      }),
+    })
+
+    if (res.status === 403) {
+      window.location.href = `/${locale}/pricing`
+      throw new Error("paywall")
+    }
+
+    const data = (await res.json()) as { contenido?: string; error?: string }
+    if (!res.ok || !data.contenido) {
+      throw new Error(data.error ?? "No se pudo modificar")
+    }
+
+    const saveRes = await fetch(`/api/mi-libro/capitulos/${capitulo.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contenido: data.contenido }),
+    })
+    const saved = (await saveRes.json()) as { capitulo?: Capitulo }
+    if (!saveRes.ok || !saved.capitulo) {
+      throw new Error("No se pudo guardar")
+    }
+
+    setCapitulos((prev) =>
+      prev.map((current) =>
+        current.id === capitulo.id ? { ...current, contenido: saved.capitulo!.contenido } : current
+      )
+    )
+
+    return saved.capitulo.contenido
   }
 
   // Delete Chapter
@@ -361,9 +525,16 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled type="button" className="hidden sm:inline-flex">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={capitulos.length === 0}
+                >
                   <Download className="size-4 mr-1.5" />
-                  PDF (próximo)
+                  <span className="sm:hidden">PDF</span>
+                  <span className="hidden sm:inline">Descargar PDF</span>
                 </Button>
               </div>
             </div>
@@ -481,6 +652,7 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
                     numero={index + 1}
                     onDelete={() => handleDeleteChapter(cap.id)}
                     onSave={(texto) => handleSaveChapter(cap.id, texto)}
+                    onImprove={handleImproveChapter}
                   />
                 ))
               )}

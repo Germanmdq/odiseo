@@ -26,7 +26,7 @@ const CARDS = [
   },
   {
     title: "Talleres",
-    desc: "32 grabaciones exclusivas de Germán González y Taty Baldi. 4 talleres de 8 lecciones cada uno, incluidos en el plan anual.",
+    desc: "4 talleres actuales de Germán González y Taty Baldi, más 8 talleres nuevos próximos durante el año. Incluidos en el plan anual.",
     href: "/talleres",
     icon: GraduationCap,
     image: "/dashboard/secciones/talleres.jpg",

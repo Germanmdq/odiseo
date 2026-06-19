@@ -20,7 +20,7 @@ export default async function CreadorDeEscenasPage({
   }
 
   return (
-    <div className="px-0 md:px-6 h-[calc(100dvh-var(--header-height))] md:h-[calc(100dvh-var(--header-height)-4rem)] overflow-hidden pb-20 md:pb-0">
+    <div className="h-full overflow-hidden px-0 pb-0 md:h-[calc(100dvh-var(--header-height)-4rem)] md:px-6">
       <CreadorDeEscenasView />
     </div>
   )

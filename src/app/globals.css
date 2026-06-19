@@ -120,7 +120,12 @@
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
+}
+
+html {
+  overflow-x: hidden;
 }
 
 /* Primary button glow */
@@ -224,6 +229,26 @@
 
 .odiseo-dashboard-shell .bg-card {
   background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.odiseo-dashboard-shell [data-slot="card"],
+.odiseo-dashboard-shell .rounded-2xl.border.bg-card,
+.odiseo-dashboard-shell .rounded-xl.border.bg-card {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 767px) {
+  .odiseo-dashboard-shell {
+    max-width: 100vw;
+    overflow-x: clip;
+  }
+
+  .odiseo-dashboard-shell main,
+  .odiseo-dashboard-shell section,
+  .odiseo-dashboard-shell [data-slot="card"] {
+    max-width: 100%;
+  }
 }
 
 .odiseo-dashboard-shell .bg-background {

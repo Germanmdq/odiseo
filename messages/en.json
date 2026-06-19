@@ -186,7 +186,7 @@
       "freePlanDesc": "You have access to the basic Odiseo tools.",
       "upgradeTitle": "Unlock all of Odiseo",
       "upgradeDesc": "With the full subscription you get:",
-      "f1": "4 complete workshops (32 lessons)",
+      "f1": "4 current workshops + 8 new workshops coming during the year",
       "f2": "Coach with unlimited sessions",
       "f3": "Persistent memory between sessions",
       "f4": "Journal with unlimited entries",
@@ -483,7 +483,9 @@
     "talleres": {
       "eyebrow": "Included in your annual plan",
       "title": "What changes is not what you do. It's how you see yourself.",
-      "subtitle": "4 workshops. A real conversation between Germán González and Taty Baldi about what no book will tell you.",
+      "subtitle": "4 current workshops and 8 new workshops coming during the year. Real conversations between Germán González and Taty Baldi about what no book will tell you.",
+      "currentBadge": "4 current workshops",
+      "upcomingBadge": "8 workshops coming during the year",
       "lessons": "8 lessons",
       "taller1Title": "The Law of Assumption",
       "taller1Desc": "The starting point that changes everything. Learn what it truly means to assume a desire as fulfilled, why feeling is everything, and how to start a daily practice that works. No detours, no empty theory.",
@@ -494,13 +496,13 @@
       "taller4Title": "The Awakening of Imagination",
       "taller4Desc": "For those who want to go further. Neville's mystical teachings on the Promise, biblical symbols as maps of the soul, and imagination as the only God that exists. A workshop that expands what you thought was possible.",
       "facilitadoresLabel": "Germán González and Taty Baldi",
-      "facilitadoresDesc": "Two practitioners who don't teach from books but from life. These 32 recordings are the result of years of private conversations, deep talks and real transformations — their own and those of the people they've accompanied.",
+      "facilitadoresDesc": "Two practitioners who don't teach from books but from life. The annual plan includes the 4 current workshops and 8 new workshops coming during the year.",
       "person1Name": "Germán González",
       "person1Role": "Founder of Odiseo",
       "person2Name": "Taty Baldi",
       "person2Role": "Co-facilitator",
       "cta": "Ingresar",
-      "ctaNote": "Included in the annual plan · $47 USD"
+      "ctaNote": "Included in the annual plan · 4 current + 8 coming · $47 USD"
     },
     "footer": {
       "newsletterTitle": "Stay updated",

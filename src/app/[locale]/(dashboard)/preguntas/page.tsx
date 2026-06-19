@@ -11,7 +11,7 @@ export default async function PreguntasPage({
   const t = await getTranslations({ locale, namespace: "preguntas" })
 
   return (
-    <div className="flex-1 space-y-4 px-6 pt-0">
+    <div className="flex-1 space-y-4 px-4 pt-0 md:px-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
       </div>

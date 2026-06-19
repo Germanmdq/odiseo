@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -19,13 +19,10 @@ export function SiteHeader() {
       .catch(() => {})
   }, [])
 
-  const pathname = usePathname()
-  const isImmersiveRoute = pathname ? /\/(coach|creador-de-escenas|narrador)\/?$/.test(pathname) : false
-
   return (
-    <header className={`flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) ${isImmersiveRoute ? "hidden md:flex" : ""}`}>
+    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-2 px-4 py-3 lg:gap-2 lg:px-6">
-        <SidebarTrigger className="-ml-1 inline-flex size-9 rounded-xl md:size-7" />
+        <SidebarTrigger className="-ml-1 inline-flex size-10 rounded-xl border border-black/15 bg-white shadow-[0_4px_14px_rgba(0,0,0,0.10)] md:size-8" />
         <div className="flex min-w-0 items-center gap-2 md:hidden">
           <div className="flex size-8 items-center justify-center rounded-xl border-2 border-black bg-black text-white">
             <Logo size={21} className="text-current" />

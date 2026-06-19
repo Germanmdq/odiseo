@@ -53,6 +53,10 @@ export function TalleresSection() {
           <p className="text-lg text-muted-foreground">
             {t("subtitle")}
           </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <Badge variant="secondary">{t("currentBadge")}</Badge>
+            <Badge variant="outline">{t("upcomingBadge")}</Badge>
+          </div>
         </div>
 
         {/* Workshop Cards */}

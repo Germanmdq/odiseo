@@ -225,7 +225,7 @@ export function PreciosClient({ locale, userId }: PreciosClientProps) {
           </h1>
           <p className="text-muted-foreground text-sm">
             Elegí el plan que mejor se adapta a vos. Cancelás cuando querés. 
-            El plan anual te da acceso exclusivo a los talleres de Germán y Taty.
+            El plan anual incluye los 4 talleres actuales de Germán y Taty y 8 talleres nuevos próximos durante el año.
           </p>
         </div>
 

@@ -157,7 +157,7 @@ export default async function TalleresPage({
           <div>
             <p className="font-semibold">Los Talleres están incluidos en el plan anual</p>
             <p className="text-sm text-muted-foreground">
-              Suscribite al plan anual ($47 USD) para desbloquear todos los talleres en video.
+              Suscribite al plan anual ($47 USD) para desbloquear los talleres actuales y los 8 nuevos que iremos publicando durante el año.
             </p>
           </div>
           <Button asChild className="shrink-0">

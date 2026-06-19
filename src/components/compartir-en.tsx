@@ -30,6 +30,8 @@ const DESTINOS = [
   { label: "Creador de escenas", path: "/creador-de-escenas" },
   { label: "Ponerme a prueba", path: "/preguntas" },
   { label: "Mi libro", path: "/mi-libro" },
+  { label: "Diario", path: "/diario" },
+  { label: "Notas", path: "/notas" },
 ]
 
 export function CompartirEn({ contenido, titulo, fuenteId, origen = "compartir", className, size = "sm", variante = "completo", label = "Reutilizar en..." }: Props) {

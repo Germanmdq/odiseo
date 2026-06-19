@@ -101,7 +101,7 @@ export function FAQList({ faqs, categories }: FAQListProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-[570px] pr-4">
+            <ScrollArea className="h-auto md:h-[570px] md:pr-4">
               {filteredFaqs.length === 0 ? (
                 <div className="py-8 text-center text-muted-foreground">
                   <p>No se encontraron preguntas.</p>
@@ -112,14 +112,14 @@ export function FAQList({ faqs, categories }: FAQListProps) {
                     <AccordionItem
                       key={item.id}
                       value={`item-${item.id}`}
-                      className="rounded-md !border"
+                      className="rounded-2xl !border border-black/10 bg-card shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
                     >
                       <AccordionTrigger className="cursor-pointer px-4 hover:no-underline">
-                        <div className="flex items-start text-left">
+                        <div className="flex min-w-0 flex-col items-start gap-2 text-left sm:flex-row">
                           <span>{item.question}</span>
                           <Badge
                             variant="outline"
-                            className="ms-3 mt-0.5 shrink-0 text-xs"
+                            className="shrink-0 text-xs sm:ms-3 sm:mt-0.5"
                           >
                             {item.category}
                           </Badge>

@@ -227,10 +227,6 @@ export function CoachView() {
         }).catch(() => {})
       }
 
-      sessionStorage.setItem(
-        "odiseo_reutilizar",
-        JSON.stringify({ content, origen: "coach", autor: authorId })
-      )
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No pude responder ahora."
@@ -272,6 +268,18 @@ export function CoachView() {
   const ultimoMensajeUsuario = currentMessages
     .filter(m => m.senderId === "current-user")
     .slice(-1)[0]?.content ?? ""
+
+  function getShareableConversation(messageIndex: number) {
+    const assistantMessage = currentMessages[messageIndex]
+    const previousUserMessage = currentMessages
+      .slice(0, messageIndex)
+      .reverse()
+      .find((message) => message.senderId === "current-user")
+
+    if (!previousUserMessage?.content) return assistantMessage.content
+
+    return `Pregunta del usuario:\n${previousUserMessage.content}\n\nRespuesta:\n${assistantMessage.content}`
+  }
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -346,7 +354,7 @@ export function CoachView() {
                               {msg.senderId !== "current-user" && msg.content && !msg.isInitial ? (
                                 <div className="hidden sm:flex opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mb-1 items-center gap-1">
                                   <CompartirEn
-                                    contenido={msg.content}
+                                    contenido={getShareableConversation(currentMessages.indexOf(msg))}
                                     origen="coach"
                                     size="xs"
                                     variante="coach"

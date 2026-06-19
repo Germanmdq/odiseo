@@ -124,8 +124,8 @@ function SetupScreen({
   }
 
   return (
-    <div className="mx-auto max-w-lg py-6">
-      <div className="rounded-2xl border bg-card p-8 shadow-sm space-y-6">
+    <div className="mx-auto w-full max-w-lg py-6">
+      <div className="space-y-6 rounded-2xl border border-black/10 bg-card p-5 shadow-[0_8px_28px_rgba(0,0,0,0.08)] sm:p-8">
         {estado.racha > 0 && (
           <div className="flex items-center gap-2 text-sm font-medium" style={{ color: "#E8401A" }}>
             <Flame className="h-4 w-4" />
@@ -148,7 +148,7 @@ function SetupScreen({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label className="text-sm text-muted-foreground block">Cantidad de preguntas</label>
             <select
@@ -488,7 +488,7 @@ export function PreguntasView() {
       try {
         const { content } = JSON.parse(raw) as { content: string }
         sessionStorage.removeItem("odiseo_reutilizar")
-        setInitialTema(content.slice(0, 150))
+        setInitialTema(content.slice(0, 1200))
       } catch {}
     }
   }, [])

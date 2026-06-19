@@ -151,6 +151,18 @@ export function CreadorDeEscenasView() {
     }
   }
 
+  function getShareableScene(messageIndex: number) {
+    const assistantMessage = messages[messageIndex]
+    const previousUserMessage = messages
+      .slice(0, messageIndex)
+      .reverse()
+      .find((message) => message.role === "user")
+
+    if (!previousUserMessage?.content) return assistantMessage.content
+
+    return `Pedido del usuario:\n${previousUserMessage.content}\n\nEscena creada:\n${assistantMessage.content}`
+  }
+
   return (
     <div className="relative flex h-full flex-col overflow-hidden rounded-none bg-white shadow-none pb-0 sm:rounded-[1.6rem] sm:shadow-[0_20px_60px_rgba(0,0,0,0.18),0_8px_20px_rgba(0,0,0,0.10),0_2px_6px_rgba(0,0,0,0.06)] sm:pb-6">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_100%,rgba(255,43,10,0.04),transparent_40%)]" />
@@ -201,7 +213,12 @@ export function CreadorDeEscenasView() {
 
                 {message.role === "assistant" && message.id !== "greeting" && message.content && !isLoading ? (
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mb-1">
-                    <CompartirEn contenido={message.content} origen="creador" size="xs" label="Usar esta escena" />
+                    <CompartirEn
+                      contenido={getShareableScene(messages.indexOf(message))}
+                      origen="creador"
+                      size="xs"
+                      label="Usar esta escena"
+                    />
                   </div>
                 ) : null}
               </div>

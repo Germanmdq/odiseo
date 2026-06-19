@@ -40,7 +40,7 @@ export default function DashboardLayout({
             <SiteHeader />
             <div className="flex flex-1 flex-col">
               <div className="@container/main flex flex-1 flex-col gap-2">
-                <div className={`flex flex-col gap-4 md:gap-6 md:py-6 ${isImmersiveRoute ? "h-[100dvh] py-0 pb-0 md:h-auto" : "py-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:pb-6"}`}>
+                <div className={`flex flex-col gap-4 md:gap-6 md:py-6 ${isImmersiveRoute ? "h-[calc(100dvh-var(--header-height))] py-0 pb-0 md:h-auto" : "py-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:pb-6"}`}>
                   {children}
                 </div>
               </div>
@@ -54,7 +54,7 @@ export default function DashboardLayout({
             <SiteHeader />
             <div className="flex flex-1 flex-col">
               <div className="@container/main flex flex-1 flex-col gap-2">
-                <div className={`flex flex-col gap-4 md:gap-6 md:py-6 ${isImmersiveRoute ? "h-[100dvh] py-0 pb-0 md:h-auto" : "py-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:pb-6"}`}>
+                <div className={`flex flex-col gap-4 md:gap-6 md:py-6 ${isImmersiveRoute ? "h-[calc(100dvh-var(--header-height))] py-0 pb-0 md:h-auto" : "py-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:pb-6"}`}>
                   {children}
                 </div>
               </div>
