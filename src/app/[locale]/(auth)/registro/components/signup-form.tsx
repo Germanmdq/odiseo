@@ -63,19 +63,24 @@ export function SignupForm({ userId }: { userId?: string }) {
     }
 
     startTransition(async () => {
-      const supabase = createClient()
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ nombre_preferido: nombre })
-        .eq("id", userId)
+      try {
+        const res = await fetch("/api/perfil", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nombrePreferido: nombre.trim() }),
+        })
 
-      if (updateError) {
-        setError(updateError.message)
-        return
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string }
+          setError(data.error || "No se pudo guardar tu nombre. Intentá de nuevo.")
+          return
+        }
+
+        router.replace(`/${locale}/dashboard`)
+        router.refresh()
+      } catch {
+        setError("No se pudo guardar tu nombre. Revisá tu conexión e intentá de nuevo.")
       }
-
-      router.replace(`/${locale}/dashboard`)
-      router.refresh()
     })
   }
 
