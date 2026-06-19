@@ -3,11 +3,18 @@
 import { useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { Loader2, Send, CheckCircle } from "lucide-react"
+import { CheckCircle, Loader2, MessageCircle, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Accordion,
   AccordionContent,
@@ -18,6 +25,7 @@ import {
 type FormData = {
   deseo: string
   nombre: string
+  whatsapp: string
   edad: string
   paisCiudad: string
   trabaja: boolean | null
@@ -35,6 +43,7 @@ type FormData = {
 const INITIAL: FormData = {
   deseo: "",
   nombre: "",
+  whatsapp: "",
   edad: "",
   paisCiudad: "",
   trabaja: null,
@@ -56,6 +65,8 @@ export default function PlanesPage() {
   const [enviando, setEnviando] = useState(false)
   const [enviado, setEnviado] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false)
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null)
 
   const set = (key: keyof FormData, value: string | boolean) =>
     setForm(prev => ({ ...prev, [key]: value }))
@@ -75,10 +86,17 @@ export default function PlanesPage() {
     })
 
     setEnviando(false)
+    const data = await res.json().catch(() => null) as { whatsappUrl?: string; code?: string; error?: string } | null
+
     if (res.ok) {
+      const url = data?.whatsappUrl ?? null
+      setWhatsappUrl(url)
       setEnviado(true)
+      if (url) window.location.href = url
+    } else if (res.status === 402 || data?.code === "subscription_required") {
+      setShowSubscriptionPopup(true)
     } else {
-      setError("Hubo un error al enviar. Intentá de nuevo.")
+      setError(data?.error ?? "Hubo un error al enviar. Intentá de nuevo.")
     }
   }
 
@@ -91,21 +109,41 @@ export default function PlanesPage() {
         </div>
         <h2 className="text-2xl font-semibold">Tu solicitud fue enviada</h2>
         <p className="text-muted-foreground max-w-sm">
-          Para recibir tu plan tenés que tener una suscripción activa.
+          Se guardó en Odiseo y abrimos WhatsApp con el mensaje armado. Tocá enviar para que le llegue directo a Germán.
         </p>
-        <Link
-          href={`/${locale}/pricing`}
-          className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold text-white"
-          style={{ backgroundColor: "#E8401A" }}
-        >
-          Ver planes →
-        </Link>
+        {whatsappUrl && (
+          <a
+            href={whatsappUrl}
+            className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold text-white"
+            style={{ backgroundColor: "#E8401A" }}
+          >
+            <MessageCircle className="size-4" />
+            Abrir WhatsApp
+          </a>
+        )}
       </div>
     )
   }
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-2xl px-4 py-4 sm:py-8">
+      <Dialog open={showSubscriptionPopup} onOpenChange={setShowSubscriptionPopup}>
+        <DialogContent className="max-w-sm text-center">
+          <DialogHeader className="items-center text-center">
+            <div className="mb-2 flex size-14 items-center justify-center rounded-full text-white" style={{ backgroundColor: "#E8401A" }}>
+              <MessageCircle className="size-7" />
+            </div>
+            <DialogTitle className="text-xl">Suscripción necesaria</DialogTitle>
+            <DialogDescription className="text-base leading-relaxed">
+              Para recibir tus planes personalizados necesitás una suscripción activa.
+            </DialogDescription>
+          </DialogHeader>
+          <Button asChild className="mt-2 h-12 text-white" style={{ backgroundColor: "#E8401A" }}>
+            <Link href={`/${locale}/pricing`}>Ver planes</Link>
+          </Button>
+        </DialogContent>
+      </Dialog>
+
       <div className="rounded-2xl border bg-card shadow-lg overflow-hidden">
         {/* Header del formulario */}
         <div className="border-b px-5 py-5 sm:px-8 sm:py-6" style={{ backgroundColor: "#E8401A" }}>
@@ -154,6 +192,15 @@ export default function PlanesPage() {
                   value={form.nombre}
                   onChange={e => set("nombre", e.target.value)}
                   placeholder="Tu nombre"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>WhatsApp</Label>
+                <Input
+                  type="tel"
+                  value={form.whatsapp}
+                  onChange={e => set("whatsapp", e.target.value)}
+                  placeholder="Ej: +54 9 223..."
                 />
               </div>
               <div className="space-y-1.5">
