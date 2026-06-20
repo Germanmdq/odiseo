@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { inter } from "@/lib/fonts";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -23,6 +25,8 @@ export default function RootLayout({
     <html className="dark" suppressHydrationWarning>
       <body className={`${inter.variable} ${inter.className} antialiased overflow-x-hidden`}>
         {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

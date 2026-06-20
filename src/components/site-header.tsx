@@ -22,7 +22,7 @@ export function SiteHeader() {
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-2 px-4 py-3 lg:gap-2 lg:px-6">
-        <SidebarTrigger className="-ml-1 inline-flex size-10 rounded-xl border border-black/15 bg-white shadow-[0_4px_14px_rgba(0,0,0,0.10)] md:size-8" />
+        <SidebarTrigger className="-ml-1 inline-flex size-11 rounded-xl border-2 border-[#FF2B0A] bg-[#FF2B0A] text-white shadow-[0_4px_14px_rgba(255,43,10,0.35)] md:size-8 md:border md:border-black/15 md:bg-white md:text-foreground md:shadow-[0_4px_14px_rgba(0,0,0,0.10)]" />
         <div className="flex min-w-0 items-center gap-2 md:hidden">
           <div className="flex size-8 items-center justify-center rounded-xl border-2 border-black bg-black text-white">
             <Logo size={21} className="text-current" />

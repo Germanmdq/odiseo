@@ -24,24 +24,36 @@ export default function RadialOrbitalTimeline({ timelineData }: Props) {
   const [activeId, setActiveId] = useState<number | null>(null)
   const [angle, setAngle] = useState(0)
   const [paused, setPaused] = useState(false)
-  const [radius, setRadius] = useState(220)
+  const [radius, setRadius] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+  const [cardWidth, setCardWidth] = useState(240)
   const containerRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Radio responsive medido del contenedor real (evita el salto de tamaño al cargar).
+  // Arranca en 0 (igual en SSR y primer render cliente → sin mismatch ni jump);
+  // los nodos se dibujan una vez medido.
   useEffect(() => {
-    const update = () => setRadius(Math.min(220, window.innerWidth * 0.37))
+    const update = () => {
+      const mobile = window.innerWidth < 768
+      const containerW = containerRef.current?.offsetWidth ?? window.innerWidth
+      setIsMobile(mobile)
+      setRadius(Math.min(200, containerW * (mobile ? 0.32 : 0.37)))
+      setCardWidth(Math.min(240, window.innerWidth - 32))
+    }
     update()
     window.addEventListener("resize", update)
     return () => window.removeEventListener("resize", update)
   }, [])
 
+  // En mobile NO auto-rota (queda estático para no "moverse"); en desktop rota salvo pausa.
   useEffect(() => {
-    if (paused) return
+    if (paused || isMobile || radius === 0) return
     timerRef.current = setInterval(() => {
       setAngle((a) => (a + 0.2) % 360)
     }, 50)
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [paused])
+  }, [paused, isMobile, radius])
 
   const handleNodeClick = (id: number) => {
     if (activeId === id) {
@@ -95,7 +107,7 @@ export default function RadialOrbitalTimeline({ timelineData }: Props) {
       </div>
 
       {/* Nodos */}
-      {timelineData.map((item, index) => {
+      {radius > 0 && timelineData.map((item, index) => {
         const { x, y, opacity } = getPosition(index)
         const isActive = activeId === item.id
         const Icon = item.icon
@@ -124,7 +136,7 @@ export default function RadialOrbitalTimeline({ timelineData }: Props) {
               `}>
                 <Icon size={16} />
               </div>
-              <span className={`text-[11px] font-medium whitespace-nowrap transition-colors duration-300 ${isActive ? "text-[#FF2B0A]" : "text-black/60"}`}>
+              <span className={`max-w-[72px] text-center leading-tight text-[10px] sm:text-[11px] font-medium transition-colors duration-300 ${isActive ? "text-[#FF2B0A]" : "text-black/60"}`}>
                 {item.title}
               </span>
             </div>
@@ -134,7 +146,7 @@ export default function RadialOrbitalTimeline({ timelineData }: Props) {
               <div
                 className="absolute bg-white border-2 border-black rounded-xl p-4 shadow-[4px_4px_0_#000]"
                 style={{
-                  width: Math.min(240, window.innerWidth - 32),
+                  width: cardWidth,
                   top: 60,
                   left: "50%",
                   transform: "translateX(-50%)",

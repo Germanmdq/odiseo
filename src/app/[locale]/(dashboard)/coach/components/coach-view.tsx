@@ -352,7 +352,7 @@ export function CoachView() {
                               }`}
                             >
                               <div
-                                className={`min-w-0 max-w-full rounded-2xl px-3.5 py-2.5 text-[16px] leading-[1.45] font-[450] break-words shadow-sm [overflow-wrap:anywhere] sm:px-4 sm:py-3 sm:text-[15px] sm:font-normal ${
+                                className={`min-w-0 max-w-full rounded-2xl px-3.5 py-2.5 text-[15px] leading-[1.45] break-words shadow-sm [overflow-wrap:anywhere] sm:px-4 sm:py-3 ${
                                   msg.senderId === "current-user"
                                     ? "w-fit bg-black text-white rounded-br-sm"
                                     : "w-full border border-[#EEEEEE] bg-[#F4F4F4] text-black prose prose-sm prose-p:my-0 max-w-none rounded-bl-sm"

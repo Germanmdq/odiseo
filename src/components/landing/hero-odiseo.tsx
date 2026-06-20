@@ -33,7 +33,7 @@ export function HeroOdiseo() {
       `}</style>
 
       <section className="flex items-center justify-center p-4 md:p-8 bg-background w-full">
-        <div className="relative w-full max-w-[1400px] aspect-[4/3] md:aspect-[16/9] min-h-[600px] md:min-h-[800px] rounded-[2rem] overflow-hidden shadow-2xl bg-black mx-auto">
+        <div className="relative w-full max-w-[1400px] aspect-[4/3] md:aspect-[16/9] min-h-[80vh] md:min-h-[800px] rounded-[2rem] overflow-hidden shadow-2xl bg-black mx-auto">
 
           {/* Video de fondo */}
           <video

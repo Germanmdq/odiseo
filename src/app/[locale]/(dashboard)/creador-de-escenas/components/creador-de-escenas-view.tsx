@@ -198,7 +198,7 @@ export function CreadorDeEscenasView() {
               <div className={cn("group relative flex items-end gap-2 max-w-[92%] sm:max-w-[85%]", message.role === "user" ? "flex-row-reverse" : "flex-row")}>
                 <div
                   className={cn(
-                    "max-w-full rounded-2xl px-3 py-2.5 text-[14px] leading-relaxed break-words shadow-sm sm:px-4 sm:py-3 sm:text-[15px]",
+                    "min-w-0 max-w-full rounded-2xl px-3 py-2.5 text-[14px] leading-relaxed break-words [overflow-wrap:anywhere] shadow-sm sm:px-4 sm:py-3 sm:text-[15px]",
                     message.role === "user"
                       ? "bg-black text-white rounded-br-sm"
                       : "border border-[#EEEEEE] bg-[#F4F4F4] text-black prose prose-sm max-w-none rounded-bl-sm"

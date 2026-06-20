@@ -95,7 +95,7 @@ export function CapituloItem({ capitulo, numero, onDelete, onSave, onImprove }: 
             </div>
           ) : (
             <div className="p-4">
-              <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/80">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-foreground/80">
                 {capitulo.contenido || <em className="text-muted-foreground">Capítulo vacío. Hacé clic en &quot;Editar&quot; para escribir.</em>}
               </p>
               <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">

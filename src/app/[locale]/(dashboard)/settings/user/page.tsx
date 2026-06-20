@@ -153,9 +153,9 @@ export default function PerfilPage() {
                     </Badge>
                     <Link
                       href={`/${locale}/pricing`}
-                      className="text-xs font-medium text-[#E8401A] hover:underline"
+                      className="inline-flex items-center gap-1 rounded-full bg-[#E8401A] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
                     >
-                      Suscribirme
+                      Suscribirme →
                     </Link>
                   </div>
                 )
