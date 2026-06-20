@@ -58,6 +58,9 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
   const [savingDraft, setSavingDraft] = React.useState(false)
   // Contenido compartido (p.ej. desde Coach) pendiente de colocar en un libro
   const [sharedPending, setSharedPending] = React.useState(false)
+  // true mientras navegamos hacia un libro (crear/seleccionar): evita descartar
+  // el contenido pendiente en el desmontaje provocado por esa navegación.
+  const navigatingToBookRef = React.useRef(false)
 
   // Load books on mount
   React.useEffect(() => {
@@ -77,36 +80,54 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
   }, [])
 
   // Contenido compartido desde otra herramienta (Coach, Fuentes, etc.).
-  // No se consume hasta que haya un libro activo donde colocarlo, así
-  // sobrevive al remontaje al crear/elegir un libro.
+  // Se mueve de inmediato de la key compartida (odiseo_reutilizar) a una key
+  // EXCLUSIVA de Mi libro (odiseo_milibro_pending), para que ninguna otra
+  // sección (p.ej. Coach) lo reinyecte si el usuario no completa la acción.
   React.useEffect(() => {
-    const raw = sessionStorage.getItem("odiseo_reutilizar")
-    if (!raw) return
-
-    let content = ""
-    try {
-      content = ((JSON.parse(raw) as { content?: string }).content ?? "")
-    } catch (e) {
-      console.error("[mi-libro] odiseo_reutilizar no es JSON válido:", raw, e)
+    const incoming = sessionStorage.getItem("odiseo_reutilizar")
+    if (incoming) {
       sessionStorage.removeItem("odiseo_reutilizar")
-      return
+      try {
+        const { content } = JSON.parse(incoming) as { content?: string }
+        if (content && content.trim()) {
+          sessionStorage.setItem("odiseo_milibro_pending", JSON.stringify({ content }))
+        }
+      } catch (e) {
+        console.error("[mi-libro] odiseo_reutilizar no es JSON válido:", incoming, e)
+      }
     }
 
-    if (!content.trim()) {
-      sessionStorage.removeItem("odiseo_reutilizar")
+    const pendingRaw = sessionStorage.getItem("odiseo_milibro_pending")
+    if (!pendingRaw) {
+      setSharedPending(false)
       return
     }
 
     if (activeLibroId) {
       // Hay un libro activo: precargar el tema y consumir el contenido.
-      setTema(content.slice(0, 1200))
+      try {
+        const { content } = JSON.parse(pendingRaw) as { content?: string }
+        if (content && content.trim()) setTema(content.slice(0, 1200))
+      } catch (e) {
+        console.error("[mi-libro] odiseo_milibro_pending inválido:", e)
+      }
+      sessionStorage.removeItem("odiseo_milibro_pending")
       setSharedPending(false)
-      sessionStorage.removeItem("odiseo_reutilizar")
     } else {
-      // Sin libro activo: mantener el contenido y avisar al usuario.
+      // Sin libro activo: queda pendiente bajo la key privada y se avisa.
       setSharedPending(true)
     }
   }, [activeLibroId])
+
+  // Al salir de Mi libro sin ir hacia un libro (crear/seleccionar), descartar el
+  // contenido pendiente para que no persiga al usuario a otras secciones.
+  React.useEffect(() => {
+    return () => {
+      if (!navigatingToBookRef.current) {
+        sessionStorage.removeItem("odiseo_milibro_pending")
+      }
+    }
+  }, [])
 
   // Load chapters when active book changes
   React.useEffect(() => {
@@ -271,6 +292,7 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
     if (d.libro) {
       const nuevo = { ...d.libro, cantidadCapitulos: 0 }
       setLibros((prev) => [nuevo, ...prev])
+      navigatingToBookRef.current = true
       router.push(`/${locale}/mi-libro/${d.libro.id}`)
     }
   }
@@ -468,7 +490,10 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
               <button
                 key={libro.id}
                 type="button"
-                onClick={() => router.push(`/${locale}/mi-libro/${libro.id}`)}
+                onClick={() => {
+                  navigatingToBookRef.current = true
+                  router.push(`/${locale}/mi-libro/${libro.id}`)
+                }}
                 className={cn(
                   "w-full text-left rounded-lg p-3 transition-colors cursor-pointer",
                   activeLibroId === libro.id

@@ -114,6 +114,12 @@ export function CoachView() {
       return
     }
 
+    // No reinyectar contenido generado por el propio Coach: evita el loop de
+    // auto-alimentación (compartir una conversación de Coach de vuelta a Coach).
+    if (origen === "coach") {
+      return
+    }
+
     const ORIGEN_LABEL: Record<string, string> = {
       creador: "el Creador de escenas",
       fuente: "las Fuentes",
