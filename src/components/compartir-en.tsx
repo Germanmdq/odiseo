@@ -41,9 +41,10 @@ export function CompartirEn({ contenido, titulo, fuenteId, origen = "compartir",
   const [saveState, setSaveState] = useState<SaveState>("idle")
 
   function navegar(path: string) {
+    console.log("[compartir-en] guardar", { origen, titulo, len: contenido.length }) // TEMP — quitar tras QA
     sessionStorage.setItem(
       "odiseo_reutilizar",
-      JSON.stringify({ content: contenido, origen })
+      JSON.stringify({ content: contenido, origen, titulo })
     )
     const url = `/${locale}${path}?desde=externo`
     router.push(url)

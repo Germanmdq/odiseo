@@ -28,7 +28,8 @@ export function UsarEnButton({ content, origen }: UsarEnButtonProps) {
   ]
 
   const handleUsar = (path: string, autor: string | null) => {
-    sessionStorage.setItem("odiseo_contexto", JSON.stringify({ content, origen }))
+    console.log("[usar-en] guardar", { origen, len: content.length }) // TEMP — quitar tras QA
+    sessionStorage.setItem("odiseo_reutilizar", JSON.stringify({ content, origen }))
     const url = autor ? `${path}?autor=${autor}&desde=${origen}` : `${path}?desde=${origen}`
     router.push(url)
   }

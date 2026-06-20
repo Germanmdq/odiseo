@@ -196,14 +196,28 @@ function FuenteDrawer({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="gap-2"
-                  onClick={() => router.push(`/${locale}/coach?contexto=${source.sourceKey}`)}
+                  onClick={() => {
+                    console.log("[compartir→guardar] Coach", { origen: "fuente", titulo: detail.name, len: shareContent.length }) // TEMP — quitar tras QA
+                    sessionStorage.setItem(
+                      "odiseo_reutilizar",
+                      JSON.stringify({ content: shareContent, origen: "fuente", titulo: detail.name })
+                    )
+                    router.push(`/${locale}/coach?desde=fuente`)
+                  }}
                 >
                   <MessageSquare className="h-4 w-4" />
                   Conversar sobre esto
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="gap-2"
-                  onClick={() => router.push(`/${locale}/creador-de-escenas?contexto=${source.sourceKey}`)}
+                  onClick={() => {
+                    console.log("[compartir→guardar] Creador", { origen: "fuente", titulo: detail.name, len: shareContent.length }) // TEMP — quitar tras QA
+                    sessionStorage.setItem(
+                      "odiseo_reutilizar",
+                      JSON.stringify({ content: shareContent, origen: "fuente", titulo: detail.name })
+                    )
+                    router.push(`/${locale}/creador-de-escenas?desde=fuente`)
+                  }}
                 >
                   <Wand2 className="h-4 w-4" />
                   Crear escena desde aquí

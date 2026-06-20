@@ -95,18 +95,44 @@ export function CoachView() {
   useEffect(() => {
     const raw = sessionStorage.getItem("odiseo_reutilizar")
     if (!raw) return
+    // Limpiar siempre, incluso si el parseo falla, para no reinyectar en visitas futuras.
+    sessionStorage.removeItem("odiseo_reutilizar")
+
+    let parsed: { content?: string; origen?: string; titulo?: string }
     try {
-      const { content, origen } = JSON.parse(raw) as { content: string; origen: string }
-      sessionStorage.removeItem("odiseo_reutilizar")
-      // El Coach es un único asistente; ignoramos el ?autor= legacy
-      // (neville/murphy/etc.) que generaban los menús viejos de "Reutilizar en…".
-      setTimeout(() => {
-        void handleSendMessage(
-          `Trabajemos con esto que generé en el ${origen === "creador" ? "Creador de escenas" : "otra herramienta"}:\n\n${content}`,
-          true
-        )
-      }, 300)
-    } catch {}
+      parsed = JSON.parse(raw)
+    } catch (e) {
+      console.error("[coach] odiseo_reutilizar no es JSON válido:", raw, e)
+      return
+    }
+
+    const content = (parsed.content ?? "").trim()
+    const origen = parsed.origen ?? "desconocido"
+    console.log("[coach] leer odiseo_reutilizar", { origen, titulo: parsed.titulo, len: content.length }) // TEMP — quitar tras QA
+
+    if (!content) {
+      console.error("[coach] contenido compartido vacío o sin campo 'content'. Objeto recibido:", parsed)
+      return
+    }
+
+    const ORIGEN_LABEL: Record<string, string> = {
+      creador: "el Creador de escenas",
+      fuente: "las Fuentes",
+      testimonios: "Testimonios",
+      biblia: "la Biblia metafísica",
+      narrador: "el Narrador",
+      notas: "Notas",
+      diario: "el Diario",
+    }
+    const fuente = ORIGEN_LABEL[origen] ?? "otra herramienta"
+
+    // El Coach es un único asistente; ignoramos el ?autor= legacy.
+    setTimeout(() => {
+      void handleSendMessage(
+        `Trabajemos con esto que traje de ${fuente}:\n\n${content}`,
+        true
+      )
+    }, 300)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
