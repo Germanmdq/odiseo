@@ -10,7 +10,6 @@ import Link from "next/link"
 import { useLocale } from "next-intl"
 
 import { Logo } from "@/components/logo"
-import { createClient } from "@/lib/supabase/client"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,20 +51,19 @@ export function NavUser({
   }, [])
 
   async function handleSignOut() {
-    const supabase = createClient()
     try {
-      // No bloquear el redirect si signOut() se cuelga (Web Locks API de
-      // @supabase/ssr puede quedar esperando un lock que no se libera).
-      // scope "local" limpia la sesión local sin depender del logout de red.
-      await Promise.race([
-        supabase.auth.signOut({ scope: "local" }),
-        new Promise((resolve) => setTimeout(resolve, 1200)),
-      ])
+      // Logout server-side: limpia las cookies de sesión de forma confiable
+      // (sin depender del Web Locks API del browser, que puede colgar a
+      // signOut() en el cliente). AbortController como red de seguridad
+      // para que el fetch nunca quede colgado.
+      const ctrl = new AbortController()
+      const t = setTimeout(() => ctrl.abort(), 2500)
+      await fetch("/api/auth/logout", { method: "POST", signal: ctrl.signal })
+      clearTimeout(t)
     } catch (e) {
       console.error("Error al cerrar sesión:", e)
     } finally {
-      // Redirect duro: recarga real para que el servidor lea las cookies ya
-      // limpias y no quede sesión vieja en caché del router.
+      // Recarga dura: el server ya no ve sesión y muestra el login.
       window.location.assign(`/${locale}/login`)
     }
   }
