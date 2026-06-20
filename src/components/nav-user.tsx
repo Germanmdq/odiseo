@@ -52,10 +52,15 @@ export function NavUser({
   }, [])
 
   async function handleSignOut() {
+    const supabase = createClient()
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signOut()
-      if (error) console.error("Error al cerrar sesión:", error)
+      // No bloquear el redirect si signOut() se cuelga (Web Locks API de
+      // @supabase/ssr puede quedar esperando un lock que no se libera).
+      // scope "local" limpia la sesión local sin depender del logout de red.
+      await Promise.race([
+        supabase.auth.signOut({ scope: "local" }),
+        new Promise((resolve) => setTimeout(resolve, 1200)),
+      ])
     } catch (e) {
       console.error("Error al cerrar sesión:", e)
     } finally {
