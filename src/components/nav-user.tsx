@@ -2,16 +2,12 @@
 
 import { useState, useEffect } from "react"
 import {
-  Bell,
-  CreditCard,
   EllipsisVertical,
   LogOut,
-  Palette,
   User,
 } from "lucide-react"
 import Link from "next/link"
 import { useLocale } from "next-intl"
-import { useRouter } from "next/navigation"
 
 import { Logo } from "@/components/logo"
 import { createClient } from "@/lib/supabase/client"
@@ -39,7 +35,6 @@ export function NavUser({
   }
 }) {
   const locale = useLocale()
-  const router = useRouter()
   const [perfil, setPerfil] = useState({
     nombre: user.name || "Usuario",
     email: user.email || "",
@@ -57,10 +52,17 @@ export function NavUser({
   }, [])
 
   async function handleSignOut() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.replace(`/${locale}/login`)
-    router.refresh()
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signOut()
+      if (error) console.error("Error al cerrar sesión:", error)
+    } catch (e) {
+      console.error("Error al cerrar sesión:", e)
+    } finally {
+      // Redirect duro: recarga real para que el servidor lea las cookies ya
+      // limpias y no quede sesión vieja en caché del router.
+      window.location.assign(`/${locale}/login`)
+    }
   }
 
   return (
@@ -114,18 +116,6 @@ export function NavUser({
                   <Link href={`/${locale}/configuracion/perfil`}>
                     <User className="size-4" />
                     Perfil
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link href={`/${locale}/configuracion/suscripcion`}>
-                    <CreditCard className="size-4" />
-                    Suscripción
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link href={`/${locale}/configuracion/notificaciones`}>
-                    <Bell className="size-4" />
-                    Notificaciones
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>

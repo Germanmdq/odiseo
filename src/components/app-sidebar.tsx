@@ -75,14 +75,8 @@ const NAV_GROUPS = [
       { title: "Testimonios y casos", url: "/testimonios", icon: ScrollText },
       { title: "Biblia metafísica", url: "/biblia", icon: Cross },
       { title: "Talleres", url: "/talleres", icon: GraduationCap },
-    ],
-  },
-  {
-    label: "Yo",
-    items: [
-      { title: "Mi actividad", url: "/actividad", icon: Calendar },
       { title: "Memoria", url: "/memoria", icon: Brain },
-      { title: "Perfil", url: "/configuracion/perfil", icon: User },
+      { title: "Mi actividad", url: "/actividad", icon: Calendar },
     ],
   },
 ]
@@ -137,12 +131,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return () => { active = false; subscription.unsubscribe() }
   }, [])
 
-  // Build navGroups with locale-prefixed Perfil URL
+  // Build navGroups with locale-prefixed /configuracion/* URLs
   const navGroups = NAV_GROUPS.map(group => ({
     ...group,
     items: group.items.map(item =>
-      item.url === "/configuracion/perfil"
-        ? { ...item, url: `/${locale}/configuracion/perfil` }
+      item.url.startsWith("/configuracion/")
+        ? { ...item, url: `/${locale}${item.url}` }
         : item
     ),
   }))
@@ -215,6 +209,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 onOpenChange={(open) => setOpenGroup(open ? group.label : null)}
               />
             ))}
+          {/* Perfil — ítem suelto al final */}
+          <Link
+            href={`/${locale}/configuracion/perfil`}
+            onClick={() => {
+              if (window.innerWidth < 1024) {
+                setOpenMobile(false)
+              }
+            }}
+            className={[
+              "mt-1 flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-150 cursor-pointer w-full",
+              isMobile
+                ? normalizedPathname === "/configuracion/perfil"
+                  ? "bg-white text-black"
+                  : "bg-white/[0.055] text-white hover:bg-white/[0.09]"
+                : normalizedPathname === "/configuracion/perfil"
+                  ? "bg-black text-white"
+                  : "text-black/70 hover:bg-black/5",
+            ].join(" ")}
+          >
+            <User className="size-4 shrink-0" />
+            <span>Perfil</span>
+          </Link>
         </div>
       </SidebarContent>
       <SidebarFooter className="px-3 pb-4">
