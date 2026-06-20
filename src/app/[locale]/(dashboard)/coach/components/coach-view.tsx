@@ -120,21 +120,10 @@ export function CoachView() {
       return
     }
 
-    const ORIGEN_LABEL: Record<string, string> = {
-      creador: "el Creador de escenas",
-      fuente: "las Fuentes",
-      testimonios: "Testimonios",
-      biblia: "la Biblia metafísica",
-      narrador: "el Narrador",
-      notas: "Notas",
-      diario: "el Diario",
-    }
-    const fuente = ORIGEN_LABEL[origen] ?? "otra herramienta"
-
     // El Coach es un único asistente; ignoramos el ?autor= legacy.
     setTimeout(() => {
       void handleSendMessage(
-        `Trabajemos con esto que traje de ${fuente}:\n\n${content}`,
+        `Quiero seguir profundizando en esto:\n\n${content}`,
         true
       )
     }, 300)
@@ -309,7 +298,7 @@ export function CoachView() {
 
     if (!previousUserMessage?.content) return assistantMessage.content
 
-    return `Pregunta del usuario:\n${previousUserMessage.content}\n\nRespuesta:\n${assistantMessage.content}`
+    return `Venía conversando sobre esto:\n${previousUserMessage.content}\n\nY el Asistente me dijo:\n${assistantMessage.content}`
   }
 
   return (

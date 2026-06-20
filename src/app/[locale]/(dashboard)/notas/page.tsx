@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
 import { ReutilizarEnButton } from "@/components/reutilizar-en-button"
+import { PersonalSubtitle } from "@/components/personal-subtitle"
 
 type Nota = { id: string; content: string; created_at: string; updated_at: string }
 
@@ -114,7 +115,10 @@ export default function NotasPage() {
     <div className="mx-auto w-full max-w-2xl space-y-5 px-4 lg:px-6">
       <div>
         <h1 className="text-3xl font-bold">Notas</h1>
-        <p className="text-muted-foreground">Tus apuntes personales de práctica.</p>
+        <PersonalSubtitle
+          conNombre="{nombre}, acá creás tus apuntes personales de práctica."
+          sinNombre="Acá creás tus apuntes personales de práctica."
+        />
       </div>
 
       {/* Nueva nota */}

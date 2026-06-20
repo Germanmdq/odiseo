@@ -8,6 +8,7 @@ import { toast } from "sonner"
 
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar"
 import { ReutilizarEnButton } from "@/components/reutilizar-en-button"
+import { PersonalSubtitle } from "@/components/personal-subtitle"
 
 type Nota = { id: string; content: string; created_at: string; updated_at: string }
 
@@ -155,7 +156,11 @@ export default function DiarioPage() {
     <div className="mx-auto w-full max-w-5xl px-4 lg:px-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Diario</h1>
-        <p className="text-muted-foreground text-sm">Tu práctica diaria, en palabras.</p>
+        <PersonalSubtitle
+          className="text-muted-foreground text-sm"
+          conNombre="{nombre}, este es tu espacio para tu práctica diaria."
+          sinNombre="Tu práctica diaria, en palabras."
+        />
       </div>
 
       <div className="flex flex-col gap-5 md:grid md:grid-cols-[auto_1fr] md:gap-8 md:items-start">

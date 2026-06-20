@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { CompartirEn } from "@/components/compartir-en"
 import { cn } from "@/lib/utils"
+import { useNombrePreferido } from "@/hooks/use-nombre-preferido"
 
 type Message = {
   id: string
@@ -32,6 +33,7 @@ export function CreadorDeEscenasView() {
   const t = useTranslations("creador")
   const params = useParams()
   const locale = (params?.locale as string) ?? "es"
+  const nombre = useNombrePreferido()
 
   const [messages, setMessages] = React.useState<Message[]>([
     { id: "greeting", role: "assistant", content: t("greeting") },
@@ -160,7 +162,7 @@ export function CreadorDeEscenasView() {
 
     if (!previousUserMessage?.content) return assistantMessage.content
 
-    return `Pedido del usuario:\n${previousUserMessage.content}\n\nEscena creada:\n${assistantMessage.content}`
+    return `Esta es la escena que venía imaginando:\n${previousUserMessage.content}\n\nY así quedó:\n${assistantMessage.content}`
   }
 
   return (
@@ -173,7 +175,9 @@ export function CreadorDeEscenasView() {
         </div>
         <div className="min-w-0">
           <h1 className="truncate text-base font-bold text-black sm:text-lg">{t("title")}</h1>
-          <p className="truncate text-xs text-black/40 sm:text-sm">{t("subtitle")}</p>
+          <p className="truncate text-xs text-black/40 sm:text-sm">
+            {nombre ? `${nombre}, viví un instante de tu deseo ya cumplido.` : t("subtitle")}
+          </p>
         </div>
       </header>
 

@@ -4,6 +4,7 @@ import {
   getContentArtifactsPage,
 } from "@/lib/content-artifacts/data"
 import { TestimoniosTable } from "./components/testimonios-table"
+import { PersonalSubtitle } from "@/components/personal-subtitle"
 
 export const revalidate = 3600
 
@@ -29,9 +30,10 @@ export default async function TestimoniosPage({
     <div className="flex-1 space-y-6 px-6 pt-0">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground">
-          {t("subtitle", { count: result.total })}
-        </p>
+        <PersonalSubtitle
+          conNombre={`{nombre}, ${result.total} testimonios reales para tu práctica.`}
+          sinNombre={t("subtitle", { count: result.total })}
+        />
       </div>
 
       <TestimoniosTable

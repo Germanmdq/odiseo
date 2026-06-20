@@ -1,6 +1,7 @@
 import { Brain } from "lucide-react"
 
 import { MemoriaView } from "./components/memoria-view"
+import { PersonalSubtitle } from "@/components/personal-subtitle"
 
 export default function MemoriaPage() {
   return (
@@ -11,9 +12,11 @@ export default function MemoriaPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Memoria</h1>
-          <p className="text-muted-foreground text-sm">
-            Lo que fuiste guardando de tus sesiones
-          </p>
+          <PersonalSubtitle
+            className="text-muted-foreground text-sm"
+            conNombre="{nombre}, esto es lo que fuiste guardando de tus sesiones."
+            sinNombre="Lo que fuiste guardando de tus sesiones."
+          />
         </div>
       </div>
       <MemoriaView />

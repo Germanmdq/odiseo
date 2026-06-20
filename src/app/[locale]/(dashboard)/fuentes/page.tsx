@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server"
 
 import { getFuenteSummaries } from "@/lib/fuentes/data"
 import { FuentesTable } from "./components/fuentes-table"
+import { PersonalSubtitle } from "@/components/personal-subtitle"
 
 export const revalidate = 3600
 
@@ -18,9 +19,10 @@ export default async function FuentesPage({
     <div className="flex-1 space-y-6 px-6 pt-0">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground">
-          Conferencias y libros completos de Neville Goddard.
-        </p>
+        <PersonalSubtitle
+          conNombre="{nombre}, explorá conferencias y libros completos de Neville Goddard."
+          sinNombre="Conferencias y libros completos de Neville Goddard."
+        />
       </div>
 
       <FuentesTable

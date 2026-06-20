@@ -6,6 +6,7 @@ import { Flame } from "lucide-react"
 import { es } from "date-fns/locale"
 
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar"
+import { PersonalSubtitle } from "@/components/personal-subtitle"
 
 const ACTIVE_COLOR = "#E8401A"
 
@@ -81,9 +82,11 @@ export default function ActividadPage() {
     <div className="mx-auto w-full max-w-5xl px-4 lg:px-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Mi actividad</h1>
-        <p className="text-muted-foreground text-sm">
-          Los días con punto naranja son días que practicaste en Odiseo.
-        </p>
+        <PersonalSubtitle
+          className="text-muted-foreground text-sm"
+          conNombre="{nombre}, los días con punto naranja son los que practicaste."
+          sinNombre="Los días con punto naranja son los que practicaste."
+        />
       </div>
 
       <div className="flex flex-col gap-5 md:grid md:grid-cols-[auto_1fr] md:gap-8 md:items-start">

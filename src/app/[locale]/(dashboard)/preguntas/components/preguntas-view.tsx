@@ -4,6 +4,7 @@ import * as React from "react"
 import { toast } from "sonner"
 import { Flame, Loader2 } from "lucide-react"
 import { useParams } from "next/navigation"
+import { useNombrePreferido } from "@/hooks/use-nombre-preferido"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -116,6 +117,7 @@ function SetupScreen({
   const [tema, setTema] = React.useState(initialTema)
   const [cantidad, setCantidad] = React.useState(5)
   const [tipo, setTipo] = React.useState<TipoPregunta>("multiple")
+  const nombre = useNombrePreferido()
 
   function handleStart() {
     const t = tema.trim()
@@ -135,7 +137,7 @@ function SetupScreen({
 
         <div className="space-y-2">
           <label className="text-xl font-semibold block">
-            ¿Sobre qué tema querés ponerte a prueba?
+            {nombre ? `${nombre}, ¿sobre qué tema querés ponerte a prueba?` : "¿Sobre qué tema querés ponerte a prueba?"}
           </label>
           <input
             type="text"

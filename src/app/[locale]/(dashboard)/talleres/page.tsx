@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { createClient } from "@/lib/supabase/server"
 import { checkAccess } from "@/lib/acceso"
 import { LeccionesBloqueables } from "./components/lecciones-bloqueables"
+import { PersonalSubtitle } from "@/components/personal-subtitle"
 
 const TALLERES_VIMEO: Record<string, string> = {
   "ley-de-la-asuncion": "VIMEO_ID_AQUI",
@@ -149,7 +150,11 @@ export default async function TalleresPage({
           {landing("eyebrow")}
         </Badge>
         <h1 className="text-2xl font-bold tracking-tight">{landing("title")}</h1>
-        <p className="text-muted-foreground max-w-3xl">{landing("subtitle")}</p>
+        <PersonalSubtitle
+          className="text-muted-foreground max-w-3xl"
+          conNombre="{nombre}, accedé a los 4 talleres con Germán y Taty."
+          sinNombre={landing("subtitle")}
+        />
       </div>
 
       {!hasActiveSubscription && (

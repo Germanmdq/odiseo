@@ -8,6 +8,7 @@ import { es } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { PersonalSubtitle } from "@/components/personal-subtitle"
 
 interface PlanSolicitud {
   id: string
@@ -147,7 +148,11 @@ export function MensajesView({ planes, pendientes, locale }: MensajesViewProps) 
         {/* Header naranja */}
         <div className="shrink-0 px-4 py-4" style={{ backgroundColor: "#E8401A" }}>
           <h1 className="font-semibold text-white text-lg">Mensajes</h1>
-          <p className="text-white/70 text-xs mt-0.5">{todos.length} solicitudes</p>
+          <PersonalSubtitle
+            className="text-white/70 text-xs mt-0.5"
+            conNombre="{nombre}, acá están tus solicitudes y respuestas."
+            sinNombre="Acá están tus solicitudes y respuestas."
+          />
         </div>
 
         <div className="max-h-[70dvh] overflow-y-auto md:max-h-none md:flex-1">

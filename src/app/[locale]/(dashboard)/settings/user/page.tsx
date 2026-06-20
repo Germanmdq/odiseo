@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/form"
 import { Separator } from "@/components/ui/separator"
 import { useTranslations } from "next-intl"
+import { useNombrePreferido } from "@/hooks/use-nombre-preferido"
 
 const profileFormSchema = z.object({
   nombrePreferido: z.string().min(1, "Requerido"),
@@ -43,6 +44,7 @@ type ProfileData = {
 export default function PerfilPage() {
   const t = useTranslations("settings.perfil")
   const router = useRouter()
+  const nombre = useNombrePreferido()
   const [isLoading, setIsLoading] = useState(true)
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [email, setEmail] = useState("")
@@ -95,7 +97,9 @@ export default function PerfilPage() {
           <Card>
             <CardHeader>
               <CardTitle>{t("title")}</CardTitle>
-              <CardDescription>{t("subtitle")}</CardDescription>
+              <CardDescription>
+                {nombre ? `${nombre}, actualizá tu información personal.` : t("subtitle")}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* nombre_preferido — highlighted */}

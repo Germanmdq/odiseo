@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { CrearLibroDialog } from "./crear-libro-dialog"
 import { CapituloItem } from "./capitulo-item"
+import { PersonalSubtitle } from "@/components/personal-subtitle"
 
 interface Libro {
   id: string
@@ -473,7 +474,11 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
       >
         <div className="p-4 border-b">
           <h2 className="font-semibold text-lg">Mis libros</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">Tu biblioteca personal</p>
+          <PersonalSubtitle
+            className="text-xs text-muted-foreground mt-0.5"
+            conNombre="{nombre}, esta es tu biblioteca personal."
+            sinNombre="Tu biblioteca personal."
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">

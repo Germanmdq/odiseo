@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useNombrePreferido } from "@/hooks/use-nombre-preferido"
 import {
   Dialog,
   DialogContent,
@@ -61,6 +62,7 @@ const INITIAL: FormData = {
 export default function PlanesPage() {
   const params = useParams()
   const locale = (params?.locale as string) ?? "es"
+  const nombre = useNombrePreferido()
   const [form, setForm] = useState<FormData>(INITIAL)
   const [enviando, setEnviando] = useState(false)
   const [enviado, setEnviado] = useState(false)
@@ -147,7 +149,9 @@ export default function PlanesPage() {
       <div className="rounded-2xl border bg-card shadow-lg overflow-hidden">
         {/* Header del formulario */}
         <div className="border-b px-5 py-5 sm:px-8 sm:py-6" style={{ backgroundColor: "#E8401A" }}>
-          <h1 className="text-2xl font-semibold text-white">Pedir un plan personalizado</h1>
+          <h1 className="text-2xl font-semibold text-white">
+            {nombre ? `${nombre}, pedí tu plan personalizado.` : "Pedir un plan personalizado"}
+          </h1>
           <p className="text-white/80 mt-1 text-sm">
             Germán te va a guiar con un plan personalizado que incluye: lecturas seleccionadas, ejercicios prácticos, imaginación nocturna y afirmaciones programadas que llegan a tu teléfono.
           </p>
