@@ -79,7 +79,7 @@ Respondé SOLO con un JSON válido, sin texto adicional ni backticks:
 ]`
 }
 
-async function callChat(prompt: string): Promise<string> {
+async function callChat(prompt: string, maxTokens: number, signal: AbortSignal): Promise<string> {
   const res = await fetch(NVIDIA_CHAT_URL, {
     method: "POST",
     headers: {
@@ -90,9 +90,10 @@ async function callChat(prompt: string): Promise<string> {
       model: NVIDIA_CHAT_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.4,
-      max_tokens: 4000,
+      max_tokens: maxTokens,
       stream: false,
     }),
+    signal,
   })
 
   if (!res.ok) {
@@ -143,8 +144,8 @@ export async function POST(request: NextRequest) {
     ? body.tipo
     : "multiple") as TipoPregunta
 
-  if (!tema || cantidad < 1 || cantidad > 10) {
-    return NextResponse.json({ error: "tema y cantidad (1-10) son requeridos" }, { status: 400 })
+  if (!tema || cantidad < 1 || cantidad > 5) {
+    return NextResponse.json({ error: "tema y cantidad (1-5) son requeridos" }, { status: 400 })
   }
 
   const apiKey = process.env.NVIDIA_API_KEY
@@ -165,20 +166,54 @@ export async function POST(request: NextRequest) {
 
   const prompt = buildPrompt(tema, cantidad, tipo)
 
+  // Tope de salida ajustado al nuevo máximo de 5 preguntas. El peor caso
+  // (5 de respuesta_breve con respuestas largas) ≈ 1.300-1.500 tokens; 2.400
+  // deja margen (~1.8x) sin riesgo de truncar el JSON. El modelo corta solo al
+  // cerrar el JSON, y el wall-clock lo acota el AbortController de abajo.
+  const maxTokens = Math.min(800 + cantidad * 320, 2400)
+
+  // Presupuesto de tiempo total bajo el límite de la función (maxDuration = 60s).
+  // Cada llamada a NIM se aborta antes de agotar el presupuesto, para devolver
+  // un error controlado en vez de un 504 crudo de Vercel.
+  const DEADLINE = Date.now() + 55_000
+
   for (let attempt = 0; attempt < 2; attempt++) {
+    const remaining = DEADLINE - Date.now()
+    if (remaining < 8_000) {
+      return NextResponse.json(
+        { error: "La generación tardó demasiado. Probá con menos preguntas o reintentá en un momento." },
+        { status: 504 }
+      )
+    }
+
+    const controller = new AbortController()
+    const perCallTimeout = Math.min(attempt === 0 ? 48_000 : 24_000, remaining)
+    const timer = setTimeout(() => controller.abort(), perCallTimeout)
+
     let raw: string
     try {
-      raw = await callChat(prompt)
+      raw = await callChat(prompt, maxTokens, controller.signal)
     } catch (err) {
+      const aborted = err instanceof Error && err.name === "AbortError"
+      if (aborted) {
+        // Si fue el primer intento y todavía queda margen real, reintentamos.
+        if (attempt === 0 && DEADLINE - Date.now() > 20_000) continue
+        return NextResponse.json(
+          { error: "La generación tardó demasiado. Probá con menos preguntas o reintentá en un momento." },
+          { status: 504 }
+        )
+      }
       const msg = err instanceof Error ? err.message : "Error al llamar al asistente"
       return NextResponse.json({ error: msg }, { status: 502 })
+    } finally {
+      clearTimeout(timer)
     }
 
     let parsed: unknown
     try {
       parsed = extractAndParse(raw)
     } catch {
-      if (attempt === 0) continue
+      if (attempt === 0 && DEADLINE - Date.now() > 12_000) continue
       return NextResponse.json(
         { error: "El asistente no devolvió un JSON válido. Intentá de nuevo." },
         { status: 502 }
@@ -186,7 +221,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!validatePreguntas(parsed, cantidad)) {
-      if (attempt === 0) continue
+      if (attempt === 0 && DEADLINE - Date.now() > 12_000) continue
       return NextResponse.json(
         { error: "Las preguntas generadas no tienen el formato correcto. Intentá de nuevo." },
         { status: 502 }
@@ -211,5 +246,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ preguntas: parsed })
   }
 
-  return NextResponse.json({ error: "No se pudieron generar las preguntas." }, { status: 502 })
+  return NextResponse.json(
+    { error: "No se pudieron generar las preguntas. Probá de nuevo." },
+    { status: 504 }
+  )
 }
