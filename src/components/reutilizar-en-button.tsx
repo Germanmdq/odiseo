@@ -30,7 +30,6 @@ export function ReutilizarEnButton({ content, origen }: ReutilizarEnButtonProps)
   ]
 
   const handleUsar = (path: string, autor: string | null) => {
-    console.log("[reutilizar-en] guardar", { origen, len: content.length }) // TEMP — quitar tras QA
     sessionStorage.setItem("odiseo_reutilizar", JSON.stringify({ content, origen }))
     const url = autor
       ? `${path}?autor=${autor}&desde=externo`

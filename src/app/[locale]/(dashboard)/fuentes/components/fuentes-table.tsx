@@ -197,7 +197,6 @@ function FuenteDrawer({
                 <DropdownMenuItem
                   className="gap-2"
                   onClick={() => {
-                    console.log("[compartir→guardar] Coach", { origen: "fuente", titulo: detail.name, len: shareContent.length }) // TEMP — quitar tras QA
                     sessionStorage.setItem(
                       "odiseo_reutilizar",
                       JSON.stringify({ content: shareContent, origen: "fuente", titulo: detail.name })
@@ -211,7 +210,6 @@ function FuenteDrawer({
                 <DropdownMenuItem
                   className="gap-2"
                   onClick={() => {
-                    console.log("[compartir→guardar] Creador", { origen: "fuente", titulo: detail.name, len: shareContent.length }) // TEMP — quitar tras QA
                     sessionStorage.setItem(
                       "odiseo_reutilizar",
                       JSON.stringify({ content: shareContent, origen: "fuente", titulo: detail.name })

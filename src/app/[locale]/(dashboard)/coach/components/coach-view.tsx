@@ -108,7 +108,6 @@ export function CoachView() {
 
     const content = (parsed.content ?? "").trim()
     const origen = parsed.origen ?? "desconocido"
-    console.log("[coach] leer odiseo_reutilizar", { origen, titulo: parsed.titulo, len: content.length }) // TEMP — quitar tras QA
 
     if (!content) {
       console.error("[coach] contenido compartido vacío o sin campo 'content'. Objeto recibido:", parsed)

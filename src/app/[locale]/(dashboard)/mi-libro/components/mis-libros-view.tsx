@@ -56,6 +56,8 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
   const [draftContenido, setDraftContenido] = React.useState("")
   const [showDraft, setShowDraft] = React.useState(false)
   const [savingDraft, setSavingDraft] = React.useState(false)
+  // Contenido compartido (p.ej. desde Coach) pendiente de colocar en un libro
+  const [sharedPending, setSharedPending] = React.useState(false)
 
   // Load books on mount
   React.useEffect(() => {
@@ -74,17 +76,37 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
     loadLibros()
   }, [])
 
-  // Pre-fill theme input if sessionStorage redirect exists
+  // Contenido compartido desde otra herramienta (Coach, Fuentes, etc.).
+  // No se consume hasta que haya un libro activo donde colocarlo, así
+  // sobrevive al remontaje al crear/elegir un libro.
   React.useEffect(() => {
     const raw = sessionStorage.getItem("odiseo_reutilizar")
-    if (raw) {
-      try {
-        const { content } = JSON.parse(raw) as { content: string }
-        sessionStorage.removeItem("odiseo_reutilizar")
-        setTema(content.slice(0, 1200))
-      } catch {}
+    if (!raw) return
+
+    let content = ""
+    try {
+      content = ((JSON.parse(raw) as { content?: string }).content ?? "")
+    } catch (e) {
+      console.error("[mi-libro] odiseo_reutilizar no es JSON válido:", raw, e)
+      sessionStorage.removeItem("odiseo_reutilizar")
+      return
     }
-  }, [])
+
+    if (!content.trim()) {
+      sessionStorage.removeItem("odiseo_reutilizar")
+      return
+    }
+
+    if (activeLibroId) {
+      // Hay un libro activo: precargar el tema y consumir el contenido.
+      setTema(content.slice(0, 1200))
+      setSharedPending(false)
+      sessionStorage.removeItem("odiseo_reutilizar")
+    } else {
+      // Sin libro activo: mantener el contenido y avisar al usuario.
+      setSharedPending(true)
+    }
+  }, [activeLibroId])
 
   // Load chapters when active book changes
   React.useEffect(() => {
@@ -499,11 +521,24 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-muted/5">
             <BookOpen className="size-12 text-muted-foreground/30 mb-3" />
             <p className="text-muted-foreground text-sm font-medium">
-              No hay ningún libro seleccionado
+              {sharedPending ? "Tu contenido está listo para un capítulo" : "No hay ningún libro seleccionado"}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Elegí un libro de la lista lateral o creá uno nuevo.
+            <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+              {sharedPending
+                ? "Creá un libro nuevo o elegí uno de la lista para convertir lo que trajiste en un capítulo."
+                : "Elegí un libro de la lista lateral o creá uno nuevo."}
             </p>
+            {sharedPending && (
+              <button
+                type="button"
+                onClick={() => setCreandoLibro(true)}
+                className="mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm text-white font-medium transition-opacity hover:opacity-90 cursor-pointer"
+                style={{ backgroundColor: "#E8401A" }}
+              >
+                <Plus className="size-4" />
+                Crear un libro
+              </button>
+            )}
           </div>
         ) : (
           <div className="flex flex-col md:h-full md:overflow-hidden">
