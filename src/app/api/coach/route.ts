@@ -201,10 +201,13 @@ export async function POST(request: NextRequest) {
       nombrePreferido?: string
     }
 
-    const authorId = body.autorId
-    if (!authorId || !isCoachAuthorId(authorId)) {
-      return Response.json({ error: "autorId inválido." }, { status: 400 })
-    }
+    // Modelo de un solo asistente: cualquier autorId desconocido o legacy
+    // (neville/murphy/fox/scovel-shinn, provenientes de menús viejos de
+    // "Reutilizar en…") se normaliza a "asistente" en vez de devolver 400.
+    // El 400 se mostraba en el frontend como error de chat con "Reintentar".
+    const authorId: CoachAuthorId = isCoachAuthorId(body.autorId ?? "")
+      ? (body.autorId as CoachAuthorId)
+      : "asistente"
 
     const messages = (body.messages ?? []).filter(
       (message) => message.role !== "system" && message.content?.trim()

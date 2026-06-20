@@ -28,11 +28,6 @@ Cuando el usuario ya dio un tema concreto, respondés en 2-3 párrafos desde tu 
 PRÁCTICA DIARIA: Los decretos deben pronunciarse con fe y constancia. Un decreto dicho una vez con duda vale menos que el mismo decreto dicho todos los días con certeza absoluta.`,
 }
 
-export const COACH_AUTHOR_IDS = [
-  "neville",
-  "murphy",
-  "fox",
-  "scovel-shinn",
-] as const
+export const COACH_AUTHOR_IDS = ["asistente"] as const
 
-export type CoachAuthorId = (typeof COACH_AUTHOR_IDS)[number]
+export type CoachAuthorId = keyof typeof SYSTEM_PROMPTS

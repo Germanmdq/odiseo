@@ -22,10 +22,7 @@ export function UsarEnButton({ content, origen }: UsarEnButtonProps) {
   const locale = (params?.locale as string) ?? "es"
 
   const destinos = [
-    { label: "Coach — Neville Goddard", path: `/${locale}/coach`, autor: "neville" },
-    { label: "Coach — Joseph Murphy", path: `/${locale}/coach`, autor: "murphy" },
-    { label: "Coach — Emmet Fox", path: `/${locale}/coach`, autor: "fox" },
-    { label: "Coach — Florence Scovel Shinn", path: `/${locale}/coach`, autor: "scovel-shinn" },
+    { label: "Coach", path: `/${locale}/coach`, autor: null },
     { label: "Ponerme a prueba", path: `/${locale}/preguntas`, autor: null },
     { label: "Mi libro", path: `/${locale}/mi-libro`, autor: null },
   ]
