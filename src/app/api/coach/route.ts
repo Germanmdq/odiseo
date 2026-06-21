@@ -60,6 +60,47 @@ function buildContext(rows: MatchRow[]) {
     .join("\n\n")
 }
 
+// Detecta saludos simples y meta-preguntas sobre la plataforma (no sobre la
+// filosofía). En esos casos la respuesta sale del system prompt y NO hace falta
+// RAG, así que se puede saltear el embedding + la búsqueda vectorial.
+// Sesgo conservador: ante la duda, NO matchea (y entonces corre el RAG normal),
+// porque un falso positivo degradaría una pregunta real; un falso negativo solo
+// mantiene el comportamiento actual.
+function esSaludoOMeta(texto: string): boolean {
+  const t = texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[¿?¡!.,]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+  if (!t) return false
+
+  // 1) Saludo simple (mensaje corto que es esencialmente un saludo)
+  const saludos = [
+    "hola", "holaa", "buenas", "buenass", "buen dia", "buenos dias",
+    "buenas tardes", "buenas noches", "hey", "que tal", "como estas", "como andas",
+  ]
+  if (saludos.includes(t)) return true
+  if (t.split(" ").length <= 4 && saludos.some((s) => t.startsWith(s))) return true
+
+  // 2) Meta-preguntas sobre la plataforma (ancladas, para no pisar preguntas reales)
+  const meta = [
+    "que puedo hacer aca", "que puedo hacer aqui", "que puedo hacer en odiseo",
+    "que puedo hacer en esta", "que puedo hacer con esto", "que puedo hacer en la plataforma",
+    "que se puede hacer aca", "que se puede hacer aqui", "que se puede hacer en odiseo",
+    "que se puede hacer en esta",
+    "para que sirve esto", "para que sirve odiseo", "para que sirve esta",
+    "para que sirve la plataforma",
+    "que secciones", "que seccion hay", "que seccion tiene", "que tiene odiseo",
+    "como funciona esto", "como funciona odiseo", "como funciona esta",
+    "como funciona la plataforma", "como uso esto", "como uso odiseo",
+    "que es odiseo", "que es esto", "que es esta plataforma",
+    "que hay aca", "que hay aqui", "que ofrece odiseo", "que ofrece esta",
+  ]
+  return meta.some((p) => t.includes(p))
+}
+
 function buildSystemPrompt(authorId: CoachAuthorId, context: string, nombrePreferido?: string) {
   const nombre = nombrePreferido?.trim()
   const nombreCtx = nombre
@@ -232,18 +273,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const queryEmbedding = await embedQuery(lastUserMessage.content)
-    const supabase = createAdminClient()
-    const { data, error } = await supabase.rpc("match_content_artifacts", {
-      query_embedding: queryEmbedding,
-      match_count: 5,
-    })
+    // Saludos y meta-preguntas sobre la plataforma no necesitan RAG: la
+    // respuesta sale del system prompt. Salteamos embedding + búsqueda vectorial
+    // (ahorra latencia y una llamada a NVIDIA). El resto corre el RAG completo.
+    let context: string
+    if (esSaludoOMeta(lastUserMessage.content)) {
+      context = "No se recuperó contexto relevante."
+    } else {
+      const queryEmbedding = await embedQuery(lastUserMessage.content)
+      const supabase = createAdminClient()
+      const { data, error } = await supabase.rpc("match_content_artifacts", {
+        query_embedding: queryEmbedding,
+        match_count: 5,
+      })
 
-    if (error) {
-      throw new Error(error.message)
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      context = buildContext((data ?? []) as MatchRow[])
     }
 
-    const context = buildContext((data ?? []) as MatchRow[])
     const systemPrompt = buildSystemPrompt(authorId, context, body.nombrePreferido)
     const nvidiaResponse = await fetch(NVIDIA_CHAT_URL, {
       method: "POST",
