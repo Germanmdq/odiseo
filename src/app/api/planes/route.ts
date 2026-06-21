@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { adminEmail, escapeHtml, sendOdiseoEmail, siteUrl } from "@/lib/email"
 
-const GERMAN_WHATSAPP = "542236151152"
+const GERMAN_WHATSAPP = "5492235523150"
 
 function buildWhatsappMessage(body: Record<string, unknown>, userEmail?: string | null) {
   const lines = [
