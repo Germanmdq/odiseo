@@ -13,6 +13,38 @@ import { PLANES, type PlanId } from "@/lib/planes"
 
 const PLAN_ORDER: PlanId[] = ["semanal", "mensual", "anual"]
 
+// ═══════════════════════════════════════════════════════════════════════════
+// OFERTA DE LANZAMIENTO (primeros 25) — SOLO VISUAL, sin lógica de pagos.
+// Para removerla cuando se completen los cupos: borrar esta función completa
+// y la línea <OfertaLanzamientoBanner planId={planId} /> en PlanCard.
+// ═══════════════════════════════════════════════════════════════════════════
+const OFERTA_LANZAMIENTO: Partial<Record<PlanId, { gancho: string; detalle: string }>> = {
+  mensual: {
+    gancho: "2 meses por el precio de 1",
+    detalle: "Solo para los primeros 25 que se suscriban",
+  },
+  anual: {
+    gancho: "Acceso de por vida",
+    detalle:
+      "Solo para los primeros 25 — incluye los 4 talleres actuales + los 8 que se suman durante el año",
+  },
+}
+
+function OfertaLanzamientoBanner({ planId }: { planId: PlanId }) {
+  const oferta = OFERTA_LANZAMIENTO[planId]
+  if (!oferta) return null
+
+  return (
+    <div className="rounded-lg p-3.5 text-center text-white" style={{ backgroundColor: "#E8401A" }}>
+      <p className="text-2xl font-extrabold uppercase leading-[1.05] tracking-tight">
+        {oferta.gancho}
+      </p>
+      <p className="mt-2 text-xs leading-snug text-white/80">{oferta.detalle}</p>
+    </div>
+  )
+}
+// ═══════════════════════════════════════════════════════════════════════════
+
 type PagoEstado = "idle" | "loading" | "error"
 
 interface PreciosClientProps {
@@ -122,6 +154,8 @@ function PlanCard({
       </CardHeader>
 
       <CardContent className="flex flex-1 flex-col space-y-6">
+        <OfertaLanzamientoBanner planId={planId} />
+
         <div className="text-center">
           <span className="text-4xl font-bold">{plan.precioUSD}</span>
           <span className="text-muted-foreground text-sm">{plan.periodo}</span>
@@ -223,7 +257,7 @@ export function PreciosClient({ locale, userId }: PreciosClientProps) {
           <h1 className="text-4xl font-bold tracking-tight text-foreground">
             Planes Odiseo
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-base font-medium text-foreground/90">
             Elegí el plan que mejor se adapta a vos. Cancelás cuando querés. 
             El plan anual incluye los 4 talleres actuales de Germán y Taty y 8 talleres nuevos próximos durante el año.
           </p>
