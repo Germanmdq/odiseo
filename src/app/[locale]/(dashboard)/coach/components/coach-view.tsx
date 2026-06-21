@@ -79,6 +79,10 @@ export function CoachView() {
   const [ultimoTema, setUltimoTema] = useState<string>("")
   const [nombrePreferido, setNombrePreferido] = useState<string | null>(null)
   const scrollBottomRef = useRef<HTMLDivElement>(null)
+  // Contenido compartido desde otra herramienta (Fuentes, etc.): se captura
+  // al montar y se envía una sola vez cuando la vista está lista.
+  const pendingSharedRef = useRef<string | null>(null)
+  const sharedSentRef = useRef(false)
 
   useEffect(() => {
     fetch("/api/perfil", { cache: "no-store" })
@@ -89,7 +93,8 @@ export function CoachView() {
       .catch(() => setNombrePreferido(""))
   }, [])
 
-  // Leer contexto compartido desde otra herramienta
+  // Leer contexto compartido desde otra herramienta.
+  // ① Al montar: capturar el contenido en un ref y consumir la key.
   useEffect(() => {
     const raw = sessionStorage.getItem("odiseo_reutilizar")
     if (!raw) return
@@ -119,14 +124,22 @@ export function CoachView() {
     }
 
     // El Coach es un único asistente; ignoramos el ?autor= legacy.
-    setTimeout(() => {
-      void handleSendMessage(
-        `Quiero seguir profundizando en esto:\n\n${content}`,
-        true
-      )
-    }, 300)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    pendingSharedRef.current = `Quiero seguir profundizando en esto:\n\n${content}`
   }, [])
+
+  // ② Cuando la vista está lista (perfil cargado), enviar una sola vez el
+  // contenido pendiente. No depende de un delay arbitrario ni del orden de
+  // re-montajes: el contenido vive en el ref hasta que se puede enviar.
+  useEffect(() => {
+    if (sharedSentRef.current) return
+    if (nombrePreferido === null) return
+    const pending = pendingSharedRef.current
+    if (!pending) return
+    sharedSentRef.current = true
+    pendingSharedRef.current = null
+    void handleSendMessage(pending, true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nombrePreferido])
 
   const currentAuthor = AUTHORS.find((a) => a.id === selectedAuthor) ?? null
   const currentMessages = useMemo(
