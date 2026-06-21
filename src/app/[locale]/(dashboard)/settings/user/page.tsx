@@ -64,6 +64,7 @@ export default function PerfilPage() {
     suscripto: boolean
     plan: string | null
     currentPeriodEnd: string | null
+    esAdmin: boolean
   } | null>(null)
 
   const form = useForm<ProfileFormValues>({
@@ -92,14 +93,15 @@ export default function PerfilPage() {
   useEffect(() => {
     fetch("/api/suscripcion/estado", { cache: "no-store" })
       .then((r) => r.json())
-      .then((d: { suscripto?: boolean; plan?: string | null; currentPeriodEnd?: string | null }) => {
+      .then((d: { suscripto?: boolean; plan?: string | null; currentPeriodEnd?: string | null; esAdmin?: boolean }) => {
         setEstadoSub({
           suscripto: !!d.suscripto,
           plan: d.plan ?? null,
           currentPeriodEnd: d.currentPeriodEnd ?? null,
+          esAdmin: !!d.esAdmin,
         })
       })
-      .catch(() => setEstadoSub({ suscripto: false, plan: null, currentPeriodEnd: null }))
+      .catch(() => setEstadoSub({ suscripto: false, plan: null, currentPeriodEnd: null, esAdmin: false }))
   }, [])
 
   async function onSubmit(data: ProfileFormValues) {
@@ -153,7 +155,11 @@ export default function PerfilPage() {
           </CardHeader>
           <CardContent>
             {estadoSub ? (
-              estadoSub.suscripto && estadoSub.plan ? (
+              estadoSub.esAdmin ? (
+                <Badge className="w-fit bg-[#E8401A] hover:bg-[#E8401A]/90 text-white border-transparent">
+                  Acceso ilimitado (Admin)
+                </Badge>
+              ) : estadoSub.suscripto && estadoSub.plan ? (
                 <Link
                   href={`/${locale}/configuracion/suscripcion`}
                   className="inline-flex w-fit flex-col gap-1 no-underline"

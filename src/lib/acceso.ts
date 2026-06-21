@@ -1,12 +1,16 @@
 import "server-only"
 import { createAdminClient } from "@/lib/supabase/admin"
 
+// Email con acceso ilimitado hardcodeado (admin). Fuente única de verdad,
+// usada por checkAccess y por /api/suscripcion/estado.
+export const ADMIN_EMAIL = "germangonzalezmdq@gmail.com"
+
 export async function checkAccess(userId: string): Promise<{ allowed: boolean; plan: string | null }> {
   const admin = createAdminClient()
 
   // Germán siempre tiene acceso ilimitado
   const { data: userData } = await admin.auth.admin.getUserById(userId)
-  if (userData?.user?.email === "germangonzalezmdq@gmail.com") {
+  if (userData?.user?.email === ADMIN_EMAIL) {
     return { allowed: true, plan: "anual" }
   }
 
