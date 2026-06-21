@@ -57,6 +57,34 @@ type DisplayMessage = {
   isInitial?: boolean
 }
 
+// Contenido compartido pendiente de inyectar al Coach. A nivel de módulo (no
+// un ref por instancia) para sobrevivir re-montajes del App Router: si una
+// instancia se descarta, la viva sigue encontrando el contenido acá.
+let coachPendingShared: string | null = null
+
+// Encabezado instructivo según el origen, para que el Coach sepa qué hacer con
+// el contenido (explicar, profundizar) sin que la persona tenga que aclararlo.
+function introCompartido(origen: string): string {
+  switch (origen) {
+    case "fuente":
+      return "Te comparto esta enseñanza para que la trabajemos juntos. Leela, explicámela con tus palabras y ayudame a profundizar en sus ideas principales:"
+    case "testimonios":
+      return "Te comparto este testimonio para que lo trabajemos juntos. Explicámelo y ayudame a profundizar en lo esencial:"
+    case "biblia":
+      return "Te comparto este pasaje para que lo trabajemos juntos. Explicámelo y ayudame a profundizar en su sentido:"
+    case "narrador":
+      return "Te comparto este texto que generé para que lo trabajemos juntos. Explicámelo y ayudame a profundizar:"
+    case "creador":
+      return "Te comparto esta escena para que la trabajemos juntos. Ayudame a profundizar en lo que despierta:"
+    case "notas":
+      return "Te comparto esta nota para que la trabajemos juntos. Ayudame a profundizar en lo que escribí:"
+    case "diario":
+      return "Te comparto esta entrada de mi diario para que la trabajemos juntos. Ayudame a profundizar en lo que escribí:"
+    default:
+      return "Te comparto este contenido para que lo trabajemos juntos. Leelo, explicámelo con tus palabras y ayudame a profundizar en sus ideas principales:"
+  }
+}
+
 // ─── Componente ─────────────────────────────────────────────────────────────
 
 export function CoachView() {
@@ -79,29 +107,22 @@ export function CoachView() {
   const [ultimoTema, setUltimoTema] = useState<string>("")
   const [nombrePreferido, setNombrePreferido] = useState<string | null>(null)
   const scrollBottomRef = useRef<HTMLDivElement>(null)
-  // Contenido compartido desde otra herramienta (Fuentes, etc.): se captura
-  // al montar y se envía una sola vez cuando la vista está lista.
-  const pendingSharedRef = useRef<string | null>(null)
-  const sharedSentRef = useRef(false)
 
   useEffect(() => {
     fetch("/api/perfil", { cache: "no-store" })
       .then((r) => r.json())
       .then((d: { nombrePreferido?: string }) => {
-        console.log("[TEMP coach] perfil OK → nombrePreferido =", JSON.stringify(d.nombrePreferido ?? "")) // TEMP
         setNombrePreferido(d.nombrePreferido ?? "")
       })
-      .catch((e) => {
-        console.log("[TEMP coach] perfil FETCH FALLÓ →", e) // TEMP
-        setNombrePreferido("")
-      })
+      .catch(() => setNombrePreferido(""))
   }, [])
 
   // Leer contexto compartido desde otra herramienta.
-  // ① Al montar: capturar el contenido en un ref y consumir la key.
+  // ① Al montar: capturar el contenido en una variable de módulo (sobrevive
+  // re-montajes del App Router, a diferencia de un ref por instancia) y
+  // consumir la key. Texto origin-aware para que el Coach sepa qué hacer.
   useEffect(() => {
     const raw = sessionStorage.getItem("odiseo_reutilizar")
-    console.log("[TEMP coach] ① MOUNT capture, raw =", raw ? `(${raw.length} chars)` : "NULL") // TEMP
     if (!raw) return
     // Limpiar siempre, incluso si el parseo falla, para no reinyectar en visitas futuras.
     sessionStorage.removeItem("odiseo_reutilizar")
@@ -116,41 +137,24 @@ export function CoachView() {
 
     const content = (parsed.content ?? "").trim()
     const origen = parsed.origen ?? "desconocido"
-    console.log("[TEMP coach] ① parsed → origen =", origen, "| contentLen =", content.length) // TEMP
 
-    if (!content) {
-      console.error("[coach] contenido compartido vacío o sin campo 'content'. Objeto recibido:", parsed)
-      return
-    }
+    if (!content) return
 
     // No reinyectar contenido generado por el propio Coach: evita el loop de
     // auto-alimentación (compartir una conversación de Coach de vuelta a Coach).
-    if (origen === "coach") {
-      console.log("[TEMP coach] ① IGNORADO por origen=coach") // TEMP
-      return
-    }
+    if (origen === "coach") return
 
-    // El Coach es un único asistente; ignoramos el ?autor= legacy.
-    pendingSharedRef.current = `Quiero seguir profundizando en esto:\n\n${content}`
-    console.log("[TEMP coach] ① pendingSharedRef SETEADO ✓") // TEMP
+    coachPendingShared = `${introCompartido(origen)}\n\n${content}`
   }, [])
 
   // ② Cuando la vista está lista (perfil cargado), enviar una sola vez el
-  // contenido pendiente. No depende de un delay arbitrario ni del orden de
-  // re-montajes: el contenido vive en el ref hasta que se puede enviar.
+  // contenido pendiente desde la variable de módulo. Sobrevive doble-montaje:
+  // la instancia viva lo encuentra aunque otra instancia haya consumido la key.
   useEffect(() => {
-    console.log(
-      "[TEMP coach] ② RUN | nombrePreferido =", nombrePreferido === null ? "NULL" : JSON.stringify(nombrePreferido),
-      "| yaEnviado =", sharedSentRef.current,
-      "| pending =", pendingSharedRef.current ? `(${pendingSharedRef.current.length} chars)` : "vacío"
-    ) // TEMP
-    if (sharedSentRef.current) return
     if (nombrePreferido === null) return
-    const pending = pendingSharedRef.current
+    const pending = coachPendingShared
     if (!pending) return
-    sharedSentRef.current = true
-    pendingSharedRef.current = null
-    console.log("[TEMP coach] ② → ENVIANDO contenido pendiente a handleSendMessage") // TEMP
+    coachPendingShared = null
     void handleSendMessage(pending, true)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nombrePreferido])
@@ -191,9 +195,7 @@ export function CoachView() {
   }, [displayMessages])
 
   const handleSendMessage = async (content: string, appendUser = true) => {
-    console.log("[TEMP coach] handleSendMessage() llamado | selectedAuthor =", JSON.stringify(selectedAuthor), "| contentLen =", content?.length) // TEMP
     if (!selectedAuthor) {
-      console.log("[TEMP coach] handleSendMessage ABORTÓ: selectedAuthor vacío/null") // TEMP
       return
     }
 

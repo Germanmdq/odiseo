@@ -40,6 +40,14 @@ interface MisLibrosViewProps {
   activeLibroId?: string | null
 }
 
+// Contenido compartido pendiente de colocar en un libro. A nivel de módulo
+// (no estado/ref por instancia) para sobrevivir re-montajes del App Router:
+// si una instancia se descarta, la viva sigue encontrando el contenido acá.
+let miLibroPendingShared: string | null = null
+// Timer para descartar el contenido al desmontar de verdad (navegar afuera).
+// Si es un re-montaje inmediato, el próximo montaje lo cancela a tiempo.
+let miLibroClearTimer: ReturnType<typeof setTimeout> | null = null
+
 export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
   const router = useRouter()
   const params = useParams()
@@ -83,48 +91,60 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
   }, [])
 
   // Contenido compartido desde otra herramienta (Coach, Fuentes, etc.).
-  // Se mueve de inmediato de la key compartida (odiseo_reutilizar) a una key
-  // EXCLUSIVA de Mi libro (odiseo_milibro_pending), para que ninguna otra
-  // sección (p.ej. Coach) lo reinyecte si el usuario no completa la acción.
-  // Acá se consume a estado de React y se abre el modal de "agregar a libro".
+  // Se consume de sessionStorage a una variable de módulo (sobrevive
+  // re-montajes) y se abre el modal de "agregar a libro". La key se borra al
+  // leerla; el contenido vive en la variable de módulo hasta guardar o cerrar.
   React.useEffect(() => {
+    // Si había una limpieza diferida programada por un desmontaje anterior
+    // (o un re-montaje del App Router), cancelarla: esta instancia está viva.
+    if (miLibroClearTimer) {
+      clearTimeout(miLibroClearTimer)
+      miLibroClearTimer = null
+    }
+
     const incoming = sessionStorage.getItem("odiseo_reutilizar")
     if (incoming) {
       sessionStorage.removeItem("odiseo_reutilizar")
       try {
         const { content } = JSON.parse(incoming) as { content?: string }
-        if (content && content.trim()) {
-          sessionStorage.setItem("odiseo_milibro_pending", JSON.stringify({ content }))
-        }
+        if (content && content.trim()) miLibroPendingShared = content
       } catch (e) {
         console.error("[mi-libro] odiseo_reutilizar no es JSON válido:", incoming, e)
       }
     }
-
-    const pendingRaw = sessionStorage.getItem("odiseo_milibro_pending")
-    if (!pendingRaw) return
-
-    try {
-      const { content } = JSON.parse(pendingRaw) as { content?: string }
-      if (content && content.trim()) {
-        // Contenido completo, SIN truncar: se usa como fuente real para generar.
-        setSharedContenido(content)
-        setCompartidoOpen(true)
+    // Compatibilidad: por si quedó una key vieja de una sesión anterior.
+    const legacy = sessionStorage.getItem("odiseo_milibro_pending")
+    if (legacy) {
+      sessionStorage.removeItem("odiseo_milibro_pending")
+      try {
+        const { content } = JSON.parse(legacy) as { content?: string }
+        if (content && content.trim()) miLibroPendingShared = content
+      } catch (e) {
+        console.error("[mi-libro] odiseo_milibro_pending inválido:", e)
       }
-    } catch (e) {
-      console.error("[mi-libro] odiseo_milibro_pending inválido:", e)
     }
-    // Consumido a estado de React: si abandona sin guardar, se pierde (deseado).
-    sessionStorage.removeItem("odiseo_milibro_pending")
+
+    if (miLibroPendingShared) {
+      // Contenido completo, SIN truncar: se usa como fuente real para generar.
+      setSharedContenido(miLibroPendingShared)
+      setCompartidoOpen(true)
+    }
   }, [])
 
   // Al salir de Mi libro sin ir hacia un libro (crear/seleccionar), descartar el
   // contenido pendiente para que no persiga al usuario a otras secciones.
+  // La limpieza de la variable de módulo se difiere para distinguir un
+  // desmontaje real (navegación afuera) de un re-montaje inmediato: si vuelve a
+  // montar, el efecto de arriba cancela el timer antes de que limpie.
   React.useEffect(() => {
     return () => {
       if (!navigatingToBookRef.current) {
         sessionStorage.removeItem("odiseo_milibro_pending")
       }
+      miLibroClearTimer = setTimeout(() => {
+        miLibroPendingShared = null
+        miLibroClearTimer = null
+      }, 0)
     }
   }, [])
 
@@ -719,12 +739,17 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
 
       <CompartidoEnLibroDialog
         open={compartidoOpen}
-        onOpenChange={setCompartidoOpen}
+        onOpenChange={(o) => {
+          setCompartidoOpen(o)
+          // Cerró sin completar: se descarta el contenido pendiente (deseado).
+          if (!o) miLibroPendingShared = null
+        }}
         contenido={sharedContenido}
         libros={libros}
         locale={locale}
         onLibroCreado={(libro) => setLibros((prev) => [libro, ...prev])}
         onGuardado={(libroId) => {
+          miLibroPendingShared = null
           setCompartidoOpen(false)
           navigatingToBookRef.current = true
           router.push(`/${locale}/mi-libro/${libroId}`)

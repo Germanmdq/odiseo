@@ -1,9 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { ArrowLeft, Share2, Bookmark, BookmarkCheck, MessageSquare, Wand2, X } from "lucide-react"
+import { ArrowLeft, X } from "lucide-react"
 import type { ColumnDef } from "@tanstack/react-table"
-import { useParams, useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { DataTable, DataTableColumnHeader } from "@/components/data-table"
 import { Button } from "@/components/ui/button"
@@ -13,12 +13,6 @@ import {
   DrawerContent,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Select,
   SelectContent,
@@ -71,8 +65,6 @@ type FuentesLabels = {
   }
 }
 
-type SaveState = "idle" | "saving" | "saved" | "error"
-
 function FuenteDrawer({
   source,
   labels,
@@ -82,10 +74,6 @@ function FuenteDrawer({
 }) {
   const [detail, setDetail] = React.useState<FuenteDetail | null>(null)
   const [error, setError] = React.useState(false)
-  const [saveState, setSaveState] = React.useState<SaveState>("idle")
-  const router = useRouter()
-  const params = useParams()
-  const locale = (params.locale as string) ?? "es"
 
   React.useEffect(() => {
     const controller = new AbortController()
@@ -117,43 +105,9 @@ function FuenteDrawer({
     return () => controller.abort()
   }, [source.sourceKey])
 
-  async function handleGuardar() {
-    if (saveState !== "idle" || !detail) return
-    setSaveState("saving")
-
-    const rawContenido = detail.fullText
-    const extracto = rawContenido.length > 300
-      ? rawContenido.slice(0, 300).trimEnd() + "..."
-      : rawContenido
-
-    try {
-      const res = await fetch("/api/memoria", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contenido: extracto,
-          origenTipo: "fuente",
-          origenMeta: { 
-            sourceKey: source.sourceKey,
-            titulo: detail.name,
-            url: `/fuentes?sourceKey=${source.sourceKey}`
-          },
-          source: detail.name,
-        }),
-      })
-      if (!res.ok) throw new Error()
-      setSaveState("saved")
-      setTimeout(() => setSaveState("idle"), 3000)
-    } catch {
-      setSaveState("error")
-      setTimeout(() => setSaveState("idle"), 2000)
-    }
-  }
-
   const typeLine = detail ? labels.types[detail.type] : labels.types[source.type]
   const yearLine = detail ? detail.year : source.year
 
-  const SaveIcon = saveState === "saved" ? BookmarkCheck : Bookmark
   const shareContent = detail
     ? `${detail.name}\n\n${detail.fullText}`
     : ""
@@ -171,57 +125,19 @@ function FuenteDrawer({
 
         {detail && (
           <div className="flex items-center gap-2">
-            <ReutilizarEnButton content={shareContent} origen="fuente" />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-1.5 text-sm">
-                  <Share2 className="h-4 w-4" />
-                  Guardar
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuItem
-                  onClick={handleGuardar}
-                  disabled={saveState === "saving" || saveState === "saved"}
-                  className="gap-2"
-                >
-                  <SaveIcon className="h-4 w-4" />
-                  {saveState === "saved"
-                    ? "Guardado"
-                    : saveState === "saving"
-                      ? "Guardando..."
-                      : saveState === "error"
-                        ? "Error al guardar"
-                        : "Guardar en Memoria"}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="gap-2"
-                  onClick={() => {
-                    sessionStorage.setItem(
-                      "odiseo_reutilizar",
-                      JSON.stringify({ content: shareContent, origen: "fuente", titulo: detail.name })
-                    )
-                    router.push(`/${locale}/coach?desde=fuente`)
-                  }}
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  Conversar sobre esto
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="gap-2"
-                  onClick={() => {
-                    sessionStorage.setItem(
-                      "odiseo_reutilizar",
-                      JSON.stringify({ content: shareContent, origen: "fuente", titulo: detail.name })
-                    )
-                    router.push(`/${locale}/creador-de-escenas?desde=fuente`)
-                  }}
-                >
-                  <Wand2 className="h-4 w-4" />
-                  Crear escena desde aquí
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ReutilizarEnButton
+              content={shareContent}
+              origen="fuente"
+              guardarEnMemoria={{
+                origenTipo: "fuente",
+                source: detail.name,
+                origenMeta: {
+                  sourceKey: source.sourceKey,
+                  titulo: detail.name,
+                  url: `/fuentes?sourceKey=${source.sourceKey}`,
+                },
+              }}
+            />
           </div>
         )}
       </div>
