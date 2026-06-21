@@ -19,9 +19,12 @@ import { AUTHORS } from "../data"
 
 // ─── Saludo inicial ──────────────────────────────────────────────────────────
 
-function getInitialGreeting(nombre: string): string {
-  const greeting = nombre ? `Hola, ${nombre}.` : "Hola."
-  return `${greeting} Soy tu Asistente de imaginación.\n\n¿De qué querés hablar hoy?`
+function getInitialGreeting(nombre: string, recurrente: boolean): string {
+  const nom = nombre ? `, ${nombre}` : ""
+  if (recurrente) {
+    return `Hola de nuevo${nom}. ¿En qué seguimos hoy?`
+  }
+  return `Hola${nom}. Soy tu Asistente de imaginación.\n\n¿De qué querés hablar hoy?`
 }
 
 // ─── ReactMarkdown renderers ─────────────────────────────────────────────────
@@ -106,13 +109,15 @@ export function CoachView() {
   const [ultimoMensaje, setUltimoMensaje] = useState<Record<string, string>>({})
   const [ultimoTema, setUltimoTema] = useState<string>("")
   const [nombrePreferido, setNombrePreferido] = useState<string | null>(null)
+  const [coachUsado, setCoachUsado] = useState(false)
   const scrollBottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch("/api/perfil", { cache: "no-store" })
       .then((r) => r.json())
-      .then((d: { nombrePreferido?: string }) => {
+      .then((d: { nombrePreferido?: string; coachUsado?: boolean }) => {
         setNombrePreferido(d.nombrePreferido ?? "")
+        setCoachUsado(!!d.coachUsado)
       })
       .catch(() => setNombrePreferido(""))
   }, [])
@@ -173,12 +178,12 @@ export function CoachView() {
 
     return {
       id: `initial-${selectedAuthor}`,
-      content: getInitialGreeting(nombrePreferido),
+      content: getInitialGreeting(nombrePreferido, coachUsado),
       timestamp: "",
       senderId: selectedAuthor,
       isInitial: true,
     }
-  }, [nombrePreferido, selectedAuthor])
+  }, [nombrePreferido, selectedAuthor, coachUsado])
 
   const displayMessages: DisplayMessage[] = useMemo(
     () =>

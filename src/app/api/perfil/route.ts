@@ -31,6 +31,13 @@ export async function GET() {
   const profile = (data ?? {}) as ProfileRow
   const metaNombre = (user.user_metadata?.nombre_preferido as string | undefined) ?? ""
 
+  // ¿El usuario ya usó Coach antes? (para diferenciar el saludo inicial)
+  const { count: coachCount } = await admin
+    .from("daily_activity_events")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("event_type", "coach_message")
+
   return NextResponse.json(
     {
       email: user.email ?? "",
@@ -38,6 +45,7 @@ export async function GET() {
       displayName: profile.display_name ?? "",
       nombrePreferido: profile.nombre_preferido || metaNombre,
       avatarUrl: profile.avatar_url ?? "",
+      coachUsado: (coachCount ?? 0) > 0,
     },
     { headers: { "Cache-Control": "no-store, max-age=0" } }
   )
