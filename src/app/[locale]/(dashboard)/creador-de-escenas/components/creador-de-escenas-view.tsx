@@ -103,6 +103,14 @@ export function CreadorDeEscenasView() {
         return
       }
 
+      if (response.status === 503) {
+        updateMessage(assistantMessage.id, (m) => ({
+          ...m,
+          content: "Estamos con mucha demanda en este momento. Probá de nuevo en un minuto.",
+        }))
+        return
+      }
+
       if (!response.ok || !response.body) {
         throw new Error((await response.text()) || t("errors.connection"))
       }

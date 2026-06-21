@@ -3,6 +3,7 @@ import { NextRequest } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { registrarActividad } from "@/lib/activity"
 import { checkAccess } from "@/lib/acceso"
+import { DEMANDA_ALTA_BODY } from "@/lib/nvidia"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -100,6 +101,10 @@ export async function POST(request: NextRequest) {
       stream: true,
     }),
   })
+
+  if (nvidiaResponse.status === 429) {
+    return Response.json(DEMANDA_ALTA_BODY, { status: 503 })
+  }
 
   if (!nvidiaResponse.ok) {
     const errorText = await nvidiaResponse.text()

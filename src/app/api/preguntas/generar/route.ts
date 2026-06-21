@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { registrarActividad } from "@/lib/activity"
 import { checkAccess } from "@/lib/acceso"
+import { NvidiaRateLimitError, DEMANDA_ALTA_BODY } from "@/lib/nvidia"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -98,6 +99,9 @@ async function callChat(prompt: string, maxTokens: number, signal: AbortSignal):
 
   if (!res.ok) {
     const body = await res.text()
+    if (res.status === 429) {
+      throw new NvidiaRateLimitError(`NVIDIA chat 429: ${body}`)
+    }
     throw new Error(`NVIDIA chat error: ${res.status} ${body}`)
   }
 
@@ -194,6 +198,9 @@ export async function POST(request: NextRequest) {
     try {
       raw = await callChat(prompt, maxTokens, controller.signal)
     } catch (err) {
+      if (err instanceof NvidiaRateLimitError) {
+        return NextResponse.json(DEMANDA_ALTA_BODY, { status: 503 })
+      }
       const aborted = err instanceof Error && err.name === "AbortError"
       if (aborted) {
         // Si fue el primer intento y todavía queda margen real, reintentamos.

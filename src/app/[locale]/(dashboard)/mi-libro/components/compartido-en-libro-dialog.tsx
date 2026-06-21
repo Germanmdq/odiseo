@@ -85,6 +85,10 @@ export function CompartidoEnLibroDialog({
         window.location.href = `/${locale}/pricing`
         return
       }
+      if (res.status === 503) {
+        setError("Estamos con mucha demanda en este momento. Probá de nuevo en un minuto.")
+        return
+      }
       if (!res.ok || !res.body) throw new Error("Error al generar")
 
       const reader = res.body.getReader()

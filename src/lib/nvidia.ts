@@ -1,5 +1,20 @@
 import "server-only"
 
+// Error específico de rate limit (429) de NVIDIA, para que las rutas lo
+// detecten y devuelvan un mensaje de "demanda alta" en vez del error crudo.
+export class NvidiaRateLimitError extends Error {
+  constructor(message = "NVIDIA rate limit (429)") {
+    super(message)
+    this.name = "NvidiaRateLimitError"
+  }
+}
+
+// Cuerpo de respuesta compartido para cuando NVIDIA está saturado (429).
+export const DEMANDA_ALTA_BODY = {
+  error: "demanda_alta",
+  mensaje: "Estamos con mucha demanda en este momento. Probá de nuevo en un minuto.",
+} as const
+
 type NvidiaEmbeddingResponse = {
   data?: Array<{
     embedding?: number[]
@@ -28,6 +43,10 @@ export async function embedQuery(text: string): Promise<number[]> {
       dimensions: 1024,
     }),
   })
+
+  if (response.status === 429) {
+    throw new NvidiaRateLimitError("NVIDIA embeddings 429")
+  }
 
   if (!response.ok) {
     const errorText = await response.text()

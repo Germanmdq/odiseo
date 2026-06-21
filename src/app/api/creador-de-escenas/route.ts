@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
 
-import { embedQuery } from "@/lib/nvidia"
+import { embedQuery, NvidiaRateLimitError, DEMANDA_ALTA_BODY } from "@/lib/nvidia"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { createClient } from "@/lib/supabase/server"
 import { registrarActividad } from "@/lib/activity"
@@ -236,6 +236,10 @@ export async function POST(request: NextRequest) {
       }),
     })
 
+    if (nvidiaResponse.status === 429) {
+      return Response.json(DEMANDA_ALTA_BODY, { status: 503 })
+    }
+
     if (!nvidiaResponse.ok) {
       const errorText = await nvidiaResponse.text()
       return new Response(`Error de NVIDIA: ${errorText}`, { status: 502 })
@@ -244,6 +248,9 @@ export async function POST(request: NextRequest) {
     return streamPlainTextFromNvidia(nvidiaResponse, user?.id)
   } catch (error) {
     console.error("Error en /api/creador-de-escenas:", error)
+    if (error instanceof NvidiaRateLimitError) {
+      return Response.json(DEMANDA_ALTA_BODY, { status: 503 })
+    }
     const message =
       error instanceof Error ? error.message : "Error interno del servidor."
     return Response.json({ error: message }, { status: 500 })

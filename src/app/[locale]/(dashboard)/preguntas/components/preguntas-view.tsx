@@ -523,12 +523,12 @@ export function PreguntasView() {
         return
       }
 
-      const data = (await res.json()) as { preguntas?: Pregunta[]; error?: string }
+      const data = (await res.json()) as { preguntas?: Pregunta[]; error?: string; mensaje?: string }
 
       if (!res.ok || !data.preguntas) {
         setEstado({
           etapa: "error",
-          mensaje: data.error ?? "No se pudieron generar las preguntas.",
+          mensaje: data.mensaje ?? data.error ?? "No se pudieron generar las preguntas.",
           tema,
           cantidad,
           tipo,

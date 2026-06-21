@@ -244,6 +244,14 @@ export function CoachView() {
         return
       }
 
+      if (response.status === 503) {
+        updateMessage(authorId, assistantMessage.id, (message) => ({
+          ...message,
+          content: "Estamos con mucha demanda en este momento. Probá de nuevo en un minuto.",
+        }))
+        return
+      }
+
       if (!response.ok || !response.body) {
         const errorText = await response.text()
         throw new Error(errorText || "No pude conectar con el Coach.")

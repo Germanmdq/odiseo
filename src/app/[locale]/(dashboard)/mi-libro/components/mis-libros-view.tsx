@@ -337,6 +337,11 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
         return
       }
 
+      if (res.status === 503) {
+        setDraftContenido("Estamos con mucha demanda en este momento. Probá de nuevo en un minuto.")
+        return
+      }
+
       if (!res.ok || !res.body) throw new Error("Error al generar")
 
       const reader = res.body.getReader()
@@ -433,6 +438,10 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
     if (res.status === 403) {
       window.location.href = `/${locale}/pricing`
       throw new Error("paywall")
+    }
+
+    if (res.status === 503) {
+      throw new Error("Estamos con mucha demanda en este momento. Probá de nuevo en un minuto.")
     }
 
     const data = (await res.json()) as { contenido?: string; error?: string }
