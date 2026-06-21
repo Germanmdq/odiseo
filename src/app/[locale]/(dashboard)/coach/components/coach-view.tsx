@@ -10,7 +10,6 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
 import { CompartirEn } from "@/components/compartir-en"
 import { GuardarEnMemoriaButton } from "@/components/guardar-en-memoria-button"
-import { Paywall } from "@/components/paywall"
 import { SugerenciasCoach, getSugerencias, extraerTema } from "@/components/sugerencias-coach"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { MessageInput } from "./message-input"
@@ -73,7 +72,6 @@ export function CoachView() {
   } = useCoach()
 
   const [loadingAuthor, setLoadingAuthor] = useState<string | null>(null)
-  const [paywallBlocked, setPaywallBlocked] = useState(false)
   const [errorByAuthor, setErrorByAuthor] = useState<Record<string, string | null>>({})
   const [retryByAuthor, setRetryByAuthor] = useState<Record<string, string | null>>({})
   const [mostrarSugerencias, setMostrarSugerencias] = useState<Record<string, boolean>>({})
@@ -209,7 +207,7 @@ export function CoachView() {
       })
 
       if (response.status === 403) {
-        setPaywallBlocked(true)
+        window.location.href = `/${locale}/pricing`
         return
       }
 
@@ -319,11 +317,7 @@ export function CoachView() {
 
             {/* Messages area */}
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-              {paywallBlocked ? (
-                <div className="flex flex-1 items-center justify-center p-4">
-                  <Paywall locale={locale} />
-                </div>
-              ) : selectedAuthor ? (
+              {selectedAuthor ? (
                 <>
                   {displayMessages.length === 0 ? (
                     // Breve estado de carga mientras se fetchea el perfil

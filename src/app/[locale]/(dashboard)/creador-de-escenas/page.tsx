@@ -1,6 +1,6 @@
+import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { checkAccess } from "@/lib/acceso"
-import { Paywall } from "@/components/paywall"
 import { CreadorDeEscenasView } from "./components/creador-de-escenas-view"
 
 export default async function CreadorDeEscenasPage({
@@ -15,7 +15,7 @@ export default async function CreadorDeEscenasPage({
   if (user) {
     const acceso = await checkAccess(user.id)
     if (!acceso.allowed) {
-      return <Paywall locale={locale} />
+      redirect(`/${locale}/pricing`)
     }
   }
 

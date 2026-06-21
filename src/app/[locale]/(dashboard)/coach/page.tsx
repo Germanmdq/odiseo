@@ -1,6 +1,6 @@
+import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { checkAccess } from "@/lib/acceso"
-import { Paywall } from "@/components/paywall"
 import { CoachView } from "./components/coach-view"
 
 export default async function CoachPage({
@@ -15,7 +15,7 @@ export default async function CoachPage({
   if (user) {
     const acceso = await checkAccess(user.id)
     if (!acceso.allowed) {
-      return <Paywall locale={locale} />
+      redirect(`/${locale}/pricing`)
     }
   }
 
