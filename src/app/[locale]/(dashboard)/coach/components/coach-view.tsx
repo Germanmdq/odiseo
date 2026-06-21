@@ -88,15 +88,20 @@ export function CoachView() {
     fetch("/api/perfil", { cache: "no-store" })
       .then((r) => r.json())
       .then((d: { nombrePreferido?: string }) => {
+        console.log("[TEMP coach] perfil OK → nombrePreferido =", JSON.stringify(d.nombrePreferido ?? "")) // TEMP
         setNombrePreferido(d.nombrePreferido ?? "")
       })
-      .catch(() => setNombrePreferido(""))
+      .catch((e) => {
+        console.log("[TEMP coach] perfil FETCH FALLÓ →", e) // TEMP
+        setNombrePreferido("")
+      })
   }, [])
 
   // Leer contexto compartido desde otra herramienta.
   // ① Al montar: capturar el contenido en un ref y consumir la key.
   useEffect(() => {
     const raw = sessionStorage.getItem("odiseo_reutilizar")
+    console.log("[TEMP coach] ① MOUNT capture, raw =", raw ? `(${raw.length} chars)` : "NULL") // TEMP
     if (!raw) return
     // Limpiar siempre, incluso si el parseo falla, para no reinyectar en visitas futuras.
     sessionStorage.removeItem("odiseo_reutilizar")
@@ -111,6 +116,7 @@ export function CoachView() {
 
     const content = (parsed.content ?? "").trim()
     const origen = parsed.origen ?? "desconocido"
+    console.log("[TEMP coach] ① parsed → origen =", origen, "| contentLen =", content.length) // TEMP
 
     if (!content) {
       console.error("[coach] contenido compartido vacío o sin campo 'content'. Objeto recibido:", parsed)
@@ -120,23 +126,31 @@ export function CoachView() {
     // No reinyectar contenido generado por el propio Coach: evita el loop de
     // auto-alimentación (compartir una conversación de Coach de vuelta a Coach).
     if (origen === "coach") {
+      console.log("[TEMP coach] ① IGNORADO por origen=coach") // TEMP
       return
     }
 
     // El Coach es un único asistente; ignoramos el ?autor= legacy.
     pendingSharedRef.current = `Quiero seguir profundizando en esto:\n\n${content}`
+    console.log("[TEMP coach] ① pendingSharedRef SETEADO ✓") // TEMP
   }, [])
 
   // ② Cuando la vista está lista (perfil cargado), enviar una sola vez el
   // contenido pendiente. No depende de un delay arbitrario ni del orden de
   // re-montajes: el contenido vive en el ref hasta que se puede enviar.
   useEffect(() => {
+    console.log(
+      "[TEMP coach] ② RUN | nombrePreferido =", nombrePreferido === null ? "NULL" : JSON.stringify(nombrePreferido),
+      "| yaEnviado =", sharedSentRef.current,
+      "| pending =", pendingSharedRef.current ? `(${pendingSharedRef.current.length} chars)` : "vacío"
+    ) // TEMP
     if (sharedSentRef.current) return
     if (nombrePreferido === null) return
     const pending = pendingSharedRef.current
     if (!pending) return
     sharedSentRef.current = true
     pendingSharedRef.current = null
+    console.log("[TEMP coach] ② → ENVIANDO contenido pendiente a handleSendMessage") // TEMP
     void handleSendMessage(pending, true)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nombrePreferido])
@@ -177,7 +191,11 @@ export function CoachView() {
   }, [displayMessages])
 
   const handleSendMessage = async (content: string, appendUser = true) => {
-    if (!selectedAuthor) return
+    console.log("[TEMP coach] handleSendMessage() llamado | selectedAuthor =", JSON.stringify(selectedAuthor), "| contentLen =", content?.length) // TEMP
+    if (!selectedAuthor) {
+      console.log("[TEMP coach] handleSendMessage ABORTÓ: selectedAuthor vacío/null") // TEMP
+      return
+    }
 
     const authorId = selectedAuthor
     const userMessage = {
