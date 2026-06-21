@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic"
 const NVIDIA_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
 const NVIDIA_CHAT_MODEL = "meta/llama-3.3-70b-instruct"
 
-function buildPrompt(tema: string) {
+function buildPromptDesdeTema(tema: string) {
   return `Escribí un capítulo reflexivo y profundo sobre "${tema}" desde la perspectiva de las enseñanzas de Neville Goddard, en primera persona del usuario, como si fuera parte de su libro personal de práctica espiritual. Español rioplatense, entre 400 y 600 palabras.
 
 El capítulo debe:
@@ -22,6 +22,24 @@ El capítulo debe:
 - Terminar con una idea que invite a seguir practicando
 
 Escribí el título y luego el capítulo directamente, sin meta-texto.`
+}
+
+function buildPromptDesdeFuente(fuente: string) {
+  return `Usá el siguiente contenido como BASE y FUENTE PRINCIPAL para escribir un capítulo del libro personal del usuario. No inventes desde cero ni lo ignores: partí de este material, profundizalo y dale forma de capítulo reflexivo. Conservá las ideas y el espíritu de lo que el usuario trajo.
+
+El capítulo debe:
+- Empezar con un título sugerido entre corchetes, ej: [Título sugerido: El momento en que entendí]
+- Estar escrito en primera persona del usuario, íntimo y reflexivo
+- Tomar el contenido base como punto de partida real (no como un tema abstracto)
+- Conectar con las enseñanzas de Neville Goddard cuando sea natural
+- No ser una clase ni una explicación teórica — es una vivencia narrada
+- Español rioplatense
+- Terminar con una idea que invite a seguir practicando
+
+Escribí el título y luego el capítulo directamente, sin meta-texto.
+
+CONTENIDO BASE:
+${fuente}`
 }
 
 function parseDelta(line: string) {
@@ -49,15 +67,23 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.NVIDIA_API_KEY
   if (!apiKey) return Response.json({ error: "Falta NVIDIA_API_KEY" }, { status: 500 })
 
-  const body = (await request.json()) as { tema?: string; libroId?: string }
+  const body = (await request.json()) as { tema?: string; fuente?: string; libroId?: string }
+  const rawFuente = body.fuente?.trim() ?? ""
   const rawTema = body.tema?.trim() ?? ""
   const libroId = body.libroId
-  // Truncate to avoid excessive token usage / timeouts
+  const esFuente = rawFuente.length > 0
+  // Camino "fuente" (contenido compartido como insumo real): tope más alto
+  // para no perder información de la fuente original. Tema corto: tope normal.
+  const fuente = rawFuente.slice(0, 6000)
   const tema = rawTema.slice(0, 2000)
 
-  if (!tema) {
+  if (!esFuente && !tema) {
     return Response.json({ error: "El tema es requerido" }, { status: 400 })
   }
+
+  const promptContent = esFuente ? buildPromptDesdeFuente(fuente) : buildPromptDesdeTema(tema)
+  // Salida amplia para el camino fuente: priorizar no cortar el capítulo.
+  const maxTokens = esFuente ? 4000 : 1500
 
   const nvidiaResponse = await fetch(NVIDIA_CHAT_URL, {
     method: "POST",
@@ -67,10 +93,10 @@ export async function POST(request: NextRequest) {
     },
     body: JSON.stringify({
       model: NVIDIA_CHAT_MODEL,
-      messages: [{ role: "user", content: buildPrompt(tema) }],
+      messages: [{ role: "user", content: promptContent }],
       temperature: 0.6,
       top_p: 0.9,
-      max_tokens: 1500,
+      max_tokens: maxTokens,
       stream: true,
     }),
   })
@@ -97,8 +123,8 @@ export async function POST(request: NextRequest) {
               await registrarActividad({
                 userId: user.id,
                 eventType: "book",
-                titleEs: `Capítulo generado: ${tema}`,
-                metadata: { tema, libroId },
+                titleEs: esFuente ? "Capítulo generado desde contenido compartido" : `Capítulo generado: ${tema}`,
+                metadata: { tema: esFuente ? undefined : tema, fuente: esFuente, libroId },
               })
             } catch (e) {
               console.error("Error registering activity in mi-libro stream:", e)

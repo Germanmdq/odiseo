@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { CrearLibroDialog } from "./crear-libro-dialog"
 import { CapituloItem } from "./capitulo-item"
+import { CompartidoEnLibroDialog } from "./compartido-en-libro-dialog"
 import { PersonalSubtitle } from "@/components/personal-subtitle"
 
 interface Libro {
@@ -58,7 +59,8 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
   const [showDraft, setShowDraft] = React.useState(false)
   const [savingDraft, setSavingDraft] = React.useState(false)
   // Contenido compartido (p.ej. desde Coach) pendiente de colocar en un libro
-  const [sharedPending, setSharedPending] = React.useState(false)
+  const [compartidoOpen, setCompartidoOpen] = React.useState(false)
+  const [sharedContenido, setSharedContenido] = React.useState("")
   // true mientras navegamos hacia un libro (crear/seleccionar): evita descartar
   // el contenido pendiente en el desmontaje provocado por esa navegación.
   const navigatingToBookRef = React.useRef(false)
@@ -84,6 +86,7 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
   // Se mueve de inmediato de la key compartida (odiseo_reutilizar) a una key
   // EXCLUSIVA de Mi libro (odiseo_milibro_pending), para que ninguna otra
   // sección (p.ej. Coach) lo reinyecte si el usuario no completa la acción.
+  // Acá se consume a estado de React y se abre el modal de "agregar a libro".
   React.useEffect(() => {
     const incoming = sessionStorage.getItem("odiseo_reutilizar")
     if (incoming) {
@@ -99,26 +102,21 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
     }
 
     const pendingRaw = sessionStorage.getItem("odiseo_milibro_pending")
-    if (!pendingRaw) {
-      setSharedPending(false)
-      return
-    }
+    if (!pendingRaw) return
 
-    if (activeLibroId) {
-      // Hay un libro activo: precargar el tema y consumir el contenido.
-      try {
-        const { content } = JSON.parse(pendingRaw) as { content?: string }
-        if (content && content.trim()) setTema(content.slice(0, 1200))
-      } catch (e) {
-        console.error("[mi-libro] odiseo_milibro_pending inválido:", e)
+    try {
+      const { content } = JSON.parse(pendingRaw) as { content?: string }
+      if (content && content.trim()) {
+        // Contenido completo, SIN truncar: se usa como fuente real para generar.
+        setSharedContenido(content)
+        setCompartidoOpen(true)
       }
-      sessionStorage.removeItem("odiseo_milibro_pending")
-      setSharedPending(false)
-    } else {
-      // Sin libro activo: queda pendiente bajo la key privada y se avisa.
-      setSharedPending(true)
+    } catch (e) {
+      console.error("[mi-libro] odiseo_milibro_pending inválido:", e)
     }
-  }, [activeLibroId])
+    // Consumido a estado de React: si abandona sin guardar, se pierde (deseado).
+    sessionStorage.removeItem("odiseo_milibro_pending")
+  }, [])
 
   // Al salir de Mi libro sin ir hacia un libro (crear/seleccionar), descartar el
   // contenido pendiente para que no persiga al usuario a otras secciones.
@@ -551,24 +549,11 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-muted/5">
             <BookOpen className="size-12 text-muted-foreground/30 mb-3" />
             <p className="text-muted-foreground text-sm font-medium">
-              {sharedPending ? "Tu contenido está listo para un capítulo" : "No hay ningún libro seleccionado"}
+              No hay ningún libro seleccionado
             </p>
             <p className="text-xs text-muted-foreground mt-1 max-w-xs">
-              {sharedPending
-                ? "Creá un libro nuevo o elegí uno de la lista para convertir lo que trajiste en un capítulo."
-                : "Elegí un libro de la lista lateral o creá uno nuevo."}
+              Elegí un libro de la lista lateral o creá uno nuevo.
             </p>
-            {sharedPending && (
-              <button
-                type="button"
-                onClick={() => setCreandoLibro(true)}
-                className="mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm text-white font-medium transition-opacity hover:opacity-90 cursor-pointer"
-                style={{ backgroundColor: "#E8401A" }}
-              >
-                <Plus className="size-4" />
-                Crear un libro
-              </button>
-            )}
           </div>
         ) : (
           <div className="flex flex-col md:h-full md:overflow-hidden">
@@ -730,6 +715,20 @@ export function MisLibrosView({ activeLibroId }: MisLibrosViewProps) {
         open={creandoLibro}
         onOpenChange={setCreandoLibro}
         onCreate={handleCrearLibro}
+      />
+
+      <CompartidoEnLibroDialog
+        open={compartidoOpen}
+        onOpenChange={setCompartidoOpen}
+        contenido={sharedContenido}
+        libros={libros}
+        locale={locale}
+        onLibroCreado={(libro) => setLibros((prev) => [libro, ...prev])}
+        onGuardado={(libroId) => {
+          setCompartidoOpen(false)
+          navigatingToBookRef.current = true
+          router.push(`/${locale}/mi-libro/${libroId}`)
+        }}
       />
     </div>
   )
