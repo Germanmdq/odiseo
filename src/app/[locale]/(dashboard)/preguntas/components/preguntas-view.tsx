@@ -56,7 +56,7 @@ type EvaluacionHistorial = {
 type Estado =
   | { etapa: "setup"; racha: number; puntosTotal: number }
   | { etapa: "generando"; tema: string; cantidad: number; tipo: TipoPregunta }
-  | { etapa: "error"; mensaje: string; tema: string; cantidad: number; tipo: TipoPregunta }
+  | { etapa: "error"; mensaje: string; tema: string; cantidad: number; tipo: TipoPregunta; sinContenido?: boolean }
   | {
       etapa: "evaluando"
       preguntas: Pregunta[]
@@ -532,6 +532,7 @@ export function PreguntasView() {
           tema,
           cantidad,
           tipo,
+          sinContenido: data.error === "sin_contenido",
         })
         return
       }
@@ -650,18 +651,30 @@ export function PreguntasView() {
 
         {estado.etapa === "error" && (
           <div className="mx-auto max-w-md space-y-4 py-12 text-center">
-            <p className="text-destructive font-medium">Hubo un error al generar las preguntas.</p>
+            {estado.sinContenido ? (
+              <p className="font-medium">No encontramos contenido sobre ese tema</p>
+            ) : (
+              <p className="text-destructive font-medium">Hubo un error al generar las preguntas.</p>
+            )}
             <p className="text-sm text-muted-foreground">{estado.mensaje}</p>
             <div className="flex flex-col gap-2">
-              <Button onClick={() => handleStart(estado.tema, estado.cantidad, estado.tipo)}>
-                Intentar de nuevo
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => setEstado({ etapa: "setup", racha: 0, puntosTotal: 0 })}
-              >
-                Elegir otro tema
-              </Button>
+              {estado.sinContenido ? (
+                <Button onClick={() => setEstado({ etapa: "setup", racha: 0, puntosTotal: 0 })}>
+                  Probá con otro tema
+                </Button>
+              ) : (
+                <>
+                  <Button onClick={() => handleStart(estado.tema, estado.cantidad, estado.tipo)}>
+                    Intentar de nuevo
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setEstado({ etapa: "setup", racha: 0, puntosTotal: 0 })}
+                  >
+                    Elegir otro tema
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}

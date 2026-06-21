@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { registrarActividad } from "@/lib/activity"
 import { checkAccess } from "@/lib/acceso"
-import { NvidiaRateLimitError, DEMANDA_ALTA_BODY } from "@/lib/nvidia"
+import { embedQuery, NvidiaRateLimitError, DEMANDA_ALTA_BODY } from "@/lib/nvidia"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -19,9 +20,53 @@ type Pregunta = {
 
 type TipoPregunta = "multiple" | "verdadero_falso" | "respuesta_breve"
 
-function buildPrompt(tema: string, cantidad: number, tipo: TipoPregunta): string {
+// --- RAG: misma fuente y función de búsqueda que usa Coach (match_content_artifacts) ---
+type MatchRow = {
+  title?: string | null
+  body?: string | null
+  libros_citados?: string[] | null
+  conferencias_citadas?: string[] | null
+  source_table?: string | null
+}
+
+function trimContext(text: string | null | undefined) {
+  const normalized = (text ?? "").replace(/\s+/g, " ").trim()
+  if (normalized.length <= 400) return normalized
+  return `${normalized.slice(0, 400)}...`
+}
+
+function formatSources(row: MatchRow) {
+  const sources = [
+    ...(row.libros_citados ?? []),
+    ...(row.conferencias_citadas ?? []),
+  ].filter(Boolean)
+  if (sources.length) return sources.join("; ")
+  return row.source_table ?? "Fuente no especificada"
+}
+
+function buildContext(rows: MatchRow[]) {
+  if (!rows.length) return "No se recuperó contexto relevante."
+  return rows
+    .map((row, index) =>
+      [
+        `[${index + 1}] ${row.title || "Sin título"}`,
+        `Fuente: ${formatSources(row)}`,
+        `Contenido: ${trimContext(row.body)}`,
+      ].join("\n")
+    )
+    .join("\n\n")
+}
+
+function buildPrompt(tema: string, cantidad: number, tipo: TipoPregunta, context: string): string {
+  const fuente = `Basá las preguntas EXCLUSIVAMENTE en el siguiente contenido textual de las fuentes de Neville Goddard. No uses conocimiento externo ni inventes: si algo no está en el contenido, no lo preguntes.
+
+CONTENIDO DE LAS FUENTES:
+${context}
+
+`
+
   if (tipo === "verdadero_falso") {
-    return `Generá exactamente ${cantidad} afirmaciones de VERDADERO O FALSO sobre "${tema}" basadas en las enseñanzas de Neville Goddard.
+    return `${fuente}Generá exactamente ${cantidad} afirmaciones de VERDADERO O FALSO sobre "${tema}", ancladas en el contenido de arriba.
 
 Cada pregunta debe:
 - Presentar una afirmación que el usuario debe evaluar como verdadera o falsa según Neville
@@ -41,7 +86,7 @@ Respondé SOLO con un JSON válido, sin texto adicional ni backticks:
   }
 
   if (tipo === "respuesta_breve") {
-    return `Generá exactamente ${cantidad} preguntas de RESPUESTA BREVE sobre "${tema}" basadas en las enseñanzas de Neville Goddard.
+    return `${fuente}Generá exactamente ${cantidad} preguntas de RESPUESTA BREVE sobre "${tema}", ancladas en el contenido de arriba.
 
 Para cada pregunta:
 - "pregunta": una pregunta abierta que requiere explicar un concepto
@@ -61,7 +106,7 @@ Respondé SOLO con un JSON válido, sin texto adicional ni backticks:
 ]`
   }
 
-  return `Generá exactamente ${cantidad} preguntas de evaluación sobre "${tema}" basadas en las enseñanzas de Neville Goddard.
+  return `${fuente}Generá exactamente ${cantidad} preguntas de evaluación sobre "${tema}", ancladas en el contenido de arriba.
 
 Cada pregunta debe:
 - Tener exactamente 4 opciones (a, b, c, d)
@@ -168,7 +213,43 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const prompt = buildPrompt(tema, cantidad, tipo)
+  // RAG: recuperar contexto específico de las fuentes, igual que Coach
+  // (embedQuery + match_content_artifacts sobre content_artifacts, match_count 5).
+  let context: string
+  try {
+    const queryEmbedding = await embedQuery(tema)
+    const admin = createAdminClient()
+    const { data: matches, error: matchError } = await admin.rpc("match_content_artifacts", {
+      query_embedding: queryEmbedding,
+      match_count: 5,
+    })
+    if (matchError) throw new Error(matchError.message)
+
+    const rows = (matches ?? []) as MatchRow[]
+    // Mismo criterio que Coach: si la búsqueda no devuelve fragmentos, no hay
+    // material relevante. En Preguntas, en vez de generar genérico, avisamos.
+    if (rows.length === 0) {
+      return NextResponse.json(
+        {
+          error: "sin_contenido",
+          mensaje: "No encontramos contenido específico sobre este tema en nuestras fuentes. Probá con otro tema.",
+        },
+        { status: 200 }
+      )
+    }
+    context = buildContext(rows)
+  } catch (err) {
+    if (err instanceof NvidiaRateLimitError) {
+      return NextResponse.json(DEMANDA_ALTA_BODY, { status: 503 })
+    }
+    console.error("Error recuperando contexto en preguntas:", err)
+    return NextResponse.json(
+      { error: "No se pudo preparar la generación. Probá de nuevo en un momento." },
+      { status: 502 }
+    )
+  }
+
+  const prompt = buildPrompt(tema, cantidad, tipo, context)
 
   // Tope de salida ajustado al nuevo máximo de 5 preguntas. El peor caso
   // (5 de respuesta_breve con respuestas largas) ≈ 1.300-1.500 tokens; 2.400
