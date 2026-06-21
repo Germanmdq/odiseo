@@ -121,122 +121,158 @@ export default function PerfilPage() {
     }
   }
 
+  const inicial = (nombre || email || "?").trim().charAt(0).toUpperCase() || "?"
+
   return (
     <div className="px-4 lg:px-6">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("title")}</CardTitle>
-              <CardDescription>
-                {nombre ? `${nombre}, actualizá tu información personal.` : t("subtitle")}
-              </CardDescription>
-              {estadoSub && (
-                estadoSub.suscripto && estadoSub.plan ? (
-                  <Link
-                    href={`/${locale}/configuracion/suscripcion`}
-                    className="mt-2 inline-flex w-fit flex-col gap-0.5 no-underline"
-                  >
-                    <Badge className="w-fit bg-[#E8401A] hover:bg-[#E8401A]/90 text-white border-transparent">
-                      Plan activo: {estadoSub.plan in PLANES ? PLANES[estadoSub.plan as PlanId].nombre : estadoSub.plan}
-                    </Badge>
-                    {estadoSub.currentPeriodEnd && (
-                      <span className="text-xs text-muted-foreground">
-                        Renueva el {formatFecha(estadoSub.currentPeriodEnd)}
-                      </span>
-                    )}
-                  </Link>
-                ) : (
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Badge variant="outline" className="w-fit">
-                      Plan: Gratis (3 usos incluidos)
-                    </Badge>
-                    <Link
-                      href={`/${locale}/pricing`}
-                      className="inline-flex items-center gap-1 rounded-full bg-[#E8401A] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-                    >
-                      Suscribirme →
-                    </Link>
-                  </div>
-                )
-              )}
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* nombre_preferido — highlighted */}
-              <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-4 space-y-4">
-                <FormField
-                  control={form.control}
-                  name="nombrePreferido"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-base font-semibold">
-                        {t("nombrePreferido")}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder={t("nombrePreferidoPlaceholder")}
-                          disabled={isLoading}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>{t("nombrePreferidoHint")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+      <div className="mx-auto w-full max-w-3xl space-y-6">
+        {/* 1. Header de identidad */}
+        <Card>
+          <CardContent className="flex items-center gap-4">
+            <div
+              className="flex size-14 shrink-0 items-center justify-center rounded-2xl text-2xl font-bold text-white"
+              style={{ backgroundColor: "#E8401A" }}
+              aria-hidden
+            >
+              {inicial}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-xl font-semibold leading-tight">
+                {nombre || t("title")}
+              </p>
+              <p className="truncate text-sm text-muted-foreground">{email}</p>
+            </div>
+          </CardContent>
+        </Card>
 
-              <Separator />
-
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("fullName")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ana García"
-                          disabled={isLoading}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormItem>
-                  <FormLabel>{t("email")}</FormLabel>
-                  <FormControl>
-                    <Input value={email} disabled readOnly className="opacity-60" />
-                  </FormControl>
-                  <FormDescription>El email no se puede cambiar desde acá.</FormDescription>
-                </FormItem>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Button
-                  type="submit"
-                  disabled={isLoading || status === "saving"}
-                  className="cursor-pointer"
+        {/* 2. Plan */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Plan</CardTitle>
+            <CardDescription>Tu plan actual y estado de la cuenta.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {estadoSub ? (
+              estadoSub.suscripto && estadoSub.plan ? (
+                <Link
+                  href={`/${locale}/configuracion/suscripcion`}
+                  className="inline-flex w-fit flex-col gap-1 no-underline"
                 >
-                  {status === "saving" ? "Guardando..." : t("save")}
-                </Button>
-                {status === "saved" && (
-                  <span className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-                    <CheckCircle className="h-4 w-4" />
-                    {t("saved")}
-                  </span>
-                )}
-                {status === "error" && (
-                  <span className="text-sm text-destructive">{t("errorSaving")}</span>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </form>
-      </Form>
+                  <Badge className="w-fit bg-[#E8401A] hover:bg-[#E8401A]/90 text-white border-transparent">
+                    Plan activo: {estadoSub.plan in PLANES ? PLANES[estadoSub.plan as PlanId].nombre : estadoSub.plan}
+                  </Badge>
+                  {estadoSub.currentPeriodEnd && (
+                    <span className="text-xs text-muted-foreground">
+                      Renueva el {formatFecha(estadoSub.currentPeriodEnd)}
+                    </span>
+                  )}
+                </Link>
+              ) : (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="w-fit">
+                    Plan: Gratis (3 usos incluidos)
+                  </Badge>
+                  <Link
+                    href={`/${locale}/pricing`}
+                    className="inline-flex items-center gap-1 rounded-full bg-[#E8401A] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
+                  >
+                    Suscribirme →
+                  </Link>
+                </div>
+              )
+            ) : (
+              <span className="text-sm text-muted-foreground">Cargando estado del plan…</span>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 3. Datos personales */}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Datos personales</CardTitle>
+                <CardDescription>
+                  {nombre ? `${nombre}, actualizá tu información personal.` : t("subtitle")}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* nombre_preferido — highlighted */}
+                <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-4 space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="nombrePreferido"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-semibold">
+                          {t("nombrePreferido")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t("nombrePreferidoPlaceholder")}
+                            disabled={isLoading}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>{t("nombrePreferidoHint")}</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Separator />
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("fullName")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ana García"
+                            disabled={isLoading}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormItem>
+                    <FormLabel>{t("email")}</FormLabel>
+                    <FormControl>
+                      <Input value={email} disabled readOnly className="opacity-60" />
+                    </FormControl>
+                    <FormDescription>El email no se puede cambiar desde acá.</FormDescription>
+                  </FormItem>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="submit"
+                    disabled={isLoading || status === "saving"}
+                    className="cursor-pointer"
+                  >
+                    {status === "saving" ? "Guardando..." : t("save")}
+                  </Button>
+                  {status === "saved" && (
+                    <span className="flex items-center gap-1 text-sm font-medium text-[#E8401A]">
+                      <CheckCircle className="h-4 w-4" />
+                      {t("saved")}
+                    </span>
+                  )}
+                  {status === "error" && (
+                    <span className="text-sm text-destructive">{t("errorSaving")}</span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </form>
+        </Form>
+      </div>
     </div>
   )
 }
